@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blackboard.dao.ImageDao">
+
+	<insert id="saveImage" parameterType="list">
+		INSERT INTO
+		tb_image
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			image_id,blackboard_id,enterprise_id,image_path,image_name,order_number,upload_date
+		</trim>
+		VALUES
+		<!-- <trim prefix="values(" suffix=")" suffixOverrides=","> -->
+		<foreach collection="imageList" item="image" index="index"
+			separator=",">
+			(#{image.imageId},#{image.blackboardId},#{image.enterpriseId},#{image.imagePath},#{image.imageName},#{image.orderNumber},#{image.uploadDate})
+		</foreach>
+		<!-- </trim> -->
+	</insert>
+
+	<update id="updateImage" parameterType="list">
+		UPDATE
+		tb_image
+		SET
+		blackboard_id = #{blackBoardId},
+		enterprise_id =
+		#{enterperiseId}
+		WHERE image_id in
+		<trim prefix="in(" suffix=")" suffixOverrides=",">
+			<foreach collection="imagesList" item="image" index="index"
+				separator=",">
+				#{image.imageId}
+			</foreach>
+		</trim>
+	</update>
+
+	<select id="getBlackboardImage" parameterType="map" resultType="Image">
+		SELECT
+		*
+		FROM
+		tb_image
+		WHERE
+		enterprise_id = #{enterpriseId}
+		AND
+		blackboard_id = #{blackboardId}
+		<!-- ORDER By orderNumber -->
+	</select>
+
+
+	<delete id="deleteBlackboardImage" parameterType="map">
+		DELETE FROM
+		tb_image
+		WHERE
+		enterprise_id = #{enterpriseId}
+		AND
+		blackboard_id =
+		#{blackboardId}
+	</delete>
+
+	<delete id="deleteImage" parameterType="String">
+		DELETE FROM
+		tb_image
+		WHERE
+		image_id = #{imageId}
+	</delete>
+</mapper>

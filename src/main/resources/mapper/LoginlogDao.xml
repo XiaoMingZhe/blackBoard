@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blackboard.dao.LoginlogDao">
+
+	<insert id="saveLog" parameterType="Loginlog">
+		INSERT INTO
+		tb_login_log
+		(use_id,create_time,token)
+		VALUES(
+		#{useId},#{createTime},#{token})
+
+	</insert>
+
+	<select id="findLog" parameterType="String" resultType="Integer">
+		SELECT
+		count(1)
+		FROM tb_login_log
+		WHERE use_id = #{EUserID}
+	</select>
+
+	<select id="findToken" parameterType="String" resultType="Integer">
+		SELECT
+		count(1)
+		FROM tb_login_log
+		WHERE token = #{token}
+	</select>
+
+	<select id="findUserId" parameterType="String" resultType="String">
+		SELECT use_id 
+		FROM tb_login_log 
+		WHERE token = #{token}
+		GROUP BY use_id
+	</select>
+
+</mapper>
