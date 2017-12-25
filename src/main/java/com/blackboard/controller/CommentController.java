@@ -24,10 +24,6 @@ public class CommentController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	// 测试用
-	private String moblie = "139*****";
-	private String enterpriseId = "101";
-
 	/**
 	 * 添加评论
 	 * 
@@ -51,15 +47,11 @@ public class CommentController {
 		comment.setEnterpriseId(enterDeptId);
 		comment.setCommenterId(mobile);
 
+		logger.info("================" + mobile + "评论" + comment.getBlackboardId());
 		if (comment == null || comment.getEnterpriseId() == null || comment.getEnterpriseId().length() <= 0
 				|| comment.getBlackboardId() == null || comment.getBlackboardId().length() <= 0
 				|| comment.getCommentContent() == null || comment.getCommentContent().length() <= 0
-				/*
-				 * ||comment.getReplyId()==null||comment.getReplyId().length()<=
-				 * 0
-				 */
 				|| comment.getCommenter() == null || comment.getCommenter().length() <= 0) {
-
 			return JsonResult.error("请求参数非法");
 		}
 

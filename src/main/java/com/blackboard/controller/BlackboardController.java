@@ -160,13 +160,12 @@ public class BlackboardController {
 		BlackboardDto bb = (BlackboardDto) result.get("blackboard");
 		
 		logger.info("==============返回详情数据:"+bb);
-		return result;
 		
-//		if (bb.getCreateBy().equals(currentUser)) {
-//			return result.put("status", 1);
-//		} else {
-//			return result.put("status", 0);
-//		}
+		if (bb.getCreateMobile().equals(mobile)) {
+			return result.put("canrevise", 1);
+		} else {
+			return result.put("canrevise", 0);
+		}
 	}
 
 	/**

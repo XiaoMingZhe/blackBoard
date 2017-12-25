@@ -13,8 +13,8 @@ public class BlackboardDto {
 	private String title;// 黑表报标题
 	private String createBy;// 创建人姓名
 	private String createMobile;// 创建人电话
-	@JsonFormat(pattern = "yyyy.MM.dd", timezone = "GMT+8")
-	private Date createTime; // 创建时间
+	// @JsonFormat(pattern = "yyyy.MM.dd", timezone = "GMT+8")
+	private String createTime; // 创建时间
 	private Integer commentCount;// 评论总数
 	private String content; // 文字内容
 
@@ -50,11 +50,11 @@ public class BlackboardDto {
 		this.createBy = createBy;
 	}
 
-	public Date getCreateTime() {
+	public String getCreateTime() {
 		return createTime;
 	}
 
-	public void setCreateTime(Date createTime) {
+	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
 	}
 

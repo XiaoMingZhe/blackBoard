@@ -42,13 +42,13 @@
 		INSERT INTO 
 			tb_comment
 		<trim prefix="(" suffix=")" suffixOverrides=",">
-            comment_id,blackboard_id,enterprise_id,commenter_id,comment_content,comment_time  
+            comment_id,blackboard_id,enterprise_id,commenter_id,comment_content,comment_time,reply_name,commenter_name  
            <if test="replyId != null">
                 ,reply_id
             </if> 
         </trim>
         <trim prefix="values(" suffix=")" suffixOverrides=",">
-            #{commentId},#{blackboardId},#{enterpriseId},#{commenterId},#{commentContent},#{commentTime}
+            #{commentId},#{blackboardId},#{enterpriseId},#{commenterId},#{commentContent},now(),#{replyName},#{commenterName}
             <if test="replyId != null">
                ,#{replyId}
             </if> 

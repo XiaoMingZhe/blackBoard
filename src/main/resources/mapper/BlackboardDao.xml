@@ -4,104 +4,107 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.blackboard.dao.BlackboardDao">
 	<!-- 目的：为dao接口方法提供sql语句配置 -->
-	
-	<select id="getAllBlackboard" resultType="Blackboard" parameterType="map">
+
+	<select id="getAllBlackboard" resultType="Blackboard"
+		parameterType="map">
 		<!-- 具体的sql -->
 		SELECT
-			blackboard_id,enterprise_id,title,create_by,create_time,create_mobile,content
+		*
 		FROM
-			tb_blackboard
-		WHERE 
-			enterprise_id = #{enterpriseId}
-		ORDER BY 
-			create_time  desc
-		LIMIT 
-			#{first},#{end}
-	</select>
-	
-	<select id="getALLBlackboardCount" resultType="long" parameterType="map">
-		<!-- 具体的sql -->
-		SELECT
-			count(1)
-		FROM
-			tb_blackboard
-		WHERE 
-			enterprise_id = #{enterpriseId}
-	</select>
-	
-	<select id="getPersonalBlackboardCount" resultType="long" parameterType="map">
-		<!-- 具体的sql -->
-		SELECT
-			count(1)
-		FROM
-			tb_blackboard
-		WHERE 
-			enterprise_id = #{enterpriseId}
-		AND 
-			create_mobile = #{createMobile}
-	</select>
-	
-	<select id="getBlackboardById" resultType="Blackboard" parameterType="map">
-		SELECT
-			*
-		FROM
-			tb_blackboard
+		tb_blackboard
 		WHERE
-			enterprise_id = #{enterpriseId}
-		AND 
-			blackboard_id = #{blackboardId}
+		enterprise_id = #{enterpriseId}
+		ORDER BY
+		update_time desc
+		LIMIT
+		#{first},#{end}
 	</select>
-	
-	<select id="getPersonalBlackboard" resultType="Blackboard" parameterType="map">
+
+	<select id="getALLBlackboardCount" resultType="long"
+		parameterType="map">
+		<!-- 具体的sql -->
 		SELECT
-			blackboard_id,enterprise_id,title,create_by,create_time,create_mobile,content
+		count(1)
 		FROM
-			tb_blackboard
+		tb_blackboard
 		WHERE
-			enterprise_id = #{enterpriseId}
-		AND 
-			create_mobile = #{createMobile}
-		ORDER BY 
-			create_time  desc
-		LIMIT 
-			#{first},#{end}
+		enterprise_id = #{enterpriseId}
 	</select>
-	
+
+	<select id="getPersonalBlackboardCount" resultType="long"
+		parameterType="map">
+		<!-- 具体的sql -->
+		SELECT
+		count(1)
+		FROM
+		tb_blackboard
+		WHERE
+		enterprise_id = #{enterpriseId}
+		AND
+		create_mobile = #{createMobile}
+	</select>
+
+	<select id="getBlackboardById" resultType="Blackboard"
+		parameterType="map">
+		SELECT
+		*
+		FROM
+		tb_blackboard
+		WHERE
+		enterprise_id = #{enterpriseId}
+		AND
+		blackboard_id = #{blackboardId}
+	</select>
+
+	<select id="getPersonalBlackboard" resultType="Blackboard"
+		parameterType="map">
+		SELECT
+		*
+		FROM
+		tb_blackboard
+		WHERE
+		enterprise_id = #{enterpriseId}
+		AND
+		create_mobile = #{createMobile}
+		ORDER BY
+		update_time desc
+		LIMIT
+		#{first},#{end}
+	</select>
+
 	<delete id="delete" parameterType="map">
 		DELETE FROM
-			tb_blackboard
-		WHERE 
-			enterprise_id = #{enterpriseId}
+		tb_blackboard
+		WHERE
+		enterprise_id = #{enterpriseId}
 		AND
-			blackboard_id = #{blackboardId}
-			
+		blackboard_id = #{blackboardId}
+
 	</delete>
-	
+
 	<insert id="createBlackboard" parameterType="Blackboard">
-		INSERT INTO 
-			tb_blackboard
+		INSERT INTO
+		tb_blackboard
 		<trim prefix="(" suffix=")" suffixOverrides=",">
-            blackboard_id,enterprise_id,title,create_by,create_time,content,create_byId,create_mobile  
-        </trim>
-        <trim prefix="values(" suffix=")" suffixOverrides=",">
-            #{blackboardId},#{enterpriseId},#{title},#{createBy},#{createTime},#{content},#{createById},#{createMobile}
-        </trim>
+			blackboard_id,enterprise_id,title,create_by,create_time,content,create_byId,create_mobile,update_time
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			#{blackboardId},#{enterpriseId},#{title},#{createBy},#{createTime},#{content},#{createById},#{createMobile},now()
+		</trim>
 	</insert>
-	
+
 	<update id="updateBlackboard" parameterType="Blackboard">
-		UPDATE 
-		   	tb_blackboard 
-		SET 	
-			title = #{title},
-			content = #{content},
-			update_time = #{updateTime}
-        	<!-- <if test="content != null">
-                content
-            </if> -->
-        WHERE
-        	enterprise_id = #{enterpriseId}
-        AND
-        	blackboard_id = #{blackboardId}
-    </update>
-    
+		UPDATE
+		tb_blackboard
+		SET
+		title = #{title},
+		content = #{content},
+		update_time = now()
+		<!-- <if test="content != null"> content </if> -->
+		WHERE
+		enterprise_id = #{enterpriseId}
+		AND
+		blackboard_id = #{blackboardId}
+	</update>
+
 </mapper>

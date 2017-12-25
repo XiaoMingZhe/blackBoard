@@ -26,6 +26,7 @@ import com.blackboard.service.CommentService;
 import com.blackboard.service.ImageService;
 import com.blackboard.utils.GainUuid;
 import com.blackboard.utils.JsonResult;
+import com.blackboard.utils.RelativeDateFormat;
 
 @Service
 @Transactional
@@ -116,9 +117,9 @@ public class BlackboardServiceImpl implements BlackboardService {
 		for (Blackboard b : list) {
 			BlackboardDto bd = new BlackboardDto();
 			bd.setBlackboardId(b.getBlackboardId());
-			// bd.setCreateBy(b.getCreateBy());
+			bd.setCreateBy(b.getCreateBy());
 			bd.setCreateMobile(b.getCreateMobile());
-			bd.setCreateTime(b.getCreateTime());
+			bd.setCreateTime(RelativeDateFormat.format(b.getUpdateTime()));
 			bd.setEnterpriseId(b.getEnterpriseId());
 			bd.setTitle(b.getTitle());
 			bd.setContent(b.getContent());
@@ -171,13 +172,13 @@ public class BlackboardServiceImpl implements BlackboardService {
 		// 获取评论
 		List<Comment> comments = commentService.getAllComments(enterpriseId, blackboardId);
 		logger.info("==============获取单条黑板报评论:ID为" + blackboardId);
-		
+
 		// 封装黑板报展示信息
 		BlackboardDto bd = new BlackboardDto();
 		bd.setBlackboardId(blackboard.getBlackboardId());
-		// bd.setCreateBy(blackboard.getCreateBy());
+		bd.setCreateBy(blackboard.getCreateBy());
 		bd.setCreateMobile(blackboard.getCreateMobile());
-		bd.setCreateTime(blackboard.getCreateTime());
+		bd.setCreateTime(RelativeDateFormat.format(blackboard.getCreateTime()));
 		bd.setEnterpriseId(blackboard.getEnterpriseId());
 		bd.setTitle(blackboard.getTitle());
 		bd.setContent(blackboard.getContent());
@@ -223,9 +224,9 @@ public class BlackboardServiceImpl implements BlackboardService {
 			for (Blackboard b : list) {
 				BlackboardDto bd = new BlackboardDto();
 				bd.setBlackboardId(b.getBlackboardId());
-				// bd.setCreateBy(b.getCreateBy());
+				bd.setCreateBy(b.getCreateBy());
 				bd.setCreateMobile(b.getCreateMobile());
-				bd.setCreateTime(b.getCreateTime());
+				bd.setCreateTime(RelativeDateFormat.format(b.getUpdateTime()));
 				bd.setEnterpriseId(b.getEnterpriseId());
 				bd.setTitle(b.getTitle());
 				bd.setContent(b.getContent());
