@@ -175,14 +175,18 @@ public class BlackboardServiceImpl implements BlackboardService {
 
 		// 封装黑板报展示信息
 		BlackboardDto bd = new BlackboardDto();
-		bd.setBlackboardId(blackboard.getBlackboardId());
-		bd.setCreateBy(blackboard.getCreateBy());
-		bd.setCreateMobile(blackboard.getCreateMobile());
-		bd.setCreateTime(RelativeDateFormat.format(blackboard.getCreateTime()));
-		bd.setEnterpriseId(blackboard.getEnterpriseId());
-		bd.setTitle(blackboard.getTitle());
-		bd.setContent(blackboard.getContent());
-		bd.setCommentCount(commentDao.selectCount(blackboard.getBlackboardId()));
+		try {
+			bd.setBlackboardId(blackboard.getBlackboardId());
+			bd.setCreateBy(blackboard.getCreateBy());
+			bd.setCreateMobile(blackboard.getCreateMobile());
+			bd.setCreateTime(RelativeDateFormat.format(blackboard.getCreateTime()));
+			bd.setEnterpriseId(blackboard.getEnterpriseId());
+			bd.setTitle(blackboard.getTitle());
+			bd.setContent(blackboard.getContent());
+			bd.setCommentCount(commentDao.selectCount(blackboard.getBlackboardId()));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		logger.info("=============黑板报详情:" + bd);
 		return JsonResult.ok().put("blackboard", bd).put("comments", comments);

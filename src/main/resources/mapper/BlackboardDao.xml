@@ -51,8 +51,6 @@
 		FROM
 		tb_blackboard
 		WHERE
-		enterprise_id = #{enterpriseId}
-		AND
 		blackboard_id = #{blackboardId}
 	</select>
 
