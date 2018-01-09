@@ -13,11 +13,12 @@
 
 	</insert>
 
-	<select id="findLog" parameterType="String" resultType="Integer">
+	<select id="findLog" parameterType="map" resultType="Integer">
 		SELECT
 		count(1)
 		FROM tb_login_log
 		WHERE use_id = #{EUserID}
+		AND token = #{token}
 	</select>
 
 	<select id="findToken" parameterType="String" resultType="Integer">

@@ -1,5 +1,7 @@
 package com.blackboard.dao;
 
+import java.util.Map;
+
 import com.blackboard.entity.Loginlog;
 
 public interface LoginlogDao {
@@ -8,11 +10,12 @@ public interface LoginlogDao {
 	void saveLog(Loginlog loginlog);
 	
 	//查找登陆日志
-	Integer findLog(String EUserID);
+	Integer findLog(Map<String,Object> map);
 	
 	//查找token
 	Integer findToken(String token);
 	
 	//查找手机号
 	String findUserId(String token);
+	
 }

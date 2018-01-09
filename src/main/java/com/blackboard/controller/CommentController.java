@@ -48,6 +48,7 @@ public class CommentController {
 		comment.setCommenterId(mobile);
 
 		logger.info("================" + mobile + "评论" + comment.getBlackboardId());
+		logger.info("================" + comment+"================");
 		if (comment == null || comment.getEnterpriseId() == null || comment.getEnterpriseId().length() <= 0
 				|| comment.getBlackboardId() == null || comment.getBlackboardId().length() <= 0
 				|| comment.getCommentContent() == null || comment.getCommentContent().length() <= 0

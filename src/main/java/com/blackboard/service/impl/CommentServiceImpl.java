@@ -29,9 +29,20 @@ public class CommentServiceImpl implements CommentService {
 	public Comment addComment(Comment comment) {
 		comment.setCommentId(GainUuid.getUUID());
 		comment.setCommentTime(new Date());
-		
-		commentDao.addComment(comment);
-		Comment com = commentDao.selectCommentById(comment.getCommentId());
+		String commentcontent = comment.getCommentContent();
+		System.out.println(commentcontent);
+		if(commentcontent.indexOf("\\")!=-1){
+			System.out.println("转换");
+			String commentcontent2 = commentcontent.replaceAll("\\", ".");
+			comment.setCommentContent(commentcontent2);
+		};
+		Comment com = new Comment();
+		try {
+			commentDao.addComment(comment);
+			 com = commentDao.selectCommentById(comment.getCommentId());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		return com;
 	}
@@ -44,13 +55,19 @@ public class CommentServiceImpl implements CommentService {
 	 * @return List<Comment>  评论列表
 	 */
 	@Override
-	public List<Comment> getAllComments(String enterpriseId,String blackboardId) {
+	public List<Comment> getAllComments(String blackboardId) {
 		
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("enterpriseId", enterpriseId);
 		map.put("blackboardId", blackboardId);
 		
 		List<Comment> comments = commentDao.getAllComments(map);
+		for(Comment c :comments){
+			String content = c.getCommentContent();
+			if(content.indexOf(".")!=-1){
+				String commentcontent2 = content.replaceAll(".", "\\");
+				c.setCommentContent(commentcontent2);
+			};
+		}
 		
 		return comments;
 	}

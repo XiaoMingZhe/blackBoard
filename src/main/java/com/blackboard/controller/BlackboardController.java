@@ -30,7 +30,6 @@ public class BlackboardController {
 	@Autowired
 	private BlackboardService blackboardService;
 
-
 	/**
 	 * 创建黑板报
 	 * 
@@ -67,9 +66,9 @@ public class BlackboardController {
 		// blackboard.setCreateMobile(mobile);
 		// blackboard.setCreateById(EUserID);
 		// 为了测试
-		if (enterDeptId == null && mobile == null) {
-			blackboard.setEnterpriseId("88888888");
-			blackboard.setCreateMobile("138888888888");
+		if ((enterDeptId == null || enterDeptId.trim().length() <= 0) && (mobile == null || mobile.trim().length() <= 0)) {
+			blackboard.setEnterpriseId("517090");
+			blackboard.setCreateMobile("13432879269");
 			blackboard.setCreateById("123456789");
 		} else {
 			blackboard.setEnterpriseId(enterDeptId);
@@ -139,14 +138,15 @@ public class BlackboardController {
 		// 用户ID
 		String mobile = (String) request.getSession().getAttribute("mobile");
 
-		
-		if (enterDeptId == null && mobile == null) {
+		if ((enterDeptId == null || enterDeptId.trim().length() <= 0) && (mobile == null || mobile.trim().length() <= 0)) {
 			enterDeptId = "517090";
 			mobile = "13432879269";
 		}
 
 		String currentUser = mobile;
 		logger.info("==============获取单条黑板报详情:ID为" + blackboardId);
+		logger.info("==============企业ID为" + blackboardId);
+		logger.info("==============用户ID为" + blackboardId);
 
 		if (enterDeptId == null || enterDeptId.length() <= 0 || blackboardId == null || blackboardId.length() <= 0
 				|| currentUser == null || currentUser.length() <= 0) {
@@ -158,9 +158,9 @@ public class BlackboardController {
 		JsonResult result = blackboardService.getBlackboardById(blackboardId, enterDeptId);
 
 		BlackboardDto bb = (BlackboardDto) result.get("blackboard");
-		
-		logger.info("==============返回详情数据:"+bb);
-		
+
+		logger.info("==============返回详情数据:" + bb);
+
 		if (bb.getCreateMobile().equals(mobile)) {
 			return result.put("canrevise", 1);
 		} else {
@@ -189,13 +189,13 @@ public class BlackboardController {
 		// 用户ID
 		String mobile = (String) request.getSession().getAttribute("mobile");
 
-		logger.info("==================获取个人的所有黑板报:企业ID为:" + enterDeptId+"电话号码为"+mobile);
-		
-		if (enterDeptId == null && mobile == null) {
+		logger.info("==================获取个人的所有黑板报:企业ID为:" + enterDeptId + "电话号码为" + mobile);
+
+		if ((enterDeptId == null || enterDeptId.trim().length() <= 0) && (mobile == null || mobile.trim().length() <= 0)) {
 			enterDeptId = "517090";
 			mobile = "13432879269";
 		}
-		logger.info("==================设置个人的所有黑板报:企业ID为:" + enterDeptId+"电话号码为"+mobile);
+		logger.info("==================设置个人的所有黑板报:企业ID为:" + enterDeptId + "电话号码为" + mobile);
 		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0
 				|| pageNumber == null) {
 
@@ -203,7 +203,7 @@ public class BlackboardController {
 		}
 		logger.info("==================获取个人的所有黑板报:" + mobile);
 		Map<String, Object> map = blackboardService.getPersonalBlackboard(enterDeptId, mobile, pageNumber);
-		logger.info("==================返回的数据:"+map);
+		logger.info("==================返回的数据:" + map);
 		return JsonResult.ok().put("personalList", map.get("list")).put("page", map.get("page"));
 	}
 
@@ -222,7 +222,7 @@ public class BlackboardController {
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
 
 		if (enterDeptId == null) {
-			enterDeptId = "88888888";
+			enterDeptId = "517090";
 		}
 
 		if (enterDeptId == null || enterDeptId.length() <= 0 || blackboardId == null || blackboardId.length() <= 0) {
@@ -249,7 +249,7 @@ public class BlackboardController {
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
 		if (enterDeptId == null) {
-			enterDeptId = "88888888";
+			enterDeptId = "517090";
 		}
 		blackboard.setEnterpriseId(enterDeptId);
 

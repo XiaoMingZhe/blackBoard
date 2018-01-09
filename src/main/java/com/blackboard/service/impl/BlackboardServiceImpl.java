@@ -170,7 +170,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		Blackboard blackboard = blackboardDao.getBlackboardById(map);
 		logger.info("==============获取单条黑板报信息:ID为" + blackboardId);
 		// 获取评论
-		List<Comment> comments = commentService.getAllComments(enterpriseId, blackboardId);
+		List<Comment> comments = commentService.getAllComments(blackboardId);
 		logger.info("==============获取单条黑板报评论:ID为" + blackboardId);
 
 		// 封装黑板报展示信息
@@ -189,6 +189,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		}
 
 		logger.info("=============黑板报详情:" + bd);
+		logger.info("=============评论详情:" + comments);
 		return JsonResult.ok().put("blackboard", bd).put("comments", comments);
 	}
 

@@ -12,8 +12,6 @@
 		FROM
 			tb_comment
 		WHERE
-			enterprise_id = #{enterpriseId}
-		AND 
 			blackboard_id = #{blackboardId}
 		ORDER BY 
 			comment_time 
@@ -48,7 +46,7 @@
             </if> 
         </trim>
         <trim prefix="values(" suffix=")" suffixOverrides=",">
-            #{commentId},#{blackboardId},#{enterpriseId},#{commenterId},#{commentContent},now(),#{replyName},#{commenterName}
+            #{commentId},#{blackboardId},#{enterpriseId},#{commenterId},#{commentContent,jdbcType=VARCHAR},now(),#{replyName},#{commenterName}
             <if test="replyId != null">
                ,#{replyId}
             </if> 

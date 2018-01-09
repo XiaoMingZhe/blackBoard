@@ -3,6 +3,8 @@ package com.blackboard.controller;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.blackboard.dao.BlackboardDao;
 import com.blackboard.dao.LoginlogDao;
 import com.blackboard.entity.Loginlog;
 import com.blackboard.utils.JsonResult;
@@ -31,6 +34,9 @@ public class IndexController {
 
 	@Autowired
 	private LoginlogDao loginlogDao;
+	
+	@Autowired
+	private BlackboardDao blackboardDao;
 
 	/**
 	 * 跳转到主页
@@ -128,12 +134,24 @@ public class IndexController {
 	private JsonResult isLogin(HttpServletRequest request) {
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		String token = (String) request.getSession().getAttribute("token");
-
+		String enterpriseId = (String)request.getSession().getAttribute("enterDeptId");
+		
+		
+		Map<String,Object> map = new HashMap<>();
+		map.put("enterpriseId", enterpriseId);
+		map.put("EUserID", mobile);
+		map.put("token", token);
+		long blackboardCount = blackboardDao.getALLBlackboardCount(map);
+		
 		Integer count = 0;
 		if (mobile != null) {
-			count = loginlogDao.findLog(mobile);
+			count = loginlogDao.findLog(map);
 		}
 
+		
+		
+		
+		
 		logger.info("=============判断有没有访问过黑板报：用户ID为" + mobile);
 		logger.info("=============有没有访问过?0是没访问过:" + count);
 
@@ -149,7 +167,7 @@ public class IndexController {
 		
 
 		logger.info("===========用户登陆:" + mobile);
-		if (count > 0) {
+		if (count > 0 || blackboardCount>0 ) {
 			return JsonResult.ok().put("isLogin", 1);
 		} else {
 			return JsonResult.ok().put("isLogin", 0);

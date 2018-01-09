@@ -18,6 +18,12 @@ public class RelativeDateFormat {
 	private static final String ONE_YEAR_AGO = "年前";
 
 	public static String format(Date date) {
+		
+		if((new Date().getYear() - date.getYear())!=0){
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			return sdf.format(date);
+		}
+		
 		long delta = new Date().getTime() - date.getTime();
 		
 		if (delta < 1L * ONE_MINUTE) {
