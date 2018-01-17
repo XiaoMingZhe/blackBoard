@@ -56,7 +56,7 @@ public interface BlackboardService {
 	 * @param currentUser   当前用户
 	 * @return result    当前黑板报所有详情（评论、状态）
 	 */
-	JsonResult getBlackboardById(String blackboardId,String enterpriseId);
+	JsonResult getBlackboardById(String blackboardId,String enterpriseId,String mobile);
 	
 	
 	/**

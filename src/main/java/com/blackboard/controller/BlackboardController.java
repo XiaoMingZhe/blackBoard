@@ -1,6 +1,7 @@
 package com.blackboard.controller;
 
-import java.util.HashMap;
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.blackboard.dto.BlackboardDto;
-import com.blackboard.dto.User;
+import com.blackboard.dto.CheckAttack;
+import com.blackboard.dto.CreateBlackboardDto;
 import com.blackboard.entity.Blackboard;
 import com.blackboard.service.BlackboardService;
+import com.blackboard.utils.CheckAttackUtil;
 import com.blackboard.utils.JsonResult;
 
 @Controller
@@ -26,6 +30,8 @@ import com.blackboard.utils.JsonResult;
 public class BlackboardController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	private CheckAttackUtil checkAttackUtil = new CheckAttackUtil();
 
 	@Autowired
 	private BlackboardService blackboardService;
@@ -41,8 +47,17 @@ public class BlackboardController {
 	 */
 	@RequestMapping(value = "/createBlackboard", method = RequestMethod.POST)
 	@ResponseBody
-	private JsonResult createBlackboard(@RequestBody Blackboard blackboard, HttpServletRequest request) {
+	private JsonResult createBlackboard(@RequestBody CreateBlackboardDto createBlackboardDto,HttpServletRequest request) {
 
+		System.out.println(createBlackboardDto);
+		Blackboard blackboard = createBlackboardDto.getBlackboard();
+		CheckAttack checkAttack = createBlackboardDto.getCheckAttack();
+		
+		if(!checkAttackUtil.checkattack(request, checkAttack)){
+			return JsonResult.error("参数有误");
+		}
+		
+		
 		// 获取信息
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
@@ -62,9 +77,6 @@ public class BlackboardController {
 			return JsonResult.error("请求参数非法");
 		}
 
-		// blackboard.setEnterpriseId(enterDeptId);
-		// blackboard.setCreateMobile(mobile);
-		// blackboard.setCreateById(EUserID);
 		// 为了测试
 		if ((enterDeptId == null || enterDeptId.trim().length() <= 0) && (mobile == null || mobile.trim().length() <= 0)) {
 			blackboard.setEnterpriseId("517090");
@@ -109,7 +121,7 @@ public class BlackboardController {
 
 		Map<String, Object> map = blackboardService.getAllBlackboard(enterDeptId, pageNumber);
 
-		logger.info("=============企业所有黑板报" + map);
+		logger.info("=============获取企业所有黑板报成功==============");
 
 		return JsonResult.ok().put("blackboardList", map.get("list")).put("page", map.get("page"));
 	}
@@ -145,8 +157,8 @@ public class BlackboardController {
 
 		String currentUser = mobile;
 		logger.info("==============获取单条黑板报详情:ID为" + blackboardId);
-		logger.info("==============企业ID为" + blackboardId);
-		logger.info("==============用户ID为" + blackboardId);
+		logger.info("==============企业ID为" + enterDeptId);
+		logger.info("==============用户ID为" + mobile);
 
 		if (enterDeptId == null || enterDeptId.length() <= 0 || blackboardId == null || blackboardId.length() <= 0
 				|| currentUser == null || currentUser.length() <= 0) {
@@ -155,11 +167,12 @@ public class BlackboardController {
 		}
 		logger.info("==============详情判断参数完毕:ID为" + blackboardId);
 		logger.info("==============获取单条黑板报信息:企业ID" + enterDeptId);
-		JsonResult result = blackboardService.getBlackboardById(blackboardId, enterDeptId);
-
+		JsonResult result = blackboardService.getBlackboardById(blackboardId, enterDeptId,mobile);
+		
+		
 		BlackboardDto bb = (BlackboardDto) result.get("blackboard");
 
-		logger.info("==============返回详情数据:" + bb);
+		logger.info("==============获取单条黑板报成功================");
 
 		if (bb.getCreateMobile().equals(mobile)) {
 			return result.put("canrevise", 1);
@@ -265,4 +278,52 @@ public class BlackboardController {
 		return JsonResult.ok().put("flag", flag);
 	}
 
+	
+	/**
+	 * 判断是否重放攻击
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	private boolean checkattack(HttpServletRequest request,CheckAttack checkAttack){
+		CheckAttack checkAttackSession = (CheckAttack)request.getSession().getAttribute("checkAttack");
+	
+		if(checkAttackSession==null){
+			request.getSession().setAttribute("checkAttack", checkAttack);
+			return true;
+		}
+		
+		String sign = checkAttack.getSign();
+		String timestamp = checkAttack.getTimestamp();
+		String nonce = checkAttack.getNonce();
+		
+		//MDS加密
+		byte[] bytes = null;
+		try {
+			bytes = (timestamp+nonce).getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		String checksign = DigestUtils.md5DigestAsHex(bytes);
+		
+		//判断参数有没有被中途篡改
+		if(!sign.equals(checksign)){
+			return false;
+		}
+		
+		//判断有没有超时3分钟内
+		Long times = new Date().getTime();
+		if(times-Long.parseLong(timestamp)>180){
+			return false;
+		}
+		
+		//判断随机数是否用过
+		if(nonce.equals(checkAttackSession.getNonce())){
+			return false;
+		}
+		
+		//判断通过，覆盖新的验证
+		request.getSession().setAttribute("checkAttack", checkAttack);
+		return true;
+	}
+	
 }

@@ -3,6 +3,7 @@ package com.blackboard.service;
 import java.util.List;
 
 import com.blackboard.entity.Comment;
+import com.blackboard.utils.JsonResult;
 
 
 public interface CommentService {
@@ -28,5 +29,12 @@ public interface CommentService {
 	 * @param blackBoardId    黑板报ID
 	 */
 	void deleteComments(String enterpriseId,String blackBoardId);
+	
+	/**
+	 * 删除单条评论
+	 * @param commentId
+	 * @param commenterId
+	 */
+	JsonResult deleteOneComment(String commentId,String commenterId);
 
 }

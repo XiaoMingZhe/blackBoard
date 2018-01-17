@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,9 +26,33 @@ public class ImagesController {
 	@Autowired
 	private ImageService imageService;
 	
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	/**
+	 *  添加图片
+	 * @param request
+	 * @param images
+	 * @return
+	 */
 	@RequestMapping(value="addimages",method = RequestMethod.POST)
 	@ResponseBody
 	public JsonResult upLoadImages (HttpServletRequest request , @RequestParam(value="img", required = false)List<MultipartFile> images){
+		
+		
+		logger.info("=========上传图片开始=========");
+		
+		for (int i = 0; i < images.size(); i++) {
+			MultipartFile file = images.get(i);
+			Long upLoadSize = file.getSize();
+			if(upLoadSize>5000000L){
+				return JsonResult.error("第"+(i+1)+"个文件过大");
+			}
+			String fileName = file.getOriginalFilename();
+			logger.info("==========文件名称为:"+fileName);
+			if(!checkFile(fileName)){
+				return JsonResult.error("第"+(i+1)+"个文件类型错误");
+			}
+		}
 		
 		
 		if(images == null || images.size()<=0){
@@ -41,7 +67,13 @@ public class ImagesController {
 		return JsonResult.ok().put("list", list);
 	}
 
-	
+
+	/**
+	 * 删除图片
+	 * @param request
+	 * @param imageId
+	 * @return
+	 */
 	@RequestMapping(value="deleteImage",method = RequestMethod.GET)
 	@ResponseBody
 	public JsonResult deleteImage(HttpServletRequest request ,String imageId){
@@ -55,4 +87,21 @@ public class ImagesController {
 		
 		return JsonResult.ok();
 	}
+	
+	
+	
+	/**
+     * 判断是否为允许的上传文件类型,true表示允许
+     */
+    private boolean checkFile(String fileName) {
+        //设置允许上传文件类型
+        String suffixList = "jpg,gif,png,ico,bmp,jpeg";
+        // 获取文件后缀
+        String suffix = fileName.substring(fileName.lastIndexOf(".")
+                + 1, fileName.length());
+        if (suffixList.contains(suffix.trim().toLowerCase())) {
+            return true;
+        }
+        return false;
+    }
 }

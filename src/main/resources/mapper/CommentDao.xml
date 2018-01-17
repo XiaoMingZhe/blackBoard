@@ -62,4 +62,11 @@
 			blackboard_id = #{blackboardId}
 	</delete>
     
+    <delete id="deleteOneComments" parameterType="map">
+		DELETE FROM
+			tb_comment
+		WHERE 
+			comment_id = #{commentId}
+	</delete>
+    
 </mapper>

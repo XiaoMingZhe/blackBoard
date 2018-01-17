@@ -12,6 +12,7 @@ import com.blackboard.dao.CommentDao;
 import com.blackboard.entity.Comment;
 import com.blackboard.service.CommentService;
 import com.blackboard.utils.GainUuid;
+import com.blackboard.utils.JsonResult;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -86,5 +87,18 @@ public class CommentServiceImpl implements CommentService {
 		
 		commentDao.deleteComments(map);
 	}
+
+
+	@Override
+	public JsonResult deleteOneComment(String commentId, String commenterId) {
+		Comment comment = commentDao.selectCommentById(commentId);
+		if(comment == null || !comment.getCommenterId().equals(commenterId)){
+			return JsonResult.error("删除黑板报失败");
+		}
+		commentDao.deleteOneComments(commentId);
+		return JsonResult.ok();
+	}
+	
+	
 
 }

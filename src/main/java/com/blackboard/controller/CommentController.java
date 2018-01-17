@@ -41,14 +41,14 @@ public class CommentController {
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
 
 		if (enterDeptId == null && mobile == null) {
-			enterDeptId = "88888888";
-			mobile = "138888888888";
+			enterDeptId = "517090";
+			mobile = "13432879269";
 		}
 		comment.setEnterpriseId(enterDeptId);
 		comment.setCommenterId(mobile);
 
 		logger.info("================" + mobile + "评论" + comment.getBlackboardId());
-		logger.info("================" + comment+"================");
+		logger.info("================" + comment + "================");
 		if (comment == null || comment.getEnterpriseId() == null || comment.getEnterpriseId().length() <= 0
 				|| comment.getBlackboardId() == null || comment.getBlackboardId().length() <= 0
 				|| comment.getCommentContent() == null || comment.getCommentContent().length() <= 0
@@ -59,4 +59,29 @@ public class CommentController {
 		Comment com = commentService.addComment(comment);
 		return JsonResult.ok().put("Comment", com);
 	}
+
+	/**
+	 * 删除评论
+	 * 
+	 * @param request
+	 * @param commentId
+	 * @return
+	 */
+	@RequestMapping(value = "/deleteComment", method = RequestMethod.GET)
+	@ResponseBody
+	private JsonResult deleteComment(HttpServletRequest request, String commentId) {
+		// 手机号
+		String mobile = (String) request.getSession().getAttribute("mobile");
+		if(mobile == null){
+			mobile = "13432879269";
+		}
+		if (commentId == null) {
+			return JsonResult.error("请求参数非法");
+		}
+		
+		JsonResult jsonResult = commentService.deleteOneComment(commentId, mobile);
+		
+		return jsonResult;
+	}
+
 }

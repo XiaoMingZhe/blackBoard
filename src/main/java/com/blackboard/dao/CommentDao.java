@@ -40,4 +40,10 @@ public interface CommentDao {
 	 * @return
 	 */
 	Integer selectCount(String blackboardId);
+	
+	/**
+	 * 删除单条评论
+	 * @param commentId
+	 */
+	void deleteOneComments(String commentId);
 } 

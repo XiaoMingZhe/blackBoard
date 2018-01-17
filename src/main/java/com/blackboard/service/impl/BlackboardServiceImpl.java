@@ -160,7 +160,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * @return result 当前黑板报所有详情（评论、状态）
 	 */
 	@Override
-	public JsonResult getBlackboardById(String blackboardId, String enterpriseId) {
+	public JsonResult getBlackboardById(String blackboardId, String enterpriseId,String mobile) {
 		// 设置参数
 		Map<String, Object> map = new HashMap<>();
 		map.put("enterpriseId", enterpriseId);
@@ -170,7 +170,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		Blackboard blackboard = blackboardDao.getBlackboardById(map);
 		logger.info("==============获取单条黑板报信息:ID为" + blackboardId);
 		// 获取评论
-		List<Comment> comments = commentService.getAllComments(blackboardId);
+		List<Comment> comment = commentService.getAllComments(blackboardId);
 		logger.info("==============获取单条黑板报评论:ID为" + blackboardId);
 
 		// 封装黑板报展示信息
@@ -186,6 +186,19 @@ public class BlackboardServiceImpl implements BlackboardService {
 			bd.setCommentCount(commentDao.selectCount(blackboard.getBlackboardId()));
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		
+		//判断是不是本人，评论能不能删除
+		List<Map<String,Object>> comments = new ArrayList<>();
+		for(Comment c :comment){
+			Map<String,Object> commentMap = new HashMap<>();
+			commentMap.put("comment", c);
+			if(c.getCommenterId().equals(mobile)){
+				commentMap.put("canDelete", 1);
+			}else{
+				commentMap.put("canDelete", 0);
+			}
+			comments.add(commentMap);
 		}
 
 		logger.info("=============黑板报详情:" + bd);

@@ -64,21 +64,8 @@ public class ImageServiceImpl implements ImageService {
 				throw new UploadException("上传图片失败！");
 			}
 
-			// 图片压缩
-			//新的绝对路径
-//			String newPath = serverPath + "uploadImages/" + oFileName;
-//			File newparent = dest.getParentFile();
-//			if (!newparent.exists()) {
-//				newparent.mkdirs();
-//			}
 			// 相对路径
 			String relativePath = Path + "/uploadImages/" + oFileName;
-//			File newDest = new File(newPath);
-//			try {
-//				Thumbnails.of(dest).size(400, 500).toFile(newDest);
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
 
 			// 设置图片信息
 			Image image = new Image();
