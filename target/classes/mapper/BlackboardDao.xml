@@ -105,4 +105,8 @@
 		blackboard_id = #{blackboardId}
 	</update>
 
+
+	<select id="getdual" resultType="long">
+		select 1 from DUAL
+	</select>
 </mapper>

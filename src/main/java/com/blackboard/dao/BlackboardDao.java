@@ -72,4 +72,10 @@ public interface BlackboardDao {
 	 */
 	Long getALLBlackboardCount(Map<String, Object> paramMap);
 	
+	/**
+	 * 定时连接数据库
+	 * @return
+	 */
+	Long getdual();
+	
 }
