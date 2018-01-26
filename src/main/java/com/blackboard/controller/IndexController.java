@@ -132,6 +132,8 @@ public class IndexController {
 	@RequestMapping(value = "/isLogin", method = RequestMethod.GET)
 	@ResponseBody
 	private JsonResult isLogin(HttpServletRequest request) {
+		
+		logger.info("============判断有没有访问过黑板报=============");
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		String token = (String) request.getSession().getAttribute("token");
 		String enterpriseId = (String)request.getSession().getAttribute("enterDeptId");
@@ -141,7 +143,10 @@ public class IndexController {
 		map.put("enterpriseId", enterpriseId);
 		map.put("EUserID", mobile);
 		map.put("token", token);
+		map.put("enterpriseId", enterpriseId);
 		long blackboardCount = blackboardDao.getALLBlackboardCount(map);
+		
+		
 		
 		Integer count = 0;
 		if (mobile != null) {
@@ -152,7 +157,7 @@ public class IndexController {
 		
 		
 		
-		logger.info("=============判断有没有访问过黑板报：用户ID为" + mobile);
+		logger.info("=============用户ID为:" + mobile);
 		logger.info("=============有没有访问过?0是没访问过:" + count);
 
 		// 添加访问记录
@@ -160,6 +165,7 @@ public class IndexController {
 		loginlog.setCreateTime(new Date());
 		loginlog.setUseId(mobile);
 		loginlog.setToken(token);
+		loginlog.setEnterpriseId(enterpriseId);
 		loginlogDao.saveLog(loginlog);
 
 		

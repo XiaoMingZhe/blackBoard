@@ -11,6 +11,16 @@ public class Loginlog {
 	@JsonFormat(pattern = "yyyy.MM.dd", timezone = "GMT+8")
 	private Date createTime; // 登陆时间
 	private String token;// token
+	private String enterpriseId;//公司id
+	
+
+	public String getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(String enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
 
 	public String getToken() {
 		return token;

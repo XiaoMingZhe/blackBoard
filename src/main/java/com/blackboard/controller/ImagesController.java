@@ -40,7 +40,7 @@ public class ImagesController {
 		
 		
 		logger.info("=========上传图片开始=========");
-		
+		logger.info("=========图片集合长度========="+images.size());
 		for (int i = 0; i < images.size(); i++) {
 			MultipartFile file = images.get(i);
 			Long upLoadSize = file.getSize();

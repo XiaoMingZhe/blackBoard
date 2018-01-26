@@ -7,9 +7,9 @@
 	<insert id="saveLog" parameterType="Loginlog">
 		INSERT INTO
 		tb_login_log
-		(use_id,create_time,token)
+		(use_id,create_time,token,enterprise_id)
 		VALUES(
-		#{useId},#{createTime},#{token})
+		#{useId},#{createTime},#{token},#{enterpriseId})
 
 	</insert>
 
@@ -18,7 +18,7 @@
 		count(1)
 		FROM tb_login_log
 		WHERE use_id = #{EUserID}
-		AND token = #{token}
+		AND enterprise_id = #{enterpriseId}
 	</select>
 
 	<select id="findToken" parameterType="String" resultType="Integer">
