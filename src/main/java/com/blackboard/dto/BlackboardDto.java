@@ -1,11 +1,5 @@
 package com.blackboard.dto;
 
-import java.util.Date;
-import java.util.List;
-
-import com.blackboard.entity.Blackboard;
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 public class BlackboardDto {
 
 	private String blackboardId;// 黑板报ID
@@ -13,10 +7,28 @@ public class BlackboardDto {
 	private String title;// 黑表报标题
 	private String createBy;// 创建人姓名
 	private String createMobile;// 创建人电话
-	// @JsonFormat(pattern = "yyyy.MM.dd", timezone = "GMT+8")
 	private String createTime; // 创建时间
 	private Integer commentCount;// 评论总数
 	private String content; // 文字内容
+	private Integer pageViews;//浏览数
+	private Integer likeCount;//点赞数
+	
+
+	public Integer getLikeCount() {
+		return likeCount;
+	}
+
+	public void setLikeCount(Integer likeCount) {
+		this.likeCount = likeCount;
+	}
+
+	public Integer getPageViews() {
+		return pageViews;
+	}
+
+	public void setPageViews(Integer pageViews) {
+		this.pageViews = pageViews;
+	}
 
 	public String getBlackboardId() {
 		return blackboardId;
@@ -86,7 +98,8 @@ public class BlackboardDto {
 	public String toString() {
 		return "BlackboardDto [blackboardId=" + blackboardId + ", enterpriseId=" + enterpriseId + ", title=" + title
 				+ ", createBy=" + createBy + ", createMobile=" + createMobile + ", createTime=" + createTime
-				+ ", commentCount=" + commentCount + ", content=" + content + "]";
+				+ ", commentCount=" + commentCount + ", content=" + content + ", pageViews=" + pageViews
+				+ ", likeCount=" + likeCount + "]";
 	}
 
 }

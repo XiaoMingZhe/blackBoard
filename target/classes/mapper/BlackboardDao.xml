@@ -5,19 +5,28 @@
 <mapper namespace="com.blackboard.dao.BlackboardDao">
 	<!-- 目的：为dao接口方法提供sql语句配置 -->
 
-	<select id="getAllBlackboard" resultType="Blackboard"
+	<select id="getAllBlackboard" resultType="com.blackboard.dto.BlackboardDto"
 		parameterType="map">
 		<!-- 具体的sql -->
-		SELECT
-		*
-		FROM
-		tb_blackboard
-		WHERE
-		enterprise_id = #{enterpriseId}
+		SELECT t.*,count(tl.like_id) as likeCount ,COUNT(tb.blackboard_id) as commentCount
+		FROM 
+		(SELECT 
+		blackboard_id,enterprise_id,title,create_by,create_mobile,
+		create_time,content 
+		FROM tb_blackboard 
+		WHERE 
+		enterprise_id = #{enterpriseId} 
+		AND type = 0 
 		ORDER BY
 		update_time desc
-		LIMIT
-		#{first},#{end}
+		LIMIT #{first},#{end}) t
+		left  join 
+		tb_like tl
+		on t.blackboard_id = tl.Be_likedId 
+		left join  
+		tb_comment tb  
+		on t.blackboard_id = tb.blackboard_id 
+		GROUP BY t.blackboard_id
 	</select>
 
 	<select id="getALLBlackboardCount" resultType="long"
@@ -44,30 +53,55 @@
 		create_mobile = #{createMobile}
 	</select>
 
-	<select id="getBlackboardById" resultType="Blackboard"
+	<select id="getBlackboardById" resultType="com.blackboard.dto.BlackboardDto"
 		parameterType="map">
-		SELECT
-		*
-		FROM
-		tb_blackboard
+		SELECT a.*,b.commentCount
+		FROM 
+		(SELECT 
+		t.blackboard_id,t.enterprise_id,t.title,t.create_by,t.create_mobile,
+		t.create_time,t.content,count(tl.like_id) as likeCount
+		FROM tb_blackboard t
+		left  join 
+		tb_like tl
+		on t.blackboard_id = tl.Be_likedId
+		AND tl.status = 0
 		WHERE
 		blackboard_id = #{blackboardId}
+		) a
+		left join
+		(SELECT 
+		t.blackboard_id,COUNT(tb.blackboard_id) as commentCount
+		FROM tb_blackboard t
+		left  join 
+		tb_comment tb
+		on t.blackboard_id = tb.blackboard_id 
+		WHERE
+		t.blackboard_id = #{blackboardId})b
+		on a.blackboard_id = b.blackboard_id
 	</select>
 
-	<select id="getPersonalBlackboard" resultType="Blackboard"
+	<select id="getPersonalBlackboard" resultType="com.blackboard.dto.BlackboardDto"
 		parameterType="map">
-		SELECT
-		*
-		FROM
-		tb_blackboard
-		WHERE
-		enterprise_id = #{enterpriseId}
-		AND
-		create_mobile = #{createMobile}
+		SELECT t.*,count(tl.like_id) as likeCount ,COUNT(tb.blackboard_id) as commentCount
+		FROM 
+		(SELECT 
+		blackboard_id,enterprise_id,title,create_by,create_mobile,
+		create_time,content 
+		FROM tb_blackboard 
+		WHERE 
+		enterprise_id = #{enterpriseId} 
+		AND create_mobile = #{createMobile}
+		AND type = 0 
 		ORDER BY
 		update_time desc
-		LIMIT
-		#{first},#{end}
+		LIMIT #{first},#{end}) t
+		left  join 
+		tb_like tl
+		on t.blackboard_id = tl.Be_likedId 
+		left join  
+		tb_comment tb  
+		on t.blackboard_id = tb.blackboard_id 
+		GROUP BY t.blackboard_id
 	</select>
 
 	<delete id="delete" parameterType="map">
@@ -84,10 +118,10 @@
 		INSERT INTO
 		tb_blackboard
 		<trim prefix="(" suffix=")" suffixOverrides=",">
-			blackboard_id,enterprise_id,title,create_by,create_time,content,create_byId,create_mobile,update_time
+			blackboard_id,enterprise_id,title,create_by,create_time,content,create_byId,create_mobile,update_time,type
 		</trim>
 		<trim prefix="values(" suffix=")" suffixOverrides=",">
-			#{blackboardId},#{enterpriseId},#{title},#{createBy},#{createTime},#{content},#{createById},#{createMobile},now()
+			#{blackboardId},#{enterpriseId},#{title},#{createBy},#{createTime},#{content},#{createById},#{createMobile},now(),#{type}
 		</trim>
 	</insert>
 
@@ -105,8 +139,31 @@
 		blackboard_id = #{blackboardId}
 	</update>
 
+	<update id="updatePageViews" parameterType="String"> 
+		UPDATE 
+		tb_blackboard 
+		SET 
+		Page_Views = Page_Views+1
+		WHERE 
+		blackboard_id  = #{blackBoardId}
+	</update>
 
 	<select id="getdual" resultType="long">
 		select 1 from DUAL
+	</select>
+	
+	<select id="selectIDList" parameterMap="map" resultType="String">
+		SELECT
+		blackboard_id
+		FROM
+		tb_blackboard
+		WHERE
+		enterprise_id = #{enterpriseId}
+		<if test="createMobile != null and createMobile !=''">
+		AND
+		create_mobile = #{createMobile}
+		</if>
+		ORDER BY
+		update_time desc
 	</select>
 </mapper>

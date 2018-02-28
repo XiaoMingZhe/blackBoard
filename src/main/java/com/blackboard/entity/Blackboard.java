@@ -24,6 +24,25 @@ public class Blackboard {
 	private Date updateTime; // 更改时间
 	private String createById;// 创建用户ID
 	private String createMobile;// 创建用户手机号
+	private Integer pageViews;//浏览数
+	private Integer type;//类型(0为黑板报，1为草稿)
+
+	
+	public Integer getPageViews() {
+		return pageViews;
+	}
+
+	public void setPageViews(Integer pageViews) {
+		this.pageViews = pageViews;
+	}
+
+	public Integer getType() {
+		return type;
+	}
+
+	public void setType(Integer type) {
+		this.type = type;
+	}
 
 	public String getCreateById() {
 		return createById;

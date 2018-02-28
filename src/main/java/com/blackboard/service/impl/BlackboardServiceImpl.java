@@ -13,14 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.blackboard.dao.BlackboardDao;
 import com.blackboard.dao.CommentDao;
-import com.blackboard.dao.ImageDao;
 import com.blackboard.dto.BlackboardDto;
+import com.blackboard.dto.CommentDto;
 import com.blackboard.entity.Blackboard;
-import com.blackboard.entity.Comment;
 import com.blackboard.service.BlackboardService;
 import com.blackboard.service.CommentService;
 import com.blackboard.service.ImageService;
@@ -38,15 +36,13 @@ public class BlackboardServiceImpl implements BlackboardService {
 	private ImageService imageService;
 	@Autowired
 	private CommentService commentService;
-	@Autowired
-	private CommentDao commentDao;
 
 	private static final Integer PAGE_SIZE = 10;
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	/**
-	 * 创建纯文字黑板报(不使用)
+	 * 创建黑板报
 	 * 
 	 * @param blackboard
 	 *            黑板报对象
@@ -73,19 +69,19 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 *            保存图片的服务器路劲
 	 * @return blackboardId 黑板报ID
 	 */
-	@Override
-	public String createBlackboard(Blackboard blackboard, MultipartFile[] images, String serverPath) {
-		// 设置黑板报ID
-		blackboard.setBlackboardId(GainUuid.getUUID());
-		// 设置黑板报日期
-		blackboard.setCreateTime(new Date());
-		// 创建黑板报
-		blackboardDao.createBlackboard(blackboard);
-
-		logger.info("===========创建黑板报service:" + blackboard);
-
-		return blackboard.getBlackboardId();
-	}
+//	@Override
+//	public String createBlackboard(Blackboard blackboard, MultipartFile[] images, String serverPath) {
+//		// 设置黑板报ID
+//		blackboard.setBlackboardId(GainUuid.getUUID());
+//		// 设置黑板报日期
+//		blackboard.setCreateTime(new Date());
+//		// 创建黑板报
+//		blackboardDao.createBlackboard(blackboard);
+//
+//		logger.info("===========创建黑板报service:" + blackboard);
+//
+//		return blackboard.getBlackboardId();
+//	}
 
 	/**
 	 * 查询企业所有黑板报
@@ -104,49 +100,20 @@ public class BlackboardServiceImpl implements BlackboardService {
 		map.put("first", (pageNumber - 1) * PAGE_SIZE);
 		map.put("end", PAGE_SIZE);
 
-		List<Blackboard> list = blackboardDao.getAllBlackboard(map);
+		List<BlackboardDto> list = blackboardDao.getAllBlackboard(map);
 		// 获取总条数，计算总页数
 		Long count = blackboardDao.getALLBlackboardCount(map);
 		long page = count / PAGE_SIZE;
 		if (count % PAGE_SIZE != 0) {
 			page++;
 		}
-
-		// 封装黑板报展示信息
-		List<BlackboardDto> bdl = new ArrayList<>();
-		for (Blackboard b : list) {
-			BlackboardDto bd = new BlackboardDto();
-			bd.setBlackboardId(b.getBlackboardId());
-			bd.setCreateBy(b.getCreateBy());
-			bd.setCreateMobile(b.getCreateMobile());
-			bd.setCreateTime(RelativeDateFormat.format(b.getUpdateTime()));
-			bd.setEnterpriseId(b.getEnterpriseId());
-			bd.setTitle(b.getTitle());
-			bd.setContent(b.getContent());
-			bd.setCommentCount(commentDao.selectCount(b.getBlackboardId()));
-			bdl.add(bd);
-		}
-
+		
 		Map<String, Object> backMap = new HashMap<>();
-		backMap.put("list", bdl);
-		backMap.put("page", page);
+		backMap.put("list", list);
+		backMap.put("page", page); 
 		return backMap;
 	}
 
-	/**
-	 * 查询企业所有黑板报,被拉黑的黑板报不可见(未使用)
-	 * 
-	 * @param enterpriseId
-	 * @param blcaklterId
-	 * @param beBlcaklterIdString
-	 * @return List<Blackboard> 黑板报列表
-	 */
-	@Override
-	public List<Blackboard> getAllBlackboard(String enterpriseId, String blcaklterId, String beBlcaklterIdString) {
-
-		List<Blackboard> list = blackboardDao.getAllBlackboard(enterpriseId, blcaklterId, beBlcaklterIdString);
-		return list;
-	}
 
 	/**
 	 * 展示单条黑板报详情
@@ -166,31 +133,20 @@ public class BlackboardServiceImpl implements BlackboardService {
 		map.put("enterpriseId", enterpriseId);
 		map.put("blackboardId", blackboardId);
 
+		//增加浏览数
+		blackboardDao.updatePageViews(blackboardId);
+		
 		// 获取单条黑板报信息
-		Blackboard blackboard = blackboardDao.getBlackboardById(map);
+		BlackboardDto blackboarddto = blackboardDao.getBlackboardById(map);
 		logger.info("==============获取单条黑板报信息:ID为" + blackboardId);
 		// 获取评论
-		List<Comment> comment = commentService.getAllComments(blackboardId);
+		List<CommentDto> commentDto = commentService.getAllComments(blackboardId);
 		logger.info("==============获取单条黑板报评论:ID为" + blackboardId);
 
-		// 封装黑板报展示信息
-		BlackboardDto bd = new BlackboardDto();
-		try {
-			bd.setBlackboardId(blackboard.getBlackboardId());
-			bd.setCreateBy(blackboard.getCreateBy());
-			bd.setCreateMobile(blackboard.getCreateMobile());
-			bd.setCreateTime(RelativeDateFormat.format(blackboard.getCreateTime()));
-			bd.setEnterpriseId(blackboard.getEnterpriseId());
-			bd.setTitle(blackboard.getTitle());
-			bd.setContent(blackboard.getContent());
-			bd.setCommentCount(commentDao.selectCount(blackboard.getBlackboardId()));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		
 		//判断是不是本人，评论能不能删除
 		List<Map<String,Object>> comments = new ArrayList<>();
-		for(Comment c :comment){
+		for(CommentDto c :commentDto){
 			Map<String,Object> commentMap = new HashMap<>();
 			commentMap.put("comment", c);
 			if(c.getCommenterId().equals(mobile)){
@@ -200,10 +156,11 @@ public class BlackboardServiceImpl implements BlackboardService {
 			}
 			comments.add(commentMap);
 		}
-
-		logger.info("=============黑板报详情:" + bd);
+		
+		
+		logger.info("=============黑板报详情:" + blackboarddto);
 		logger.info("=============评论详情:" + comments);
-		return JsonResult.ok().put("blackboard", bd).put("comments", comments);
+		return JsonResult.ok().put("blackboard", blackboarddto).put("comments", comments);
 	}
 
 	/**
@@ -227,35 +184,18 @@ public class BlackboardServiceImpl implements BlackboardService {
 		map.put("end", PAGE_SIZE);
 
 		// 获取所有黑板报
-		List<Blackboard> list = blackboardDao.getPersonalBlackboard(map);
+		List<BlackboardDto> list = blackboardDao.getPersonalBlackboard(map);
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
 		long page = count / PAGE_SIZE;
 		if (count % PAGE_SIZE != 0) {
 			page++;
 		}
+		
 		logger.info("==============所有黑板报:" + list);
 		logger.info("==============黑板报条数:" + count);
-		// 封装黑板报展示信息
-		List<BlackboardDto> bdl = new ArrayList<>();
-		try {
-			for (Blackboard b : list) {
-				BlackboardDto bd = new BlackboardDto();
-				bd.setBlackboardId(b.getBlackboardId());
-				bd.setCreateBy(b.getCreateBy());
-				bd.setCreateMobile(b.getCreateMobile());
-				bd.setCreateTime(RelativeDateFormat.format(b.getUpdateTime()));
-				bd.setEnterpriseId(b.getEnterpriseId());
-				bd.setTitle(b.getTitle());
-				bd.setContent(b.getContent());
-				bd.setCommentCount(commentDao.selectCount(b.getBlackboardId()));
-				bdl.add(bd);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		Map<String, Object> backMap = new HashMap<>();
-		backMap.put("list", bdl);
+		backMap.put("list", list);
 		backMap.put("page", page);
 		return backMap;
 	}

@@ -138,7 +138,6 @@ public class IndexController {
 		String token = (String) request.getSession().getAttribute("token");
 		String enterpriseId = (String)request.getSession().getAttribute("enterDeptId");
 		
-		
 		Map<String,Object> map = new HashMap<>();
 		map.put("enterpriseId", enterpriseId);
 		map.put("EUserID", mobile);
@@ -146,16 +145,10 @@ public class IndexController {
 		map.put("enterpriseId", enterpriseId);
 		long blackboardCount = blackboardDao.getALLBlackboardCount(map);
 		
-		
-		
 		Integer count = 0;
 		if (mobile != null) {
 			count = loginlogDao.findLog(map);
 		}
-
-		
-		
-		
 		
 		logger.info("=============用户ID为:" + mobile);
 		logger.info("=============有没有访问过?0是没访问过:" + count);
@@ -168,12 +161,8 @@ public class IndexController {
 		loginlog.setEnterpriseId(enterpriseId);
 		loginlogDao.saveLog(loginlog);
 
-		
-		
-		
-
 		logger.info("===========用户登陆:" + mobile);
-		if (count > 0 || blackboardCount>0 ) {
+		if (count > 0 || blackboardCount > 0) {
 			return JsonResult.ok().put("isLogin", 1);
 		} else {
 			return JsonResult.ok().put("isLogin", 0);

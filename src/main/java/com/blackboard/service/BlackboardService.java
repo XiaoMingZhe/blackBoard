@@ -1,11 +1,7 @@
 package com.blackboard.service;
 
 
-import java.util.List;
 import java.util.Map;
-
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.blackboard.entity.Blackboard;
 import com.blackboard.utils.JsonResult;
@@ -14,21 +10,12 @@ public interface BlackboardService {
 	
 	
 	/**
-	 * 创建纯文字黑板报 
+	 * 创建黑板报 
 	 * @param blackBoard   黑板报对象
 	 * @return blackboardId   黑板报ID
 	 */
 	void createBlackboard(Blackboard blackboard);
 	
-	
-	/**
-	 * 创建黑板报 
-	 * @param blackboard   黑板报对象
-	 * @param images 	        图片对象
-	 * @param serverPath   保存图片的服务器路劲
-	 * @return blackboardId   黑板报ID
-	 */
-	String createBlackboard(Blackboard blackboard,MultipartFile[] images,String serverPath);
 	
 	/**
 	 * 查询企业所有黑板报
@@ -38,15 +25,6 @@ public interface BlackboardService {
 	 */
 	Map<String,Object> getAllBlackboard(String enterpriseId,Integer pageNumber);
 	
-	
-	/**
-	 * 查询企业所有黑板报,被拉黑的黑板报不可见 
-	 * @param enterpriseId
-	 * @param blcaklterId
-	 * @param beBlcaklterId
-	 * @return List<Blackboard> 黑板报列表
-	 */
-	List<Blackboard> getAllBlackboard(String enterpriseId,String blcaklterId,String beBlcaklterIdString);
 	
 	
 	/**

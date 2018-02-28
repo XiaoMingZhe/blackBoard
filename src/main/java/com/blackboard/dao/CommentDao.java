@@ -3,6 +3,7 @@ package com.blackboard.dao;
 import java.util.List;
 import java.util.Map;
 
+import com.blackboard.dto.CommentDto;
 import com.blackboard.entity.Comment;
 
 
@@ -19,7 +20,7 @@ public interface CommentDao {
 	 * 展示当前黑板报所有评论
 	 * @param parmMap    
 	 */
-	List<Comment> getAllComments(Map<String, Object> parmMap);
+	List<CommentDto> getAllComments(Map<String, Object> parmMap);
 
 	/**
 	 * 删除当前黑板报所有评论

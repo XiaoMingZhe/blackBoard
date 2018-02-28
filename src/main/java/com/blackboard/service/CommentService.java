@@ -2,6 +2,7 @@ package com.blackboard.service;
 
 import java.util.List;
 
+import com.blackboard.dto.CommentDto;
 import com.blackboard.entity.Comment;
 import com.blackboard.utils.JsonResult;
 
@@ -21,7 +22,7 @@ public interface CommentService {
 	 * @param blackBoardId    黑板报ID
 	 * @return List<Comment>  评论列表
 	 */
-	List<Comment> getAllComments(String blackBoardId);
+	List<CommentDto> getAllComments(String blackBoardId);
 	
 	/**
 	 * 删除当前黑板报所有评论

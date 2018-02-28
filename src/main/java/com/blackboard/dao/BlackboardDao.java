@@ -19,7 +19,7 @@ public interface BlackboardDao {
 	 * 查询企业所有黑板报 
 	 * @param paramMap
 	 */
-	public List<Blackboard> getAllBlackboard(Map<String,Object> paramMap);
+	List<BlackboardDto> getAllBlackboard(Map<String,Object> paramMap);
 	
 	
 	/**
@@ -32,17 +32,17 @@ public interface BlackboardDao {
 	
 	
 	/**
-	 * 查询企业单条黑板报详情 
+	 * 查询单条黑板报详情 
 	 * @param paramMap
 	 */
-	Blackboard getBlackboardById(Map<String,Object> paramMap);
+	BlackboardDto getBlackboardById(Map<String,Object> paramMap);
 	
 	
 	/**
 	 * 查询企业个人所有黑板报
 	 * @param paramMap
 	 */
-	List<Blackboard> getPersonalBlackboard(Map<String,Object> paramMap);
+	List<BlackboardDto> getPersonalBlackboard(Map<String,Object> paramMap);
 	
 	
 	/**
@@ -77,5 +77,17 @@ public interface BlackboardDao {
 	 * @return
 	 */
 	Long getdual();
+	
+	/**
+	 * 更新浏览数
+	 * @param blackBoardId
+	 */
+	void updatePageViews(String blackBoardId);
+	
+	/**
+	 * 查询黑板报ID列表
+	 * @return
+	 */
+	List<String> selectIDList(Map<String,Object> map);
 	
 }

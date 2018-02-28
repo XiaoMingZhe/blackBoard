@@ -1,14 +1,15 @@
 package com.blackboard.service.impl;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Date;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.blackboard.dao.CommentDao;
+import com.blackboard.dto.CommentDto;
 import com.blackboard.entity.Comment;
 import com.blackboard.service.CommentService;
 import com.blackboard.utils.GainUuid;
@@ -56,12 +57,12 @@ public class CommentServiceImpl implements CommentService {
 	 * @return List<Comment>  评论列表
 	 */
 	@Override
-	public List<Comment> getAllComments(String blackboardId) {
+	public List<CommentDto> getAllComments(String blackboardId) {
 		
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("blackboardId", blackboardId);
 		
-		List<Comment> comments = commentDao.getAllComments(map);
+		List<CommentDto> comments = commentDao.getAllComments(map);
 		for(Comment c :comments){
 			String content = c.getCommentContent();
 			if(content.indexOf(".")!=-1){

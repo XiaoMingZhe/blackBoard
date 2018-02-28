@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blackboard.dao.LikeDao">
+	
+	<insert id="addLike" parameterType="Like">
+		INSERT INTO 
+		tb_like 
+		(Be_likedId,like_useid,status,type) 
+		VALUES
+		(#{beLikedId},#{likeUseid},0,#{type})
+	</insert>
+	
+	<update id="updateLike" parameterType="Like">
+		UPDATE tb_like SET  status = #{status}
+		WHERE 
+		like_id = #{likeId}
+	</update>
+	
+	<select id="findStatus" parameterType="Like" resultType="map">
+	select like_id as likeId ,status from 
+	tb_like 
+	where Be_likedId = #{beLikedId}
+	AND like_useid = #{likeUseid}
+	AND type = #{type}
+	</select>
+	
+</mapper>

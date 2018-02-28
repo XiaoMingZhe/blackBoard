@@ -2,6 +2,8 @@ package com.blackboard.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.blackboard.dao.BlackboardDao;
 import com.blackboard.dto.BlackboardDto;
 import com.blackboard.dto.CheckAttack;
 import com.blackboard.dto.CreateBlackboardDto;
@@ -30,34 +33,62 @@ import com.blackboard.utils.JsonResult;
 public class BlackboardController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+
 	private CheckAttackUtil checkAttackUtil = new CheckAttackUtil();
 
 	@Autowired
 	private BlackboardService blackboardService;
 
+	@Autowired
+	private BlackboardDao blackboardDao;
+
 	/**
-	 * 创建黑板报
+	 * 保存草稿
 	 * 
-	 * @param blackboardDto
-	 *            黑板报对象
-	 * @param images
-	 *            图片对象
-	 * @return blackboardId 黑板报ID
+	 * @param createBlackboardDto
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/saveDraft", method = RequestMethod.POST)
+	@ResponseBody
+	private JsonResult saveDraft(@RequestBody CreateBlackboardDto createBlackboardDto, HttpServletRequest request) {
+		createBlackboardDto.getBlackboard().setType(1);
+		return saveBlackboard(createBlackboardDto, request);
+	}
+
+	/**
+	 * 保存黑板报
+	 * 
+	 * @param createBlackboardDto
+	 * @param request
+	 * @return
 	 */
 	@RequestMapping(value = "/createBlackboard", method = RequestMethod.POST)
 	@ResponseBody
-	private JsonResult createBlackboard(@RequestBody CreateBlackboardDto createBlackboardDto,HttpServletRequest request) {
+	private JsonResult createBlackboard(@RequestBody CreateBlackboardDto createBlackboardDto,
+			HttpServletRequest request) {
+		createBlackboardDto.getBlackboard().setType(0);
+		return saveBlackboard(createBlackboardDto, request);
+	}
+
+	/**
+	 * 保存黑板报或草稿
+	 * 
+	 * @param createBlackboardDto
+	 * @param request
+	 * @return
+	 */
+	private JsonResult saveBlackboard(@RequestBody CreateBlackboardDto createBlackboardDto,
+			HttpServletRequest request) {
 
 		System.out.println(createBlackboardDto);
 		Blackboard blackboard = createBlackboardDto.getBlackboard();
 		CheckAttack checkAttack = createBlackboardDto.getCheckAttack();
-		
-		if(!checkAttackUtil.checkattack(request, checkAttack)){
+
+		if (!checkAttackUtil.checkattack(request, checkAttack)) {
 			return JsonResult.error("参数有误");
 		}
-		
-		
+
 		// 获取信息
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
@@ -78,7 +109,8 @@ public class BlackboardController {
 		}
 
 		// 为了测试
-		if ((enterDeptId == null || enterDeptId.trim().length() <= 0) && (mobile == null || mobile.trim().length() <= 0)) {
+		if ((enterDeptId == null || enterDeptId.trim().length() <= 0)
+				&& (mobile == null || mobile.trim().length() <= 0)) {
 			blackboard.setEnterpriseId("517090");
 			blackboard.setCreateMobile("13432879269");
 			blackboard.setCreateById("123456789");
@@ -123,6 +155,12 @@ public class BlackboardController {
 
 		logger.info("=============获取企业所有黑板报成功==============");
 
+		// 获取所有黑板报ID集合,存到session
+		Map<String, Object> selectID = new HashMap<String, Object>();
+		selectID.put("enterDeptId", enterDeptId);
+		List<String> IDlist = blackboardDao.selectIDList(selectID);
+		request.getSession().setAttribute("IDlist", IDlist);
+
 		return JsonResult.ok().put("blackboardList", map.get("list")).put("page", map.get("page"));
 	}
 
@@ -150,7 +188,8 @@ public class BlackboardController {
 		// 用户ID
 		String mobile = (String) request.getSession().getAttribute("mobile");
 
-		if ((enterDeptId == null || enterDeptId.trim().length() <= 0) && (mobile == null || mobile.trim().length() <= 0)) {
+		if ((enterDeptId == null || enterDeptId.trim().length() <= 0)
+				&& (mobile == null || mobile.trim().length() <= 0)) {
 			enterDeptId = "517090";
 			mobile = "13432879269";
 		}
@@ -167,11 +206,37 @@ public class BlackboardController {
 		}
 		logger.info("==============详情判断参数完毕:ID为" + blackboardId);
 		logger.info("==============获取单条黑板报信息:企业ID" + enterDeptId);
-		JsonResult result = blackboardService.getBlackboardById(blackboardId, enterDeptId,mobile);
+		JsonResult result = blackboardService.getBlackboardById(blackboardId, enterDeptId, mobile);
+
+		//获取上一条 下一条黑板报ID
+		List<String> IDlist = (List<String>) request.getSession().getAttribute("IDlist");
+		
+		int index = 0;
+		for (int i = 0; i < IDlist.size(); i++) {
+		     String listBlackboardId = IDlist.get(i);
+		     if(listBlackboardId.equals(blackboardId)){
+		    	 index = i ;
+		    	 break;
+		     }
+		 }
+		
+		String lastBlackboardID = "";
+		String nextBlackboardID = "";
+		if(index-1>0){
+			lastBlackboardID = IDlist.get(index-1);
+		}
+		
+		if(index+1 < IDlist.size()){
+			nextBlackboardID = IDlist.get(index+1);
+		}
+		
+		result.put("lastBlackboardID", lastBlackboardID);
+		result.put("nextBlackboardID", nextBlackboardID);
 		
 		
 		BlackboardDto bb = (BlackboardDto) result.get("blackboard");
 
+		
 		logger.info("==============获取单条黑板报成功================");
 
 		if (bb.getCreateMobile().equals(mobile)) {
@@ -204,7 +269,8 @@ public class BlackboardController {
 
 		logger.info("==================获取个人的所有黑板报:企业ID为:" + enterDeptId + "电话号码为" + mobile);
 
-		if ((enterDeptId == null || enterDeptId.trim().length() <= 0) && (mobile == null || mobile.trim().length() <= 0)) {
+		if ((enterDeptId == null || enterDeptId.trim().length() <= 0)
+				&& (mobile == null || mobile.trim().length() <= 0)) {
 			enterDeptId = "517090";
 			mobile = "13432879269";
 		}
@@ -217,7 +283,52 @@ public class BlackboardController {
 		logger.info("==================获取个人的所有黑板报:" + mobile);
 		Map<String, Object> map = blackboardService.getPersonalBlackboard(enterDeptId, mobile, pageNumber);
 		logger.info("==================返回的数据:" + map);
+
+		// 获取所有黑板报ID集合,存到session
+		Map<String, Object> selectID = new HashMap<String, Object>();
+		selectID.put("enterDeptId", enterDeptId);
+		selectID.put("mobile", mobile);
+		List<String> IDlist = blackboardDao.selectIDList(selectID);
+		request.getSession().setAttribute("IDlist", IDlist);
+
 		return JsonResult.ok().put("personalList", map.get("list")).put("page", map.get("page"));
+	}
+
+	/**
+	 * 获取他人黑板报
+	 * 
+	 * @param request
+	 * @param map
+	 * @return
+	 */
+	@RequestMapping(value = "/getAnotherPersonBlackboard", method = RequestMethod.GET)
+	@ResponseBody
+	private JsonResult getAnotherPersonBlackboard(HttpServletRequest request,
+			@RequestParam("map") Map<Object, Object> map) {
+
+		String enterDeptId = (String) map.get("enterDeptId");
+		String mobile = (String) map.get("mobile");
+		Integer pageNumber = (Integer) map.get("pageNumber");
+
+		logger.info("==================获取他人的所有黑板报:企业ID为" + enterDeptId + "，电话号码为" + mobile);
+
+		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0
+				|| pageNumber == null) {
+			return JsonResult.error("请求参数非法");
+		}
+
+		Map<String, Object> returnmap = blackboardService.getPersonalBlackboard(enterDeptId, mobile, pageNumber);
+
+		logger.info("==================返回的数据:" + returnmap);
+
+		// 获取所有黑板报ID集合,存到session
+		Map<String, Object> selectID = new HashMap<String, Object>();
+		selectID.put("enterDeptId", enterDeptId);
+		selectID.put("mobile", mobile);
+		List<String> IDlist = blackboardDao.selectIDList(selectID);
+		request.getSession().setAttribute("IDlist", IDlist);
+		
+		return JsonResult.ok().put("personalList", returnmap.get("list")).put("page", returnmap.get("page"));
 	}
 
 	/**
@@ -252,9 +363,7 @@ public class BlackboardController {
 	 * 修改黑板报
 	 * 
 	 * @param blackboard
-	 *            修改的黑板报对象
-	 * @param images
-	 *            图片文件对象 return flag 是否更新成功（true/false）
+	 *            修改的黑板报对象 return flag 是否更新成功（true/false）
 	 */
 	@RequestMapping(value = "/updateBlackboard", method = RequestMethod.POST)
 	@ResponseBody
@@ -278,52 +387,52 @@ public class BlackboardController {
 		return JsonResult.ok().put("flag", flag);
 	}
 
-	
 	/**
 	 * 判断是否重放攻击
+	 * 
 	 * @return
 	 */
 	@SuppressWarnings("unused")
-	private boolean checkattack(HttpServletRequest request,CheckAttack checkAttack){
-		CheckAttack checkAttackSession = (CheckAttack)request.getSession().getAttribute("checkAttack");
-	
-		if(checkAttackSession==null){
+	private boolean checkattack(HttpServletRequest request, CheckAttack checkAttack) {
+		CheckAttack checkAttackSession = (CheckAttack) request.getSession().getAttribute("checkAttack");
+
+		if (checkAttackSession == null) {
 			request.getSession().setAttribute("checkAttack", checkAttack);
 			return true;
 		}
-		
+
 		String sign = checkAttack.getSign();
 		String timestamp = checkAttack.getTimestamp();
 		String nonce = checkAttack.getNonce();
-		
-		//MDS加密
+
+		// MDS加密
 		byte[] bytes = null;
 		try {
-			bytes = (timestamp+nonce).getBytes("UTF-8");
+			bytes = (timestamp + nonce).getBytes("UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
 		String checksign = DigestUtils.md5DigestAsHex(bytes);
-		
-		//判断参数有没有被中途篡改
-		if(!sign.equals(checksign)){
+
+		// 判断参数有没有被中途篡改
+		if (!sign.equals(checksign)) {
 			return false;
 		}
-		
-		//判断有没有超时3分钟内
+
+		// 判断有没有超时3分钟内
 		Long times = new Date().getTime();
-		if(times-Long.parseLong(timestamp)>180){
+		if (times - Long.parseLong(timestamp) > 180) {
 			return false;
 		}
-		
-		//判断随机数是否用过
-		if(nonce.equals(checkAttackSession.getNonce())){
+
+		// 判断随机数是否用过
+		if (nonce.equals(checkAttackSession.getNonce())) {
 			return false;
 		}
-		
-		//判断通过，覆盖新的验证
+
+		// 判断通过，覆盖新的验证
 		request.getSession().setAttribute("checkAttack", checkAttack);
 		return true;
 	}
-	
+
 }
