@@ -5,84 +5,104 @@
 <mapper namespace="com.blackboard.dao.CommentDao">
 	<!-- 目的：为dao接口方法提供sql语句配置 -->
 
-	
-	<select id="getAllComments" resultType="com.blackboard.dto.CommentDto" parameterType="map">
+
+	<select id="getAllComments" resultType="com.blackboard.dto.CommentDto"
+		parameterType="map">
 		SELECT
 		a.*,count(tl.like_id) as likeCount
-		from 
+		from
 		(select t.*
 		FROM
-			tb_comment t
+		tb_comment t
 		WHERE
-			blackboard_id = 'e4cd72db14b54626954626e5835da72e'
+		blackboard_id = 'e4cd72db14b54626954626e5835da72e'
 		AND t.status = 0
-		ORDER BY 
-			comment_time) a 
-		left join 
-		tb_like tl  on a.comment_id = tl.Be_likedId
+		ORDER BY
+		comment_time) a
+		left join
+		tb_like tl on a.comment_id = tl.Be_likedId
 		and tl.status = 0
-		GROUP BY a.comment_id 
+		GROUP BY
+		a.comment_id
 	</select>
-	
-	<select id="selectCommentById" resultType="Comment" parameterType="String">
+
+	<select id="selectCommentById" resultType="Comment"
+		parameterType="String">
 		SELECT
-			*
+		*
 		FROM
-			tb_comment
+		tb_comment
 		WHERE
-			comment_id = #{commentId}
+		comment_id = #{commentId}
 	</select>
-	
-	
+
+
 	<select id="selectCount" parameterType="String" resultType="Integer">
-		SELECT 
-			COUNT(*)
-		FROM 
-			tb_comment
-		WHERE 
-			blackboard_id = #{blackboardId}
+		SELECT
+		COUNT(*)
+		FROM
+		tb_comment
+		WHERE
+		blackboard_id = #{blackboardId}
 		AND status = 0
 	</select>
-	
+
 	<insert id="addComment" parameterType="Comment">
-		INSERT INTO 
-			tb_comment
+		INSERT INTO
+		tb_comment
 		<trim prefix="(" suffix=")" suffixOverrides=",">
-            comment_id,blackboard_id,enterprise_id,commenter_id,comment_content,comment_time,reply_name,commenter_name,status 
-           <if test="replyId != null">
-                ,reply_id
-            </if> 
-        </trim>
-        <trim prefix="values(" suffix=")" suffixOverrides=",">
-            #{commentId},#{blackboardId},#{enterpriseId},#{commenterId},#{commentContent,jdbcType=VARCHAR},now(),#{replyName},#{commenterName},0
-            <if test="replyId != null">
-               ,#{replyId}
-            </if> 
-        </trim>
+			comment_id,blackboard_id,enterprise_id,commenter_id,comment_content,comment_time,reply_name,commenter_name,status,read
+			<if test="replyId != null">
+				,reply_id
+			</if>
+		</trim>
+		<trim prefix="values(" suffix=")" suffixOverrides=",">
+			#{commentId},#{blackboardId},#{enterpriseId},#{commenterId},#{commentContent,jdbcType=VARCHAR},now(),#{replyName},#{commenterName},0,0
+			<if test="replyId != null">
+				,#{replyId}
+			</if>
+		</trim>
 	</insert>
-	
+
+	<select id="selectremind" parameterType="String" resultType="">
+		SELECT
+			tc.comment_content,
+			tc.commenter_name,
+			tc.comment_time,
+			tc.commenter_id,
+			tc.comment_id
+		FROM
+			tb_comment tc,
+			tb_blackboard tb
+		WHERE
+			tc.blackboard_id = tb.blackboard_id
+			AND tb.create_mobile = #{mobile}
+		UNION
+		SELECT
+			tc.comment_content,
+			tc.commenter_name,
+			tc.comment_time,
+			tc.commenter_id,
+			tc.comment_id
+		FROM
+			tb_comment tc
+		WHERE
+			tc.reply_id = #{mobile}
+	</select>
+
 	<delete id="deleteComments" parameterType="map">
 		DELETE FROM
-			tb_comment
-		WHERE 
-			enterprise_id = #{enterpriseId}
+		tb_comment
+		WHERE
+		enterprise_id = #{enterpriseId}
 		AND
-			blackboard_id = #{blackboardId}
+		blackboard_id = #{blackboardId}
 	</delete>
-    
-	<!--    
-	<delete id="deleteOneComments" parameterType="map">
-		DELETE FROM
-			tb_comment
-		WHERE 
-			comment_id = #{commentId}
-	</delete> 
-	-->
-    
-  	<update id="deleteOneComments" parameterType="String">
-  		update tb_comment set 
-  		status = 1
-  		where comment_id = #{commentId}
-  	</update>
-    
+
+	<update id="deleteOneComments" parameterType="String">
+		update tb_comment set
+		status = 1
+		where comment_id = #{commentId}
+	</update>
+
 </mapper>

@@ -2,6 +2,8 @@ package com.blackboard.entity;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 /**
  * 评论
  * 
@@ -23,10 +25,20 @@ public class Comment {
 	private String commenterId;// 评论人ID
 
 	private String commentContent;// 评论内容
-
+	@JsonFormat(pattern = "yyyy.MM.dd", timezone = "GMT+8")
 	private Date commentTime;// 评论时间
 
 	private String enterpriseId; // 企业ID
+	
+	private Integer read;//是否已读 0 未读 1 已读
+
+	public Integer getRead() {
+		return read;
+	}
+
+	public void setRead(Integer read) {
+		this.read = read;
+	}
 
 	public String getCommenterId() {
 		return commenterId;
