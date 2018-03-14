@@ -1,8 +1,10 @@
 package com.blackboard.service;
 
 
+import java.util.List;
 import java.util.Map;
 
+import com.blackboard.dto.Remind;
 import com.blackboard.entity.Blackboard;
 import com.blackboard.utils.JsonResult;
 
@@ -23,7 +25,7 @@ public interface BlackboardService {
 	 * @param pageNumber    页码（第几页）
 	 * @return blackboardList   黑板报列表对象
 	 */
-	Map<String,Object> getAllBlackboard(String enterpriseId,Integer pageNumber);
+	Map<String,Object> getAllBlackboard(String enterpriseId,Integer pageNumber,String mobile);
 	
 	
 	
@@ -62,5 +64,13 @@ public interface BlackboardService {
 	 * return flag   是否更新成功（true/false）
 	 */
 	boolean updateBlackboard(Blackboard blackboard);
+	
+	/**
+	 * 获取消息提醒列表
+	 * @param moblie
+	 * @param enterpriseId
+	 * @return
+	 */
+	List<Remind> selectRemind(String mobile,String enterpriseId);
 
 }

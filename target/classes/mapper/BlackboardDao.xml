@@ -8,17 +8,15 @@
 	<select id="getAllBlackboard" resultType="com.blackboard.dto.BlackboardDto"
 		parameterType="map">
 		<!-- 具体的sql -->
-		SELECT t.*,count(tl.like_id) as likeCount ,COUNT(tb.blackboard_id) as commentCount
+		SELECT t.*,count(tl.like_id) as likeCount ,COUNT(tb.blackboard_id) as commentCount,count(tll.like_id) as isLike
 		FROM 
 		(SELECT 
-		blackboard_id,enterprise_id,title,create_by,create_mobile,
-		create_time,content 
+		blackboard_id,enterprise_id,title,create_by,create_mobile,page_Views,
+		content,update_time as createTime
 		FROM tb_blackboard 
 		WHERE 
 		enterprise_id = #{enterpriseId} 
 		AND type = 0 
-		ORDER BY
-		update_time desc
 		LIMIT #{first},#{end}) t
 		left  join 
 		tb_like tl
@@ -26,7 +24,14 @@
 		left join  
 		tb_comment tb  
 		on t.blackboard_id = tb.blackboard_id 
+		left join 
+		tb_like tll 
+		on tll.Be_likedId = t.blackboard_id
+		and tll.like_useid = #{mobile}
+		and tll.status = 0
 		GROUP BY t.blackboard_id
+		ORDER BY
+		t.createTime  desc
 	</select>
 
 	<select id="getALLBlackboardCount" resultType="long"
@@ -58,7 +63,7 @@
 		SELECT a.*,b.commentCount
 		FROM 
 		(SELECT 
-		t.blackboard_id,t.enterprise_id,t.title,t.create_by,t.create_mobile,
+		t.blackboard_id,page_Views,t.enterprise_id,t.title,t.create_by,t.create_mobile,
 		t.create_time,t.content,count(tl.like_id) as likeCount
 		FROM tb_blackboard t
 		left  join 
@@ -76,24 +81,23 @@
 		tb_comment tb
 		on t.blackboard_id = tb.blackboard_id 
 		WHERE
-		t.blackboard_id = #{blackboardId})b
+		t.blackboard_id = #{blackboardId}
+		and tb.status = 0)b
 		on a.blackboard_id = b.blackboard_id
 	</select>
 
 	<select id="getPersonalBlackboard" resultType="com.blackboard.dto.BlackboardDto"
 		parameterType="map">
-		SELECT t.*,count(tl.like_id) as likeCount ,COUNT(tb.blackboard_id) as commentCount
+		SELECT t.*,count(tl.like_id) as likeCount ,COUNT(tb.blackboard_id) as commentCount,count(tll.like_id) as isLike
 		FROM 
 		(SELECT 
-		blackboard_id,enterprise_id,title,create_by,create_mobile,
-		create_time,content 
+		blackboard_id,enterprise_id,title,create_by,create_mobile,page_Views,
+		content,update_time as createTime 
 		FROM tb_blackboard 
 		WHERE 
 		enterprise_id = #{enterpriseId} 
 		AND create_mobile = #{createMobile}
 		AND type = 0 
-		ORDER BY
-		update_time desc
 		LIMIT #{first},#{end}) t
 		left  join 
 		tb_like tl
@@ -101,7 +105,14 @@
 		left join  
 		tb_comment tb  
 		on t.blackboard_id = tb.blackboard_id 
+		left join 
+		tb_like tll 
+		on tll.Be_likedId = t.blackboard_id
+		and tll.like_useid = "13432879269"
+		and tll.status = 0
 		GROUP BY t.blackboard_id
+		ORDER BY
+		t.createTime  desc
 	</select>
 
 	<delete id="delete" parameterType="map">
@@ -118,10 +129,36 @@
 		INSERT INTO
 		tb_blackboard
 		<trim prefix="(" suffix=")" suffixOverrides=",">
-			blackboard_id,enterprise_id,title,create_by,create_time,content,create_byId,create_mobile,update_time,type
+			blackboard_id,
+			enterprise_id,
+			<if test="title != null">
+				title,
+			</if>
+			<if test="content != null">
+				content,
+			</if>
+			create_by,
+			create_time,
+			create_byId,
+			create_mobile,
+			update_time,
+			type
 		</trim>
 		<trim prefix="values(" suffix=")" suffixOverrides=",">
-			#{blackboardId},#{enterpriseId},#{title},#{createBy},#{createTime},#{content},#{createById},#{createMobile},now(),#{type}
+			#{blackboardId},
+			#{enterpriseId},
+			<if test="title != null">
+				#{title},
+			</if>
+			<if test="content != null">
+				#{content},
+			</if>
+			#{createBy},
+			#{createTime},
+			#{createById},
+			#{createMobile},
+			now(),
+			#{type}
 		</trim>
 	</insert>
 
@@ -152,18 +189,125 @@
 		select 1 from DUAL
 	</select>
 	
-	<select id="selectIDList" parameterMap="map" resultType="String">
+	<select id="selectIDList" parameterType="map" resultType="String">
 		SELECT
 		blackboard_id
 		FROM
 		tb_blackboard
 		WHERE
-		enterprise_id = #{enterpriseId}
+		enterprise_id = #{enterDeptId}
+		AND type = #{type}
 		<if test="createMobile != null and createMobile !=''">
 		AND
 		create_mobile = #{createMobile}
 		</if>
 		ORDER BY
 		update_time desc
+	</select>
+	
+	
+	<select id="selectRemind" parameterType="map" resultType="map">
+		SELECT
+		* 
+		FROM
+			(
+		SELECT
+			tb.title AS title,
+			tb.blackboard_id AS blackboardId,
+			tb.content as blackboardContent,
+			tc.comment_content AS  content,
+			tc.commenter_id AS moblie,
+			tc.commenter_name AS userName,
+			tc.comment_time AS creatTime,
+			tc.comment_id AS remindID,
+			tc.reply_name AS commenterName,
+			0 AS type,
+			99 AS likeType 
+		FROM
+			tb_blackboard tb,
+			tb_comment tc 
+		WHERE
+			tb.blackboard_id = tc.blackboard_id 
+			<if test="isread !=null">
+			AND tc.is_read = 0 
+			</if>
+			AND tb.create_mobile = #{mobile} 
+			AND tb.enterprise_id = #{enterpriseId}
+		UNION
+		SELECT
+			tb.title AS title,
+			tb.blackboard_id AS blackboardId,
+			tb.content as blackboardContent,
+			tc.comment_content AS content,
+			tc.commenter_id AS moblie,
+			tc.commenter_name AS userName,
+			tc.comment_time AS creatTime,
+			tc.comment_id AS remindID,
+			tc.reply_name AS commenterName,
+			0 AS type,
+			99 AS likeType 
+		FROM
+			tb_blackboard tb,
+			tb_comment tc 
+		WHERE
+			tb.blackboard_id = tc.blackboard_id 
+			<if test="isread !=null">
+			AND tc.is_read = 0 
+			</if>
+			AND tc.reply_id = #{mobile} 
+			AND tb.enterprise_id = #{enterpriseId}
+		UNION
+		SELECT
+			tb.title AS title,
+			tb.blackboard_id AS blackboardId,
+			tb.content as blackboardContent,
+			NULL AS content,
+			tl.like_useid AS moblie,
+			tl.like_user AS userName,
+			tl.create_time AS creatTime,
+			tl.Be_likedId AS remindID,
+			NULL AS commenterName,
+			1 AS type,
+			0 AS likeType 
+		FROM
+			tb_blackboard tb,
+			tb_like tl 
+		WHERE
+			tb.blackboard_id = tl.Be_likedId 
+			<if test="isread !=null">
+			AND tl.read = 0 
+			</if>
+			AND tl.`status` = 0 
+			AND tb.create_mobile = #{mobile}
+			AND tb.enterprise_id = #{enterpriseId}
+	 	UNION
+		SELECT
+			tb.title AS title,
+			tb.blackboard_id AS blackboardId,
+			tb.content as blackboardContent,
+			NULL AS content,
+			tl.like_useid AS moblie,
+			tl.like_user AS userName,
+			tl.create_time AS creatTime,
+			tl.Be_likedId AS remindID,
+			NULL AS commenterName,
+			1 AS type,
+			1 AS likeType 
+		FROM
+			tb_blackboard tb,
+			tb_like tl,
+			tb_comment tc 
+		WHERE
+			tb.blackboard_id = tc.blackboard_id 
+			AND tc.comment_id = tl.Be_likedId 
+			<if test="isread !=null">
+			AND tl.`read` = 0 
+			</if>
+			AND tl.`status` = 0 
+			AND tc.commenter_id = #{mobile} 
+			AND tb.enterprise_id = #{enterpriseId}
+			) a 
+		ORDER BY
+			a.creatTime DESC
 	</select>
 </mapper>

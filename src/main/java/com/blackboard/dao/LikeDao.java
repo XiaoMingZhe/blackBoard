@@ -14,4 +14,8 @@ public interface LikeDao {
 	
 	//查找状态
 	Map<String,Object> findStatus (Like like);
+	
+	//更新已读状态
+	void updateRead(String mobile);
+	
 }

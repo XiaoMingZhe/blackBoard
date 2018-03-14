@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 /**
  * 黑板报实体类
  * 
- * @author luzhenxing
+ * @author 
  *
  */
 

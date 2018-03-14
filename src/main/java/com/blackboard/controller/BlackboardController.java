@@ -23,6 +23,7 @@ import com.blackboard.dao.BlackboardDao;
 import com.blackboard.dto.BlackboardDto;
 import com.blackboard.dto.CheckAttack;
 import com.blackboard.dto.CreateBlackboardDto;
+import com.blackboard.dto.Remind;
 import com.blackboard.entity.Blackboard;
 import com.blackboard.service.BlackboardService;
 import com.blackboard.utils.CheckAttackUtil;
@@ -141,27 +142,38 @@ public class BlackboardController {
 
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
+		// 用户ID
+		String mobile = (String) request.getSession().getAttribute("mobile");
+		
 		// 测试使用
-		if (enterDeptId == null) {
+		if ((enterDeptId == null || enterDeptId.trim().length() <= 0)
+				&& (mobile == null || mobile.trim().length() <= 0)) {
 			enterDeptId = "517090";
+			mobile = "13432879269";
 		}
 
-		if (enterDeptId == null || enterDeptId.length() <= 0 || pageNumber == null) {
+		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0
+				|| pageNumber == null) {
 
 			return JsonResult.error("请求参数非法");
 		}
 
-		Map<String, Object> map = blackboardService.getAllBlackboard(enterDeptId, pageNumber);
+		Map<String, Object> map = blackboardService.getAllBlackboard(enterDeptId, pageNumber,mobile);
 
 		logger.info("=============获取企业所有黑板报成功==============");
 
 		// 获取所有黑板报ID集合,存到session
 		Map<String, Object> selectID = new HashMap<String, Object>();
 		selectID.put("enterDeptId", enterDeptId);
+		selectID.put("type", 0);
 		List<String> IDlist = blackboardDao.selectIDList(selectID);
 		request.getSession().setAttribute("IDlist", IDlist);
+		System.out.println(IDlist);
 
-		return JsonResult.ok().put("blackboardList", map.get("list")).put("page", map.get("page"));
+		return JsonResult.ok().put("blackboardList", map.get("list"))
+							  .put("page", map.get("page"))
+							  .put("remindCount", map.get("remindCount"))
+							  .put("moblie", map.get("moblie"));
 	}
 
 	public String getAllBlackboard(String enterpriseId, String blcaklterId, String beBlcaklterIdString) {
@@ -208,35 +220,33 @@ public class BlackboardController {
 		logger.info("==============获取单条黑板报信息:企业ID" + enterDeptId);
 		JsonResult result = blackboardService.getBlackboardById(blackboardId, enterDeptId, mobile);
 
-		//获取上一条 下一条黑板报ID
+		// 获取上一条 下一条黑板报ID
 		List<String> IDlist = (List<String>) request.getSession().getAttribute("IDlist");
-		
 		int index = 0;
+
 		for (int i = 0; i < IDlist.size(); i++) {
-		     String listBlackboardId = IDlist.get(i);
-		     if(listBlackboardId.equals(blackboardId)){
-		    	 index = i ;
-		    	 break;
-		     }
-		 }
-		
+			String listBlackboardId = IDlist.get(i);
+			if (listBlackboardId.equals(blackboardId)) {
+				index = i;
+				break;
+			}
+		}
+
 		String lastBlackboardID = "";
 		String nextBlackboardID = "";
-		if(index-1>0){
-			lastBlackboardID = IDlist.get(index-1);
+		if (index - 1 > 0) {
+			lastBlackboardID = IDlist.get(index - 1);
 		}
-		
-		if(index+1 < IDlist.size()){
-			nextBlackboardID = IDlist.get(index+1);
+
+		if (index + 1 < IDlist.size()) {
+			nextBlackboardID = IDlist.get(index + 1);
 		}
-		
+
 		result.put("lastBlackboardID", lastBlackboardID);
 		result.put("nextBlackboardID", nextBlackboardID);
-		
-		
+
 		BlackboardDto bb = (BlackboardDto) result.get("blackboard");
 
-		
 		logger.info("==============获取单条黑板报成功================");
 
 		if (bb.getCreateMobile().equals(mobile)) {
@@ -303,12 +313,13 @@ public class BlackboardController {
 	 */
 	@RequestMapping(value = "/getAnotherPersonBlackboard", method = RequestMethod.GET)
 	@ResponseBody
-	private JsonResult getAnotherPersonBlackboard(HttpServletRequest request,
-			@RequestParam("map") Map<Object, Object> map) {
+	private JsonResult getAnotherPersonBlackboard(HttpServletRequest request, @RequestParam("mobile") String mobile,
+			@RequestParam("pageNumber") Integer pageNumber) {
 
-		String enterDeptId = (String) map.get("enterDeptId");
-		String mobile = (String) map.get("mobile");
-		Integer pageNumber = (Integer) map.get("pageNumber");
+		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
+		if (enterDeptId == "" || enterDeptId == null) {
+			enterDeptId = "517090";
+		}
 
 		logger.info("==================获取他人的所有黑板报:企业ID为" + enterDeptId + "，电话号码为" + mobile);
 
@@ -327,7 +338,7 @@ public class BlackboardController {
 		selectID.put("mobile", mobile);
 		List<String> IDlist = blackboardDao.selectIDList(selectID);
 		request.getSession().setAttribute("IDlist", IDlist);
-		
+
 		return JsonResult.ok().put("personalList", returnmap.get("list")).put("page", returnmap.get("page"));
 	}
 
@@ -387,6 +398,38 @@ public class BlackboardController {
 		return JsonResult.ok().put("flag", flag);
 	}
 
+	/**
+	 * 获取消息提醒列表
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/selectRemind" , method = RequestMethod.GET)
+	@ResponseBody
+	private JsonResult selectRemind(HttpServletRequest request){
+		// 企业ID
+		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
+		// 用户ID
+		String mobile = (String) request.getSession().getAttribute("mobile");
+		
+		if ((enterDeptId == null || enterDeptId.trim().length() <= 0)
+				&& (mobile == null || mobile.trim().length() <= 0)) {
+			enterDeptId = "517090";
+			mobile = "13432879269";
+		}
+		
+		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0) {
+
+			return JsonResult.error("请求参数非法");
+		}
+		
+		List<Remind> remindlist = blackboardService.selectRemind(mobile, enterDeptId);
+		
+		return JsonResult.ok().put("remindlist", remindlist);
+	}
+	
+	
+	
+	
 	/**
 	 * 判断是否重放攻击
 	 * 

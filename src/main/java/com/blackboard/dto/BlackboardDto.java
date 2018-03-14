@@ -12,7 +12,16 @@ public class BlackboardDto {
 	private String content; // 文字内容
 	private Integer pageViews;//浏览数
 	private Integer likeCount;//点赞数
+	private Integer isLike;//是否点赞 0没点赞 1点赞
 	
+	
+	public Integer getIsLike() {
+		return isLike;
+	}
+
+	public void setIsLike(Integer isLike) {
+		this.isLike = isLike;
+	}
 
 	public Integer getLikeCount() {
 		return likeCount;

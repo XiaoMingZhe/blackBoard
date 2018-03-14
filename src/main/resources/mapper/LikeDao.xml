@@ -7,10 +7,31 @@
 	<insert id="addLike" parameterType="Like">
 		INSERT INTO 
 		tb_like 
-		(Be_likedId,like_useid,status,type) 
+		(Be_likedId,like_useid,status,type,read,create_time,like_user) 
 		VALUES
-		(#{beLikedId},#{likeUseid},0,#{type})
+		(#{beLikedId},#{likeUseid},0,#{type},0,now(),#{likeUser})
 	</insert>
+	
+	<update id="updateRead" parameterType = "String">
+		UPDATE tb_like 
+		SET `read` = 1 
+		WHERE
+			Be_likedId IN (
+		SELECT
+			blackboard_id AS belikeid 
+		FROM
+			tb_blackboard 
+		WHERE
+			create_mobile = #{mobile} 
+		UNION
+		SELECT
+			comment_id AS belikeid 
+		FROM
+			tb_comment 
+		WHERE
+			commenter_id = #{mobile}
+		)
+	</update>
 	
 	<update id="updateLike" parameterType="Like">
 		UPDATE tb_like SET  status = #{status}
@@ -19,11 +40,12 @@
 	</update>
 	
 	<select id="findStatus" parameterType="Like" resultType="map">
-	select like_id as likeId ,status from 
-	tb_like 
-	where Be_likedId = #{beLikedId}
-	AND like_useid = #{likeUseid}
-	AND type = #{type}
+		select like_id as likeId ,status from 
+		tb_like 
+		where Be_likedId = #{beLikedId}
+		AND like_useid = #{likeUseid}
+		AND type = #{type}
 	</select>
+	
 	
 </mapper>

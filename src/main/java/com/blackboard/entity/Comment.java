@@ -25,19 +25,50 @@ public class Comment {
 	private String commenterId;// 评论人ID
 
 	private String commentContent;// 评论内容
-	@JsonFormat(pattern = "yyyy.MM.dd", timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyy.MM.dd HH:mm", timezone = "GMT+8")
 	private Date commentTime;// 评论时间
 
 	private String enterpriseId; // 企业ID
 	
-	private Integer read;//是否已读 0 未读 1 已读
+	private Integer isread;//是否已读 0 未读 1 已读
+	
+	private String replyCommentId;//被回复评论ID
+	
+	private Integer status;//状态(0为正常,1为删除)
+	
+	private Integer replyStatus;//回复类型(0回复黑板报  1回复评论 2回复回复)
+	
 
-	public Integer getRead() {
-		return read;
+	public String getReplyCommentId() {
+		return replyCommentId;
 	}
 
-	public void setRead(Integer read) {
-		this.read = read;
+	public void setReplyCommentId(String replyCommentId) {
+		this.replyCommentId = replyCommentId;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+
+	public Integer getReplyStatus() {
+		return replyStatus;
+	}
+
+	public void setReplyStatus(Integer replyStatus) {
+		this.replyStatus = replyStatus;
+	}
+
+	public Integer getIsread() {
+		return isread;
+	}
+
+	public void setIsread(Integer isread) {
+		this.isread = isread;
 	}
 
 	public String getCommenterId() {
@@ -125,7 +156,8 @@ public class Comment {
 		return "Comment [commentId=" + commentId + ", blackboardId=" + blackboardId + ", replyId=" + replyId
 				+ ", replyName=" + replyName + ", commenterName=" + commenterName + ", commenterId=" + commenterId
 				+ ", commentContent=" + commentContent + ", commentTime=" + commentTime + ", enterpriseId="
-				+ enterpriseId + "]";
+				+ enterpriseId + ", isread=" + isread + ", replyCommentId=" + replyCommentId + ", status=" + status
+				+ ", replyStatus=" + replyStatus + "]";
 	}
 
 }

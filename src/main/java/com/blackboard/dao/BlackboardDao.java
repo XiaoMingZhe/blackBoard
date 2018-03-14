@@ -90,4 +90,11 @@ public interface BlackboardDao {
 	 */
 	List<String> selectIDList(Map<String,Object> map);
 	
+	/**
+	 * 消息提醒列表
+	 * @param moblie
+	 * @return
+	 */
+	List<Map<String,Object>> selectRemind(Map<String,Object> map);
+	
 }
