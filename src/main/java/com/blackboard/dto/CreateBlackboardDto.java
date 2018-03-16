@@ -1,5 +1,8 @@
 package com.blackboard.dto;
 
+import java.util.List;
+import java.util.Map;
+
 import com.blackboard.entity.Blackboard;
 
 /**
@@ -11,6 +14,15 @@ public class CreateBlackboardDto {
 
 	private Blackboard blackboard;
 	private CheckAttack checkAttack;
+	private List<Map<String,Object>> visibleRange;
+	
+	public List<Map<String, Object>> getVisibleRange() {
+		return visibleRange;
+	}
+
+	public void setVisibleRange(List<Map<String, Object>> visibleRange) {
+		this.visibleRange = visibleRange;
+	}
 
 	public Blackboard getBlackboard() {
 		return blackboard;

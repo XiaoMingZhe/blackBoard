@@ -1,7 +1,6 @@
 package com.blackboard.service.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,8 +16,6 @@ import com.blackboard.dto.UploadException;
 import com.blackboard.entity.Image;
 import com.blackboard.service.ImageService;
 import com.blackboard.utils.GainUuid;
-
-import net.coobird.thumbnailator.Thumbnails;
 
 @Service
 public class ImageServiceImpl implements ImageService {

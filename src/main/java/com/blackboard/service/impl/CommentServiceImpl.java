@@ -1,8 +1,5 @@
 package com.blackboard.service.impl;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.blackboard.dao.CommentDao;
-import com.blackboard.dto.BlackboardDto;
 import com.blackboard.dto.CommentDto;
 import com.blackboard.entity.Comment;
 import com.blackboard.service.CommentService;
@@ -165,7 +161,6 @@ public class CommentServiceImpl implements CommentService {
 	 * @return
 	 */
 	private List<CommentDto> dateChange(List<CommentDto> list) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		for (CommentDto c : list) {
 			try {
 				c.setTime(RelativeDateFormat.format(c.getCommentTime()));

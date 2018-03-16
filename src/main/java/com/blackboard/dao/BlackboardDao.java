@@ -51,6 +51,12 @@ public interface BlackboardDao {
 	 */
 	void delete(Map<String, Object> paramMap);
 	
+	/**
+	 * 批量删除黑板报
+	 * @param map
+	 */
+	void deleteList(List<String> list);
+	
 	
 	/**
 	 * 更新黑板报 
@@ -71,6 +77,7 @@ public interface BlackboardDao {
 	 * @return
 	 */
 	Long getALLBlackboardCount(Map<String, Object> paramMap);
+
 	
 	/**
 	 * 定时连接数据库
@@ -96,5 +103,24 @@ public interface BlackboardDao {
 	 * @return
 	 */
 	List<Map<String,Object>> selectRemind(Map<String,Object> map);
+	
+	/**
+	 * 添加可见范围
+	 * @param visibleRange
+	 */
+	void saveVisibleRange(Map<String,Object> map);
+	
+	/**
+	 * 删除可见范围
+	 * @param blackBoardId
+	 */
+	void deleteVisibleRange(String blackBoardId);
+	
+	/**
+	 * 批量删除可见范围
+	 * @param list
+	 */
+	void deleteVisibleRangeList(List<String> list);
+	
 	
 }

@@ -26,7 +26,6 @@ import com.blackboard.entity.Blackboard;
 import com.blackboard.entity.Like;
 import com.blackboard.service.BlackboardService;
 import com.blackboard.service.CommentService;
-import com.blackboard.service.ImageService;
 import com.blackboard.utils.GainUuid;
 import com.blackboard.utils.JsonResult;
 import com.blackboard.utils.RelativeDateFormat;
@@ -37,8 +36,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 
 	@Autowired
 	private BlackboardDao blackboardDao;
-	@Autowired
-	private ImageService imageService;
 	@Autowired
 	private CommentService commentService;
 	@Autowired
@@ -58,12 +55,23 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * @return blackboardId 黑板报ID
 	 */
 	@Override
-	public void createBlackboard(Blackboard blackboard) {
+	public void createBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange) {
 
 		blackboard.setBlackboardId(GainUuid.getUUID());
 		blackboard.setCreateTime(new Date());
 
 		blackboardDao.createBlackboard(blackboard);
+		
+		if(visibleRange.size()>=0){
+			Map<String,Object> map = new HashMap<>();
+			List<String> list = new ArrayList<>();
+			for(Map<String,Object> m : visibleRange){
+				list.add((String)m.get("mobile"));
+			}
+			map.put("list", list);
+			map.put("blackBoardId", blackboard.getBlackboardId());
+			blackboardDao.saveVisibleRange(map);
+		}
 
 	}
 
@@ -186,13 +194,14 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * @return List<Blackboard> 个人发布的所有黑板报记录
 	 */
 	@Override
-	public Map<String, Object> getPersonalBlackboard(String enterpriseId, String createMobile, Integer pageNumber) {
+	public Map<String, Object> getPersonalBlackboard(String enterpriseId, String createMobile, Integer pageNumber,Integer type) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("enterpriseId", enterpriseId);
 		// 封装分页信息
 		map.put("createMobile", createMobile);
 		map.put("first", (pageNumber - 1) * PAGE_SIZE);
 		map.put("end", PAGE_SIZE);
+		map.put("type", type);
 
 		// 获取所有黑板报
 		List<BlackboardDto> list = blackboardDao.getPersonalBlackboard(map);
@@ -226,12 +235,21 @@ public class BlackboardServiceImpl implements BlackboardService {
 		map.put("blackboardId", blackboardId);
 		map.put("enterpriseId", enterpriseId);
 
-		imageService.deleteBlackboardImage(enterpriseId, blackboardId);
-
 		commentService.deleteComments(enterpriseId, blackboardId);
 
 		blackboardDao.delete(map);
+		blackboardDao.deleteVisibleRange(blackboardId);
 
+	}
+
+	/**
+	 * 批量删除黑板报
+	 */
+	@Override
+	public void deleteList(List<String> list) {
+		
+		blackboardDao.deleteList(list);
+		blackboardDao.deleteVisibleRangeList(list);
 	}
 
 	/**
@@ -241,11 +259,24 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 *            修改的黑板报对象
 	 */
 	@Override
-	public boolean updateBlackboard(Blackboard blackboard) {
+	public boolean updateBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange) {
 
 		blackboard.setUpdateTime(new Date());
 
 		Boolean bFlag = blackboardDao.updateBlackboard(blackboard);
+		
+		blackboardDao.deleteVisibleRange(blackboard.getBlackboardId());
+		
+		if(visibleRange.size()>=0){
+			Map<String,Object> map = new HashMap<>();
+			List<String> list = new ArrayList<>();
+			for(Map<String,Object> m : visibleRange){
+				list.add((String)m.get("mobile"));
+			}
+			map.put("list", list);
+			map.put("blackBoardId", blackboard.getBlackboardId());
+			blackboardDao.saveVisibleRange(map);
+		}
 		return bFlag;
 	}
 

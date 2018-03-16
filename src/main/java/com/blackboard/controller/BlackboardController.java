@@ -1,6 +1,7 @@
 package com.blackboard.controller;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +43,7 @@ public class BlackboardController {
 
 	@Autowired
 	private BlackboardDao blackboardDao;
+	
 
 	/**
 	 * 保存草稿
@@ -122,7 +124,7 @@ public class BlackboardController {
 		}
 
 		logger.info("=============黑板报:" + blackboard);
-		blackboardService.createBlackboard(blackboard);
+		blackboardService.createBlackboard(blackboard,createBlackboardDto.getVisibleRange());
 
 		return JsonResult.ok();
 	}
@@ -176,9 +178,6 @@ public class BlackboardController {
 							  .put("moblie", map.get("moblie"));
 	}
 
-	public String getAllBlackboard(String enterpriseId, String blcaklterId, String beBlcaklterIdString) {
-		return null;
-	}
 
 	/**
 	 * 展示单条黑板报详情
@@ -256,6 +255,7 @@ public class BlackboardController {
 		}
 	}
 
+	
 	/**
 	 * 查询企业个人所有黑板报
 	 * 
@@ -271,6 +271,39 @@ public class BlackboardController {
 	@ResponseBody
 	private JsonResult getPersonalBlackboard(HttpServletRequest request,
 			@RequestParam("pageNumber") Integer pageNumber) {
+		JsonResult jsonResult = getBlackboard(request, pageNumber, 0);
+		return jsonResult;
+	}
+	 
+	/**
+	 * 查询企业个人所有草稿
+	 * 
+	 * @param enterpriseId
+	 *            企业ID
+	 * @param createBy
+	 *            黑板报所属用户
+	 * @param pageNumber
+	 *            页码（第几页）
+	 * @return List<Blackboard> 个人发布的所有黑板报记录
+	 */
+	@RequestMapping(value = "/getDraft", method = RequestMethod.GET)
+	@ResponseBody
+	private JsonResult getDraft(HttpServletRequest request,
+			@RequestParam("pageNumber") Integer pageNumber) {
+		JsonResult jsonResult = getBlackboard(request, pageNumber, 1);
+		return jsonResult;
+	}
+	
+	
+	/**
+	 * 查询个人黑板报或草稿
+	 * @param request
+	 * @param pageNumber
+	 * @param type
+	 * @return
+	 */
+	private JsonResult getBlackboard(HttpServletRequest request,
+			 Integer pageNumber,Integer type) {
 
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
@@ -291,7 +324,7 @@ public class BlackboardController {
 			return JsonResult.error("请求参数非法");
 		}
 		logger.info("==================获取个人的所有黑板报:" + mobile);
-		Map<String, Object> map = blackboardService.getPersonalBlackboard(enterDeptId, mobile, pageNumber);
+		Map<String, Object> map = blackboardService.getPersonalBlackboard(enterDeptId, mobile, pageNumber,type);
 		logger.info("==================返回的数据:" + map);
 
 		// 获取所有黑板报ID集合,存到session
@@ -304,6 +337,9 @@ public class BlackboardController {
 		return JsonResult.ok().put("personalList", map.get("list")).put("page", map.get("page"));
 	}
 
+	
+	
+	
 	/**
 	 * 获取他人黑板报
 	 * 
@@ -328,7 +364,7 @@ public class BlackboardController {
 			return JsonResult.error("请求参数非法");
 		}
 
-		Map<String, Object> returnmap = blackboardService.getPersonalBlackboard(enterDeptId, mobile, pageNumber);
+		Map<String, Object> returnmap = blackboardService.getPersonalBlackboard(enterDeptId, mobile, pageNumber,0);
 
 		logger.info("==================返回的数据:" + returnmap);
 
@@ -343,7 +379,7 @@ public class BlackboardController {
 	}
 
 	/**
-	 * 删除黑板报
+	 * 删除单条黑板报
 	 * 
 	 * @param enterpriseId
 	 *            企业ID
@@ -369,6 +405,26 @@ public class BlackboardController {
 
 		return JsonResult.ok();
 	}
+	
+	/**
+	 * 批量删除黑板报
+	 * @param blackboardIdList 黑板报ID集合
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/deletrBlackboardList" , method = RequestMethod.POST)
+	@ResponseBody
+	private JsonResult deleteBlackboard(@RequestParam("blackboardIdList")ArrayList<String> blackboardIdList ,HttpServletRequest request){
+		
+		if(blackboardIdList == null|| blackboardIdList.size()<=0){
+			return JsonResult.error("请求参数非法");
+		}
+		
+		blackboardService.deleteList(blackboardIdList);
+		
+		return JsonResult.ok();
+	}
+	
 
 	/**
 	 * 修改黑板报
@@ -378,8 +434,10 @@ public class BlackboardController {
 	 */
 	@RequestMapping(value = "/updateBlackboard", method = RequestMethod.POST)
 	@ResponseBody
-	private JsonResult updateBlackboard(@RequestBody Blackboard blackboard, HttpServletRequest request) {
+	private JsonResult updateBlackboard(@RequestBody CreateBlackboardDto createBlackboardDto, HttpServletRequest request) {
 		// 企业ID
+		
+		Blackboard blackboard = createBlackboardDto.getBlackboard();
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
 		if (enterDeptId == null) {
 			enterDeptId = "517090";
@@ -393,7 +451,8 @@ public class BlackboardController {
 			return JsonResult.error("请求参数非法");
 		}
 		logger.info("================修改黑板报:" + blackboard.getBlackboardId());
-		Boolean flag = blackboardService.updateBlackboard(blackboard);
+		
+		Boolean flag = blackboardService.updateBlackboard(blackboard,createBlackboardDto.getVisibleRange());
 
 		return JsonResult.ok().put("flag", flag);
 	}

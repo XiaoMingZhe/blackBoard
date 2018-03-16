@@ -16,7 +16,7 @@ public interface BlackboardService {
 	 * @param blackBoard   黑板报对象
 	 * @return blackboardId   黑板报ID
 	 */
-	void createBlackboard(Blackboard blackboard);
+	void createBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange);
 	
 	
 	/**
@@ -46,7 +46,7 @@ public interface BlackboardService {
 	 * @param pageNumber     页码（第几页）
 	 * @return List<Blackboard> 个人发布的所有黑板报记录
 	 */
-	Map<String,Object> getPersonalBlackboard(String enterpriseId, String createBy,Integer pageNumber);
+	Map<String,Object> getPersonalBlackboard(String enterpriseId, String createBy,Integer pageNumber,Integer type);
 	
 	
 	/**
@@ -57,13 +57,19 @@ public interface BlackboardService {
 	void delete(String blackboardId,String enterpriseId);
 	
 	/**
+	 * 批量删除黑板报
+	 * @param list
+	 */
+	void deleteList(List<String> list);
+	
+	/**
 	 * 修改黑板报 
 	 * @param blackboard   修改的黑板报对象 
 	 * @param images	        图片文件对象
 	 * @param serverPath   保存图片的服务器路劲
 	 * return flag   是否更新成功（true/false）
 	 */
-	boolean updateBlackboard(Blackboard blackboard);
+	boolean updateBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange);
 	
 	/**
 	 * 获取消息提醒列表

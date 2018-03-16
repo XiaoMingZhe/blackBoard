@@ -56,6 +56,8 @@
 		enterprise_id = #{enterpriseId}
 		AND
 		create_mobile = #{createMobile}
+		AND 
+		type = #{type}
 	</select>
 
 	<select id="getBlackboardById" resultType="com.blackboard.dto.BlackboardDto"
@@ -97,7 +99,7 @@
 		WHERE 
 		enterprise_id = #{enterpriseId} 
 		AND create_mobile = #{createMobile}
-		AND type = 0 
+		AND type = #{type} 
 		LIMIT #{first},#{end}) t
 		left  join 
 		tb_like tl
@@ -122,7 +124,16 @@
 		enterprise_id = #{enterpriseId}
 		AND
 		blackboard_id = #{blackboardId}
-
+	</delete>
+	
+	<delete id="deleteList" parameterType="list">
+		DELETE FROM
+		tb_blackboard
+		WHERE
+		blackboard_id in 
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
 	</delete>
 
 	<insert id="createBlackboard" parameterType="Blackboard">
@@ -310,4 +321,30 @@
 		ORDER BY
 			a.creatTime DESC
 	</select>
+	
+	<insert id="saveVisibleRange" parameterType="map">
+		INSERT INTO tb_blcaklist ( blacklter_id, be_blacklter_id, create_time )
+		VALUES
+		<foreach collection="list" index="index" item="item" separator="," >
+		  (#{blackBoardId},#{item},now())
+		</foreach>
+	</insert>
+	
+	<delete id="deleteVisibleRange" parameterType="String">
+		DELETE FROM
+		tb_blcaklist
+		WHERE
+		blackboard_id = #{blackboardId} 
+	</delete>
+	
+	<delete id="deleteVisibleRangeList" parameterType="list">
+		DELETE FROM
+		tb_blcaklist
+		WHERE
+		blackboard_id in
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+		  #{item}
+		</foreach>
+	</delete>
+	
 </mapper>
