@@ -60,7 +60,7 @@ public interface BlackboardService {
 	 * 批量删除黑板报
 	 * @param list
 	 */
-	void deleteList(List<String> list);
+	void deleteList(List<Map<String,Object>> list);
 	
 	/**
 	 * 修改黑板报 

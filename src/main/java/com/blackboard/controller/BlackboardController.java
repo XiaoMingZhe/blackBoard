@@ -175,7 +175,7 @@ public class BlackboardController {
 		return JsonResult.ok().put("blackboardList", map.get("list"))
 							  .put("page", map.get("page"))
 							  .put("remindCount", map.get("remindCount"))
-							  .put("moblie", map.get("moblie"));
+							  .put("mobile", map.get("moblie"));
 	}
 
 
@@ -223,13 +223,16 @@ public class BlackboardController {
 		List<String> IDlist = (List<String>) request.getSession().getAttribute("IDlist");
 		int index = 0;
 
-		for (int i = 0; i < IDlist.size(); i++) {
-			String listBlackboardId = IDlist.get(i);
-			if (listBlackboardId.equals(blackboardId)) {
-				index = i;
-				break;
+		if(IDlist != null && IDlist.size()>0){
+			for (int i = 0; i < IDlist.size(); i++) {
+				String listBlackboardId = IDlist.get(i);
+				if (listBlackboardId.equals(blackboardId)) {
+					index = i;
+					break;
+				}
 			}
 		}
+
 
 		String lastBlackboardID = "";
 		String nextBlackboardID = "";
@@ -237,9 +240,12 @@ public class BlackboardController {
 			lastBlackboardID = IDlist.get(index - 1);
 		}
 
-		if (index + 1 < IDlist.size()) {
-			nextBlackboardID = IDlist.get(index + 1);
+		if(IDlist != null && IDlist.size()>0){
+			if (index + 1 < IDlist.size()) {
+				nextBlackboardID = IDlist.get(index + 1);
+			}
 		}
+		
 
 		result.put("lastBlackboardID", lastBlackboardID);
 		result.put("nextBlackboardID", nextBlackboardID);
@@ -414,13 +420,13 @@ public class BlackboardController {
 	 */
 	@RequestMapping(value = "/deletrBlackboardList" , method = RequestMethod.POST)
 	@ResponseBody
-	private JsonResult deleteBlackboard(@RequestParam("blackboardIdList")ArrayList<String> blackboardIdList ,HttpServletRequest request){
+	private JsonResult deleteBlackboard(@RequestBody Map<String,Object> blackboardIdList ,HttpServletRequest request){
 		
+		System.out.println(blackboardIdList.size());
 		if(blackboardIdList == null|| blackboardIdList.size()<=0){
 			return JsonResult.error("请求参数非法");
 		}
-		
-		blackboardService.deleteList(blackboardIdList);
+		blackboardService.deleteList((List<Map<String, Object>>) blackboardIdList.get("blackboardIdList"));
 		
 		return JsonResult.ok();
 	}

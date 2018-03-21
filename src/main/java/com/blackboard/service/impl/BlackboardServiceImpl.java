@@ -62,7 +62,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 
 		blackboardDao.createBlackboard(blackboard);
 		
-		if(visibleRange.size()>=0){
+		if(visibleRange != null && visibleRange.size()>=0){
 			Map<String,Object> map = new HashMap<>();
 			List<String> list = new ArrayList<>();
 			for(Map<String,Object> m : visibleRange){
@@ -246,7 +246,12 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * 批量删除黑板报
 	 */
 	@Override
-	public void deleteList(List<String> list) {
+	public void deleteList(List<Map<String,Object>> maplist) {
+		List<String> list = new ArrayList<>();
+		
+		for(Map<String,Object> m : maplist){
+			list.add((String) m.get("blackboardId"));
+		}
 		
 		blackboardDao.deleteList(list);
 		blackboardDao.deleteVisibleRangeList(list);

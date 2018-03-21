@@ -7,7 +7,7 @@
 	<insert id="addLike" parameterType="Like">
 		INSERT INTO 
 		tb_like 
-		(Be_likedId,like_useid,status,type,read,create_time,like_user) 
+		(Be_likedId,like_useid,status,type,`read`,create_time,like_user) 
 		VALUES
 		(#{beLikedId},#{likeUseid},0,#{type},0,now(),#{likeUser})
 	</insert>
@@ -44,7 +44,10 @@
 		tb_like 
 		where Be_likedId = #{beLikedId}
 		AND like_useid = #{likeUseid}
+		<if test="type!=null">
 		AND type = #{type}
+		</if>
+		
 	</select>
 	
 	

@@ -37,6 +37,7 @@ public class CommentController {
 	@ResponseBody
 	private JsonResult addComment(@RequestBody Comment comment, HttpServletRequest request) {
 
+		System.out.println(comment);
 		// 手机号
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		// 企业ID
@@ -51,10 +52,10 @@ public class CommentController {
 
 		logger.info("================" + mobile + "评论" + comment.getBlackboardId());
 		logger.info("================" + comment + "================");
-		if (comment == null || comment.getEnterpriseId() == null || comment.getEnterpriseId().length() <= 0
+		if (comment == null 
 				|| comment.getBlackboardId() == null || comment.getBlackboardId().length() <= 0
 				|| comment.getCommentContent() == null || comment.getCommentContent().length() <= 0
-				|| comment.getCommenter() == null || comment.getCommenter().length() <= 0) {
+				) {
 			return JsonResult.error("请求参数非法");
 		}
 
@@ -88,7 +89,7 @@ public class CommentController {
 		if (comment == null || comment.getEnterpriseId() == null || comment.getEnterpriseId().length() <= 0
 				|| comment.getBlackboardId() == null || comment.getBlackboardId().length() <= 0
 				|| comment.getCommentContent() == null || comment.getCommentContent().length() <= 0
-				|| comment.getCommenter() == null || comment.getCommenter().length() <= 0
+				|| comment.getCommenterId() == null || comment.getCommenterId().length() <= 0
 				|| comment.getReplyCommentId() == null || comment.getReplyCommentId().length() <= 0) {
 			return JsonResult.error("请求参数非法");
 		}
@@ -123,7 +124,7 @@ public class CommentController {
 		if (comment == null || comment.getEnterpriseId() == null || comment.getEnterpriseId().length() <= 0
 				|| comment.getBlackboardId() == null || comment.getBlackboardId().length() <= 0
 				|| comment.getCommentContent() == null || comment.getCommentContent().length() <= 0
-				|| comment.getCommenter() == null || comment.getCommenter().length() <= 0
+				|| comment.getCommenterId() == null || comment.getCommenterId().length() <= 0
 				|| comment.getReplyCommentId() == null || comment.getReplyCommentId().length() <= 0
 				|| comment.getReplyId() == null || comment.getReplyId().length() <= 0
 				|| comment.getReplyName() == null || comment.getReplyName().length() <=0) {

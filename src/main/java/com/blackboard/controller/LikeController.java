@@ -32,9 +32,9 @@ public class LikeController {
 	 */
 	@RequestMapping(value = "/LikeOfBlackBoard", method = RequestMethod.GET)
 	@ResponseBody
-	private JsonResult BlackBoardLike(HttpServletRequest request,@RequestParam("blackboardId") String blackboardId){
+	private JsonResult BlackBoardLike(HttpServletRequest request,@RequestParam("blackboardId") String blackboardId,@RequestParam("likeUser") String likeUser){
 		logger.info("=======点赞黑板报:"+blackboardId+"==========");
-		return Like(request,blackboardId,0);
+		return Like(request,blackboardId,0,likeUser);
 	};
 	
 	/**
@@ -45,9 +45,9 @@ public class LikeController {
 	 */
 	@RequestMapping(value = "/LikeOfComment", method = RequestMethod.GET)
 	@ResponseBody
-	private JsonResult CommentLike(HttpServletRequest request,@RequestParam("commentId") String commentId){
+	private JsonResult CommentLike(HttpServletRequest request,@RequestParam("commentId") String commentId,@RequestParam("likeUser") String likeUser){
 		logger.info("=======点赞评论:"+commentId+"==========");
-		return Like(request,commentId,1);
+		return Like(request,commentId,1,likeUser);
 	};
 	
 	/**
@@ -57,7 +57,7 @@ public class LikeController {
 	 * @param type
 	 * @return
 	 */
-	private JsonResult Like(HttpServletRequest request,String beLikedId,Integer type){
+	private JsonResult Like(HttpServletRequest request,String beLikedId,Integer type,String likeUser){
 		
 		try {
 			// 手机号
@@ -66,6 +66,7 @@ public class LikeController {
 			Like like = new Like();
 			like.setBeLikedId(beLikedId);
 			like.setType(type);
+			like.setLikeUser(likeUser);
 			if ((mobile == null || mobile.trim().length() <= 0)) {
 				like.setLikeUseid("13432879269");
 			} else {
@@ -74,6 +75,7 @@ public class LikeController {
 			likeService.Like(like);
 			return JsonResult.ok();
 		} catch (Exception e) {
+			e.printStackTrace();
 			return JsonResult.error("点赞失败。");
 		}
 		

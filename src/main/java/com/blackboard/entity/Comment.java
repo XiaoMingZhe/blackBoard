@@ -37,55 +37,6 @@ public class Comment {
 	private Integer status;//状态(0为正常,1为删除)
 	
 	private Integer replyStatus;//回复类型(0回复黑板报  1回复评论 2回复回复)
-	
-
-	public String getReplyCommentId() {
-		return replyCommentId;
-	}
-
-	public void setReplyCommentId(String replyCommentId) {
-		this.replyCommentId = replyCommentId;
-	}
-
-	public Integer getStatus() {
-		return status;
-	}
-
-	public void setStatus(Integer status) {
-		this.status = status;
-	}
-
-	public Integer getReplyStatus() {
-		return replyStatus;
-	}
-
-	public void setReplyStatus(Integer replyStatus) {
-		this.replyStatus = replyStatus;
-	}
-
-	public Integer getIsread() {
-		return isread;
-	}
-
-	public void setIsread(Integer isread) {
-		this.isread = isread;
-	}
-
-	public String getCommenterId() {
-		return commenterId;
-	}
-
-	public void setCommenterId(String commenterId) {
-		this.commenterId = commenterId;
-	}
-
-	public String getEnterpriseId() {
-		return enterpriseId;
-	}
-
-	public void setEnterpriseId(String enterpriseId) {
-		this.enterpriseId = enterpriseId;
-	}
 
 	public String getCommentId() {
 		return commentId;
@@ -111,12 +62,28 @@ public class Comment {
 		this.replyId = replyId;
 	}
 
-	public String getCommenter() {
+	public String getReplyName() {
+		return replyName;
+	}
+
+	public void setReplyName(String replyName) {
+		this.replyName = replyName;
+	}
+
+	public String getCommenterName() {
+		return commenterName;
+	}
+
+	public void setCommenterName(String commenterName) {
+		this.commenterName = commenterName;
+	}
+
+	public String getCommenterId() {
 		return commenterId;
 	}
 
-	public void setCommenter(String commenter) {
-		this.commenterId = commenter;
+	public void setCommenterId(String commenterId) {
+		this.commenterId = commenterId;
 	}
 
 	public String getCommentContent() {
@@ -135,20 +102,44 @@ public class Comment {
 		this.commentTime = commentTime;
 	}
 
-	public String getReplyName() {
-		return replyName;
+	public String getEnterpriseId() {
+		return enterpriseId;
 	}
 
-	public void setReplyName(String replyName) {
-		this.replyName = replyName;
+	public void setEnterpriseId(String enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
-	public String getCommenterName() {
-		return commenterName;
+	public Integer getIsread() {
+		return isread;
 	}
 
-	public void setCommenterName(String commenterName) {
-		this.commenterName = commenterName;
+	public void setIsread(Integer isread) {
+		this.isread = isread;
+	}
+
+	public String getReplyCommentId() {
+		return replyCommentId;
+	}
+
+	public void setReplyCommentId(String replyCommentId) {
+		this.replyCommentId = replyCommentId;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+
+	public Integer getReplyStatus() {
+		return replyStatus;
+	}
+
+	public void setReplyStatus(Integer replyStatus) {
+		this.replyStatus = replyStatus;
 	}
 
 	@Override
@@ -159,5 +150,7 @@ public class Comment {
 				+ enterpriseId + ", isread=" + isread + ", replyCommentId=" + replyCommentId + ", status=" + status
 				+ ", replyStatus=" + replyStatus + "]";
 	}
+	
 
+	
 }

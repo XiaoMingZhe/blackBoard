@@ -20,9 +20,7 @@
 		WHERE
 		t.blackboard_id = #{blackboardId}
 		AND t.status = 0
-		AND t.reply_status = 0 
-		ORDER BY
-		comment_time)aa
+		AND t.reply_status = 0 )aa
 		left join tb_comment tb 
 		on aa.comment_id = tb.reply_comment_id
 		GROUP BY aa.comment_id) a
@@ -37,6 +35,8 @@
 		and tll.status = 0
 		GROUP BY
 		a.comment_id
+		ORDER BY
+		a.comment_time 
 	</select>
 
     <update id="updateRead" parameterType="String">
@@ -75,6 +75,7 @@
 		SELECT 
 		comment_id,
 		blackboard_id,
+		commenter_id,
 		reply_comment_id,
 		reply_id,
 		comment_content,
@@ -208,6 +209,7 @@
 		SELECT 
 		comment_id,
 		blackboard_id,
+		commenter_id,
 		reply_comment_id,
 		reply_id,
 		comment_content,

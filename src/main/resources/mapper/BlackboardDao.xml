@@ -12,7 +12,7 @@
 		FROM 
 		(SELECT 
 		blackboard_id,enterprise_id,title,create_by,create_mobile,page_Views,
-		content,update_time as createTime
+		update_time as createTime
 		FROM tb_blackboard 
 		WHERE 
 		enterprise_id = #{enterpriseId} 
@@ -334,14 +334,14 @@
 		DELETE FROM
 		tb_blcaklist
 		WHERE
-		blackboard_id = #{blackboardId} 
+		blacklter_id = #{blackboardId} 
 	</delete>
 	
 	<delete id="deleteVisibleRangeList" parameterType="list">
 		DELETE FROM
 		tb_blcaklist
 		WHERE
-		blackboard_id in
+		blacklter_id in
 		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
 		  #{item}
 		</foreach>
