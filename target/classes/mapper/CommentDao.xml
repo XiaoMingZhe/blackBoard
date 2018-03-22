@@ -227,6 +227,7 @@
 		LEFT JOIN 
 		tb_like tl ON 
 		a.comment_id = tl.Be_likedId
+		and tl.status = 0
 		LEFT JOIN 
 		tb_like tll ON 
 		tll.Be_likedId = a.comment_id

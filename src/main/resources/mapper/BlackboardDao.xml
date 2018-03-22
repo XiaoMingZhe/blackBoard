@@ -23,6 +23,7 @@
 		left  join 
 		tb_like tl
 		on t.blackboard_id = tl.Be_likedId 
+		AND tl.status = 0
 		left join  
 		tb_comment tb  
 		on t.blackboard_id = tb.blackboard_id 

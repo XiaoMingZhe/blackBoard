@@ -1,5 +1,6 @@
 package com.blackboard.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,8 +111,23 @@ public class CommentServiceImpl implements CommentService {
 		List<CommentDto> list = commentDao.getreply(map);
 		dateChange(list);
 		Map<String,Object> returnMap = new HashMap<>();
+		
+		
+		// 判断是不是本人，评论能不能删除
+		List<Map<String, Object>> comments = new ArrayList<>();
+		for (CommentDto c : list) {
+			Map<String, Object> commentMap = new HashMap<>();
+			commentMap.put("comment", c);
+			if (c.getCommenterId().equals(mobile)) {
+				commentMap.put("canDelete", 1);
+			} else {
+				commentMap.put("canDelete", 0);
+			}
+			comments.add(commentMap);
+		}
 		returnMap.put("comment", cDto);
-		returnMap.put("reply", list);
+		returnMap.put("reply", comments);
+		System.out.println(comments);
 		return returnMap;
 	}
 	
