@@ -8,7 +8,7 @@
 	<select id="getAllBlackboard" resultType="com.blackboard.dto.BlackboardDto"
 		parameterType="map">
 		<!-- 具体的sql -->
-		SELECT t.*,count(tl.like_id) as likeCount ,COUNT(tb.blackboard_id) as commentCount,count(tll.like_id) as isLike
+		SELECT t.*,count(distinct tl.like_id) as likeCount ,COUNT(tb.blackboard_id) as commentCount,count(tll.like_id) as isLike
 		FROM 
 		(SELECT 
 		blackboard_id,enterprise_id,title,create_by,create_mobile,page_Views,
@@ -17,6 +17,8 @@
 		WHERE 
 		enterprise_id = #{enterpriseId} 
 		AND type = 0 
+		ORDER BY
+		createTime  desc
 		LIMIT #{first},#{end}) t
 		left  join 
 		tb_like tl
