@@ -323,15 +323,12 @@ public class BlackboardController {
 			enterDeptId = "517090";
 			mobile = "13432879269";
 		}
-		logger.info("==================设置个人的所有黑板报:企业ID为:" + enterDeptId + "电话号码为" + mobile);
 		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0
 				|| pageNumber == null) {
 
 			return JsonResult.error("请求参数非法");
 		}
-		logger.info("==================获取个人的所有黑板报:" + mobile);
 		Map<String, Object> map = blackboardService.getPersonalBlackboard(enterDeptId, mobile, pageNumber,type);
-		logger.info("==================返回的数据:" + map);
 
 		// 获取所有黑板报ID集合,存到session
 		Map<String, Object> selectID = new HashMap<String, Object>();
@@ -363,7 +360,6 @@ public class BlackboardController {
 			enterDeptId = "517090";
 		}
 
-		logger.info("==================获取他人的所有黑板报:企业ID为" + enterDeptId + "，电话号码为" + mobile);
 
 		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0
 				|| pageNumber == null) {
@@ -372,7 +368,6 @@ public class BlackboardController {
 
 		Map<String, Object> returnmap = blackboardService.getPersonalBlackboard(enterDeptId, mobile, pageNumber,0);
 
-		logger.info("==================返回的数据:" + returnmap);
 
 		// 获取所有黑板报ID集合,存到session
 		Map<String, Object> selectID = new HashMap<String, Object>();

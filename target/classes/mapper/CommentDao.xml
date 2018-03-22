@@ -87,6 +87,7 @@
 		LEFT JOIN 
 		tb_like tl ON 
 		a.comment_id = tl.Be_likedId
+		AND tl.`status` = 0
 		LEFT JOIN 
 		tb_like tll ON 
 		tll.Be_likedId = a.comment_id
@@ -230,8 +231,9 @@
 		tb_like tll ON 
 		tll.Be_likedId = a.comment_id
 		and tll.like_useid = #{mobile}
-		and tll.status = 0
+		and tll.status = 0	
 		GROUP BY a.comment_id
+		order by a.comment_time
 	</select>
 
 	<delete id="deleteComments" parameterType="map">

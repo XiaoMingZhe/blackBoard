@@ -19,13 +19,14 @@
 		AND type = 0 
 		ORDER BY
 		createTime  desc
-		LIMIT #{first},#{end}) t
+		) t
 		left  join 
 		tb_like tl
 		on t.blackboard_id = tl.Be_likedId 
 		left join  
 		tb_comment tb  
 		on t.blackboard_id = tb.blackboard_id 
+		and tb.status = 0
 		left join 
 		tb_like tll 
 		on tll.Be_likedId = t.blackboard_id
@@ -45,6 +46,7 @@
 		tb_blackboard
 		WHERE
 		enterprise_id = #{enterpriseId}
+		AND type = 0
 	</select>
 
 	<select id="getPersonalBlackboardCount" resultType="long"

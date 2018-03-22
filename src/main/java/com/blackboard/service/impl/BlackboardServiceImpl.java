@@ -97,6 +97,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 
 		List<BlackboardDto> list = blackboardDao.getAllBlackboard(map);
 		dateChangeForList(list);
+		
 		// 获取总条数，计算总页数
 		Long count = blackboardDao.getALLBlackboardCount(map);
 		long page = count / PAGE_SIZE;

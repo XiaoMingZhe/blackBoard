@@ -106,8 +106,9 @@ public class CommentServiceImpl implements CommentService {
 		map.put("getreply", "getreply");
 		
 		CommentDto cDto = commentDao.selectById(map);
+		cDto.setTime(RelativeDateFormat.format(cDto.getCommentTime()));
 		List<CommentDto> list = commentDao.getreply(map);
-		
+		dateChange(list);
 		Map<String,Object> returnMap = new HashMap<>();
 		returnMap.put("comment", cDto);
 		returnMap.put("reply", list);
