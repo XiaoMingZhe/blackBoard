@@ -48,6 +48,14 @@ public interface BlackboardService {
 	 */
 	Map<String,Object> getPersonalBlackboard(String enterpriseId, String createBy,Integer pageNumber,Integer type);
 	
+	/**
+	 * 查询他人所有黑板报
+	 * @param enterpriseId   企业ID
+	 * @param createBy       黑板报所属用户
+	 * @param pageNumber     页码（第几页）
+	 * @return List<Blackboard> 个人发布的所有黑板报记录
+	 */
+	Map<String,Object> getOtherBlackboard(String enterpriseId, String createBy,Integer pageNumber,Integer type,String mowUser);
 	
 	/**
 	 * 删除黑板报 

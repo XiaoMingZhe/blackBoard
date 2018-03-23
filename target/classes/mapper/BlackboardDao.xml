@@ -8,34 +8,63 @@
 	<select id="getAllBlackboard" resultType="com.blackboard.dto.BlackboardDto"
 		parameterType="map">
 		<!-- 具体的sql -->
-		SELECT t.*,count(distinct tl.like_id) as likeCount ,COUNT(tb.blackboard_id) as commentCount,count(tll.like_id) as isLike
-		FROM 
-		(SELECT 
-		blackboard_id,enterprise_id,title,create_by,create_mobile,page_Views,
-		update_time as createTime
-		FROM tb_blackboard 
-		WHERE 
+	SELECT
+		t.blackboard_id,
+		t.title,
+		t.create_by,
+		t.create_mobile,
+		t.page_Views,
+		t.page_Views,
+		t.createTime,
+		count( DISTINCT tl.like_id ) AS likeCount,
+		COUNT( tb.blackboard_id ) AS commentCount,
+		count( tll.like_id ) AS isLike 
+	FROM
+		(
+	SELECT
+		blackboard_id,
+		title,
+		create_by,
+		create_mobile,
+		page_Views,
+		update_time AS createTime 
+	FROM
+		tb_blackboard tb 
+	WHERE
 		enterprise_id = #{enterpriseId} 
 		AND type = 0 
-		ORDER BY
-		createTime  desc
+		AND NOT EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id ) UNION
+		(
+	SELECT
+		blackboard_id,
+		title,
+		create_by,
+		create_mobile,
+		page_Views,
+		update_time AS createTime 
+	FROM
+		tb_blackboard tb 
+	WHERE
+		enterprise_id = #{enterpriseId}
+		AND type = 0 
+		AND EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id AND tbl.be_blacklter_id = #{mobile}  ) 
+		) 
 		) t
-		left  join 
-		tb_like tl
-		on t.blackboard_id = tl.Be_likedId 
-		AND tl.status = 0
-		left join  
-		tb_comment tb  
-		on t.blackboard_id = tb.blackboard_id 
-		and tb.status = 0
-		left join 
-		tb_like tll 
-		on tll.Be_likedId = t.blackboard_id
-		and tll.like_useid = #{mobile}
-		and tll.status = 0
-		GROUP BY t.blackboard_id
-		ORDER BY
-		t.createTime  desc
+		LEFT JOIN tb_like tl ON t.blackboard_id = tl.Be_likedId
+		LEFT JOIN tb_comment tb ON t.blackboard_id = tb.blackboard_id
+		LEFT JOIN tb_like tll ON tll.Be_likedId = t.blackboard_id 
+		AND tll.like_useid = #{mobile} 
+		AND tll.STATUS = 0 
+	GROUP BY
+		t.blackboard_id,
+		t.title,
+		t.create_by,
+		t.create_mobile,
+		t.page_Views,
+		t.page_Views,
+		t.createTime 
+	ORDER BY
+		t.createTime DESC
 	</select>
 
 	<select id="getALLBlackboardCount" resultType="long"
@@ -95,31 +124,66 @@
 
 	<select id="getPersonalBlackboard" resultType="com.blackboard.dto.BlackboardDto"
 		parameterType="map">
-		SELECT t.*,count(tl.like_id) as likeCount ,COUNT(tb.blackboard_id) as commentCount,count(tll.like_id) as isLike
-		FROM 
-		(SELECT 
-		blackboard_id,enterprise_id,title,create_by,create_mobile,page_Views,
-		content,update_time as createTime 
-		FROM tb_blackboard 
-		WHERE 
-		enterprise_id = #{enterpriseId} 
+		SELECT
+		t.blackboard_id,
+		t.title,
+		t.create_by,
+		t.create_mobile,
+		t.page_Views,
+		t.page_Views,
+		t.createTime,
+		count( DISTINCT tl.like_id ) AS likeCount,
+		COUNT( tb.blackboard_id ) AS commentCount,
+		count( tll.like_id ) AS isLike 
+	FROM
+		(
+	SELECT
+		blackboard_id,
+		title,
+		create_by,
+		create_mobile,
+		page_Views,
+		update_time AS createTime 
+	FROM
+		tb_blackboard tb 
+	WHERE
+		enterprise_id = #{enterpriseId}
 		AND create_mobile = #{createMobile}
-		AND type = #{type} 
-		LIMIT #{first},#{end}) t
-		left  join 
-		tb_like tl
-		on t.blackboard_id = tl.Be_likedId 
-		left join  
-		tb_comment tb  
-		on t.blackboard_id = tb.blackboard_id 
-		left join 
-		tb_like tll 
-		on tll.Be_likedId = t.blackboard_id
-		and tll.like_useid = "13432879269"
-		and tll.status = 0
-		GROUP BY t.blackboard_id
-		ORDER BY
-		t.createTime  desc
+		AND type = 0 
+		<if test="nowUser != null">
+		AND NOT EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id ) UNION
+		(
+	SELECT
+		blackboard_id,
+		title,
+		create_by,
+		create_mobile,
+		page_Views,
+		update_time AS createTime 
+	FROM
+		tb_blackboard tb 
+	WHERE
+		enterprise_id = #{enterpriseId}
+		AND type = 0 
+		AND EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id AND tbl.be_blacklter_id = #{nowUser}  ) 
+		)
+		</if>
+		) t
+		LEFT JOIN tb_like tl ON t.blackboard_id = tl.Be_likedId
+		LEFT JOIN tb_comment tb ON t.blackboard_id = tb.blackboard_id
+		LEFT JOIN tb_like tll ON tll.Be_likedId = t.blackboard_id 
+		AND tll.like_useid = #{nowUser} 
+		AND tll.STATUS = 0 
+	GROUP BY
+		t.blackboard_id,
+		t.title,
+		t.create_by,
+		t.create_mobile,
+		t.page_Views,
+		t.page_Views,
+		t.createTime 
+	ORDER BY
+		t.createTime DESC
 	</select>
 
 	<delete id="delete" parameterType="map">

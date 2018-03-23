@@ -198,6 +198,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 	public Map<String, Object> getPersonalBlackboard(String enterpriseId, String createMobile, Integer pageNumber,Integer type) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("enterpriseId", enterpriseId);
+		
 		// 封装分页信息
 		map.put("createMobile", createMobile);
 		map.put("first", (pageNumber - 1) * PAGE_SIZE);
@@ -222,6 +223,52 @@ public class BlackboardServiceImpl implements BlackboardService {
 		return backMap;
 	}
 
+
+	/**
+	 * 查询企业个人所有黑板报
+	 * 
+	 * @param enterpriseId
+	 *            企业ID
+	 * @param createById
+	 *            黑板报所属用户
+	 * @param pageNumber
+	 *            页码（第几页）
+	 * @return List<Blackboard> 个人发布的所有黑板报记录
+	 */
+	@Override
+	public Map<String, Object> getOtherBlackboard(String enterpriseId, String createMobile, Integer pageNumber,Integer type,String nowUser) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("enterpriseId", enterpriseId);
+		
+		// 封装分页信息
+		map.put("createMobile", createMobile);
+		map.put("nowUser", nowUser);
+		map.put("first", (pageNumber - 1) * PAGE_SIZE);
+		map.put("end", PAGE_SIZE);
+		map.put("type", type);
+
+		System.out.println(map);
+		// 获取所有黑板报
+		List<BlackboardDto> list = blackboardDao.getPersonalBlackboard(map);
+		dateChangeForList(list);
+		// 获取黑板报条数，计算分页总页数
+		Long count = blackboardDao.getPersonalBlackboardCount(map);
+		long page = count / PAGE_SIZE;
+		if (count % PAGE_SIZE != 0) {
+			page++;
+		}
+
+		logger.info("==============所有黑板报:" + list);
+		logger.info("==============黑板报条数:" + count);
+		Map<String, Object> backMap = new HashMap<>();
+		backMap.put("list", list);
+		backMap.put("page", page);
+		return backMap;
+	}
+	
+	
+	
+	
 	/**
 	 * 删除黑板报
 	 * 
