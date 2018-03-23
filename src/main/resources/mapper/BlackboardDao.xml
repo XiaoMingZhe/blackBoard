@@ -122,9 +122,47 @@
 		on a.blackboard_id = b.blackboard_id
 	</select>
 
+	
+	
 	<select id="getPersonalBlackboard" resultType="com.blackboard.dto.BlackboardDto"
 		parameterType="map">
-		SELECT
+	SELECT
+		t.*,
+		count( DISTINCT tl.like_id ) AS likeCount,
+		COUNT( tb.blackboard_id ) AS commentCount,
+		count( tll.like_id ) AS isLike 
+	FROM
+		(
+	SELECT
+		blackboard_id,
+		title,
+		create_by,
+		create_mobile,
+		page_Views,
+		update_time AS createTime 
+	FROM
+		tb_blackboard 
+	WHERE
+		enterprise_id = #{enterpriseId} 
+		AND create_mobile = #{createMobile}
+		AND type = #{type}
+		) t
+		LEFT JOIN tb_like tl ON t.blackboard_id = tl.Be_likedId
+		LEFT JOIN tb_comment tb ON t.blackboard_id = tb.blackboard_id
+		LEFT JOIN tb_like tll ON tll.Be_likedId = t.blackboard_id 
+		AND tll.like_useid = #{createMobile} 
+		AND tll.STATUS = 0 
+	GROUP BY
+		t.blackboard_id 
+	ORDER BY
+		t.createTime DESC
+	</select>
+	
+	
+	
+	<select id="getOtherBlackboard" resultType="com.blackboard.dto.BlackboardDto"
+		parameterType="map">
+	SELECT
 		t.blackboard_id,
 		t.title,
 		t.create_by,
@@ -150,7 +188,6 @@
 		enterprise_id = #{enterpriseId}
 		AND create_mobile = #{createMobile}
 		AND type = 0 
-		<if test="nowUser != null">
 		AND NOT EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id ) UNION
 		(
 	SELECT
@@ -167,7 +204,6 @@
 		AND type = 0 
 		AND EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id AND tbl.be_blacklter_id = #{nowUser}  ) 
 		)
-		</if>
 		) t
 		LEFT JOIN tb_like tl ON t.blackboard_id = tl.Be_likedId
 		LEFT JOIN tb_comment tb ON t.blackboard_id = tb.blackboard_id

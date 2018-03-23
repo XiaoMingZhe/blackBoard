@@ -372,7 +372,7 @@ public class BlackboardController {
 			return JsonResult.error("请求参数非法");
 		}
 
-		Map<String, Object> returnmap = blackboardService.getOtherBlackboard(enterDeptId, mobile, pageNumber,0,nowUser);
+		Map<String, Object> returnmap = blackboardService.getOtherBlackboard(enterDeptId, mobile, pageNumber,nowUser);
 
 
 		// 获取所有黑板报ID集合,存到session

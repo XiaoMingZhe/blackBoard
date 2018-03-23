@@ -225,7 +225,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 
 
 	/**
-	 * 查询企业个人所有黑板报
+	 * 查询他人所有黑板报
 	 * 
 	 * @param enterpriseId
 	 *            企业ID
@@ -236,7 +236,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * @return List<Blackboard> 个人发布的所有黑板报记录
 	 */
 	@Override
-	public Map<String, Object> getOtherBlackboard(String enterpriseId, String createMobile, Integer pageNumber,Integer type,String nowUser) {
+	public Map<String, Object> getOtherBlackboard(String enterpriseId, String createMobile, Integer pageNumber,String nowUser) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("enterpriseId", enterpriseId);
 		
@@ -245,11 +245,11 @@ public class BlackboardServiceImpl implements BlackboardService {
 		map.put("nowUser", nowUser);
 		map.put("first", (pageNumber - 1) * PAGE_SIZE);
 		map.put("end", PAGE_SIZE);
-		map.put("type", type);
+		
 
 		System.out.println(map);
 		// 获取所有黑板报
-		List<BlackboardDto> list = blackboardDao.getPersonalBlackboard(map);
+		List<BlackboardDto> list = blackboardDao.getOtherBlackboard(map);
 		dateChangeForList(list);
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);

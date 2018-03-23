@@ -44,6 +44,11 @@ public interface BlackboardDao {
 	 */
 	List<BlackboardDto> getPersonalBlackboard(Map<String,Object> paramMap);
 	
+	/**
+	 * 查询企业个人所有黑板报
+	 * @param paramMap
+	 */
+	List<BlackboardDto> getOtherBlackboard(Map<String,Object> paramMap);
 	
 	/**
 	 * 删除黑板报 

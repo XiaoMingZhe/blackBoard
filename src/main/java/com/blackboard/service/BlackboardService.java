@@ -55,7 +55,7 @@ public interface BlackboardService {
 	 * @param pageNumber     页码（第几页）
 	 * @return List<Blackboard> 个人发布的所有黑板报记录
 	 */
-	Map<String,Object> getOtherBlackboard(String enterpriseId, String createBy,Integer pageNumber,Integer type,String mowUser);
+	Map<String,Object> getOtherBlackboard(String enterpriseId, String createBy,Integer pageNumber,String mowUser);
 	
 	/**
 	 * 删除黑板报 
