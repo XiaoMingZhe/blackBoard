@@ -62,7 +62,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 
 		blackboardDao.createBlackboard(blackboard);
 		
-		if(visibleRange != null && visibleRange.size()>=0){
+		if(visibleRange != null && visibleRange.size()>0){
 			Map<String,Object> map = new HashMap<>();
 			List<String> list = new ArrayList<>();
 			for(Map<String,Object> m : visibleRange){
