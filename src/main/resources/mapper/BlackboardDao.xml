@@ -8,12 +8,13 @@
 	<select id="getAllBlackboard" resultType="com.blackboard.dto.BlackboardDto"
 		parameterType="map">
 		<!-- 具体的sql -->
+	SELECT *
+	FROM (
 	SELECT
 		t.blackboard_id,
 		t.title,
 		t.create_by,
 		t.create_mobile,
-		t.page_Views,
 		t.page_Views,
 		t.createTime,
 		count( DISTINCT tl.like_id ) AS likeCount,
@@ -61,10 +62,10 @@
 		t.create_by,
 		t.create_mobile,
 		t.page_Views,
-		t.page_Views,
 		t.createTime 
 	ORDER BY
-		t.createTime DESC
+		t.createTime DESC) a
+	LIMIT #{first},#{end}
 	</select>
 
 	<select id="getALLBlackboardCount" resultType="long"
