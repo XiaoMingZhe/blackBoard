@@ -181,4 +181,17 @@ public class IndexController {
 		String moblie = (String) request.getSession().getAttribute("mobile");
 		return JsonResult.ok().put("moblie", moblie);
 	}
+	
+	/**
+	 * 获取当前登陆用户企业ID
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/getEnterpriseId", method = RequestMethod.GET)
+	@ResponseBody
+	private JsonResult getEnterpriseId(HttpServletRequest request) {
+		String enterpriseId = (String) request.getSession().getAttribute("enterpriseId");
+		return JsonResult.ok().put("enterpriseId", enterpriseId);
+	}
 }
