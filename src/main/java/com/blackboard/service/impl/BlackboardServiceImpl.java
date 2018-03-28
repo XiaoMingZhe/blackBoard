@@ -320,7 +320,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		
 		blackboardDao.deleteVisibleRange(blackboard.getBlackboardId());
 		
-		if(visibleRange.size()>=0){
+		if(visibleRange.size()>0){
 			Map<String,Object> map = new HashMap<>();
 			List<String> list = new ArrayList<>();
 			for(Map<String,Object> m : visibleRange){
@@ -424,7 +424,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 			try {
 				Date date = sdf.parse(b.getCreateTime());
 				b.setCreateTime(RelativeDateFormat.format(date));
-				System.out.println(b);
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -444,7 +443,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		try {
 			Date date = sdf.parse(b.getCreateTime());
 			b.setCreateTime(RelativeDateFormat.format(date));
-			System.out.println(b);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}

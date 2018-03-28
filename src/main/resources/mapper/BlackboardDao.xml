@@ -50,6 +50,20 @@
 		AND type = 0 
 		AND EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id AND tbl.be_blacklter_id = #{mobile}  ) 
 		) 
+	UNION
+	(SELECT
+			blackboard_id,
+		title,
+		create_by,
+		create_mobile,
+		page_Views,
+		update_time AS createTime 
+	FROM
+		tb_blackboard tb 
+	WHERE
+		enterprise_id = #{enterpriseId} 
+		AND type = 0 
+		AND create_mobile = #{mobile})
 		) t
 		LEFT JOIN tb_like tl ON t.blackboard_id = tl.Be_likedId
 		LEFT JOIN tb_comment tb ON t.blackboard_id = tb.blackboard_id

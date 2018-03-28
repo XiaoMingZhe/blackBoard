@@ -29,6 +29,7 @@ import com.blackboard.entity.Blackboard;
 import com.blackboard.service.BlackboardService;
 import com.blackboard.utils.CheckAttackUtil;
 import com.blackboard.utils.JsonResult;
+import com.blackboard.utils.OaTokenJob;
 
 @Controller
 @RequestMapping("/blackboard")
@@ -171,7 +172,6 @@ public class BlackboardController {
 		List<String> IDlist = blackboardDao.selectIDList(selectID);
 		request.getSession().setAttribute("IDlist", IDlist);
 		System.out.println(IDlist);
-
 		return JsonResult.ok().put("blackboardList", map.get("list"))
 							  .put("page", map.get("page"))
 							  .put("remindCount", map.get("remindCount"))
@@ -450,7 +450,8 @@ public class BlackboardController {
 			enterDeptId = "517090";
 		}
 		blackboard.setEnterpriseId(enterDeptId);
-
+		logger.info("================修改黑板报开始=====================");
+		logger.info("================参数:"+createBlackboardDto+"=====================");
 		if (blackboard == null || blackboard.getEnterpriseId() == null || blackboard.getEnterpriseId().length() <= 0
 				|| blackboard.getBlackboardId() == null || blackboard.getBlackboardId().length() <= 0
 				|| blackboard.getTitle() == null || blackboard.getTitle().length() <= 0) {
