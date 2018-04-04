@@ -27,7 +27,10 @@ import com.blackboard.entity.Like;
 import com.blackboard.service.BlackboardService;
 import com.blackboard.service.CommentService;
 import com.blackboard.utils.GainUuid;
+import com.blackboard.utils.Hex16;
 import com.blackboard.utils.JsonResult;
+import com.blackboard.utils.MsgPushThread;
+import com.blackboard.utils.PropertiesUtils;
 import com.blackboard.utils.RelativeDateFormat;
 
 @Service
@@ -44,6 +47,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 	private LikeDao likeDao;
 
 	private static final Integer PAGE_SIZE = 10;
+	
+	private static final String KEY = PropertiesUtils.getProperties("KEY");
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -71,7 +76,17 @@ public class BlackboardServiceImpl implements BlackboardService {
 			map.put("list", list);
 			map.put("blackBoardId", blackboard.getBlackboardId());
 			blackboardDao.saveVisibleRange(map);
+			
+			Map<String, Object> MsgPush = new HashMap<>();
+			MsgPush.put("Title", blackboard.getTitle());
+			MsgPush.put("Connent", "来自："+blackboard.getCreateBy());
+			MsgPush.put("blackboardId", blackboard.getBlackboardId());
+			MsgPush.put("mobile", list);
+			Thread thread = new MsgPushThread(MsgPush);
+			thread.start();
 		}
+		
+
 
 	}
 
@@ -97,6 +112,11 @@ public class BlackboardServiceImpl implements BlackboardService {
 
 		List<BlackboardDto> list = blackboardDao.getAllBlackboard(map);
 		dateChangeForList(list);
+		
+		//模糊电话号码
+		for(BlackboardDto b:list){
+			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile()+KEY)));
+		}
 		
 		// 获取总条数，计算总页数
 		Long count = blackboardDao.getALLBlackboardCount(map);
@@ -147,6 +167,10 @@ public class BlackboardServiceImpl implements BlackboardService {
 		BlackboardDto blackboarddto = blackboardDao.getBlackboardById(map);
 		logger.info("==============获取单条黑板报信息:ID为" + blackboardId);
 		dateChange(blackboarddto);
+		//模糊电话号码
+		blackboarddto.setCreateMobile(Hex16.Encode(Hex16.Encode(blackboarddto.getCreateMobile()+KEY)));
+		
+
 		
 		//查看有没有点赞过
 		Like like = new Like();
@@ -169,18 +193,23 @@ public class BlackboardServiceImpl implements BlackboardService {
 		List<Map<String, Object>> comments = new ArrayList<>();
 		for (CommentDto c : commentDto) {
 			Map<String, Object> commentMap = new HashMap<>();
-			commentMap.put("comment", c);
-			if (c.getCommenterId().equals(mobile)) {
+			//模糊手机号
+			if (c.getCommenterId().equals(Hex16.Encode(Hex16.Encode(mobile+KEY)))) {
 				commentMap.put("canDelete", 1);
 			} else {
 				commentMap.put("canDelete", 0);
 			}
+			commentMap.put("comment", c);
 			comments.add(commentMap);
 		}
-
+		
+		List<String> visibleRangeList = blackboardDao.selectVisibleRangeList(blackboardId);
+		Integer permission = 0;
+		if(visibleRangeList!=null && visibleRangeList.size()>0){
+			permission = 1;
+		}
 		logger.info("=============黑板报详情:" + blackboarddto);
-		logger.info("=============评论详情:" + comments);
-		return JsonResult.ok().put("blackboard", blackboarddto).put("comments", comments);
+		return JsonResult.ok().put("blackboard", blackboarddto).put("comments", comments).put("permission", permission);
 	}
 
 	/**
@@ -208,6 +237,11 @@ public class BlackboardServiceImpl implements BlackboardService {
 		// 获取所有黑板报
 		List<BlackboardDto> list = blackboardDao.getPersonalBlackboard(map);
 		dateChangeForList(list);
+		//模糊电话号码
+		for(BlackboardDto b:list){
+			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile()+KEY)));
+		}
+		
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
 		long page = count / PAGE_SIZE;
@@ -245,12 +279,19 @@ public class BlackboardServiceImpl implements BlackboardService {
 		map.put("nowUser", nowUser);
 		map.put("first", (pageNumber - 1) * PAGE_SIZE);
 		map.put("end", PAGE_SIZE);
+		map.put("type", 0);
 		
 
 		System.out.println(map);
 		// 获取所有黑板报
 		List<BlackboardDto> list = blackboardDao.getOtherBlackboard(map);
 		dateChangeForList(list);
+		
+		//模糊电话号码
+		for(BlackboardDto b:list){
+			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile()+KEY)));
+		}
+		
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
 		long page = count / PAGE_SIZE;
@@ -354,7 +395,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 			String blackboardContent = (String)m.get("blackboardContent");
 			String userName = (String)m.get("userName");
 			String content = (String) m.get("content");
-			String moblie = (String) m.get("moblie");
+			//模糊手机号
+			String moblie = Hex16.Encode(Hex16.Encode((String) m.get("moblie")+KEY));
 			Date creatTime = (Date) m.get("creatTime");
 			String remindID = (String) m.get("remindID");
 			Long type = (Long) m.get("type");

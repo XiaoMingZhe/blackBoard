@@ -36,7 +36,7 @@
 		GROUP BY
 		a.comment_id
 		ORDER BY
-		a.comment_time 
+		a.comment_time DESC
 	</select>
 
     <update id="updateRead" parameterType="String">

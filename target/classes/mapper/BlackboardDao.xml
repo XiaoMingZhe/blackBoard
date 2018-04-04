@@ -8,12 +8,13 @@
 	<select id="getAllBlackboard" resultType="com.blackboard.dto.BlackboardDto"
 		parameterType="map">
 		<!-- 具体的sql -->
+	SELECT *
+	FROM (
 	SELECT
 		t.blackboard_id,
 		t.title,
 		t.create_by,
 		t.create_mobile,
-		t.page_Views,
 		t.page_Views,
 		t.createTime,
 		count( DISTINCT tl.like_id ) AS likeCount,
@@ -49,9 +50,23 @@
 		AND type = 0 
 		AND EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id AND tbl.be_blacklter_id = #{mobile}  ) 
 		) 
+	UNION
+	(SELECT
+			blackboard_id,
+		title,
+		create_by,
+		create_mobile,
+		page_Views,
+		update_time AS createTime 
+	FROM
+		tb_blackboard tb 
+	WHERE
+		enterprise_id = #{enterpriseId} 
+		AND type = 0 
+		AND create_mobile = #{mobile})
 		) t
-		LEFT JOIN tb_like tl ON t.blackboard_id = tl.Be_likedId
-		LEFT JOIN tb_comment tb ON t.blackboard_id = tb.blackboard_id
+		LEFT JOIN tb_like tl ON t.blackboard_id = tl.Be_likedId and tl.status = 0
+		LEFT JOIN tb_comment tb ON t.blackboard_id = tb.blackboard_id and tb.status = 0
 		LEFT JOIN tb_like tll ON tll.Be_likedId = t.blackboard_id 
 		AND tll.like_useid = #{mobile} 
 		AND tll.STATUS = 0 
@@ -61,10 +76,10 @@
 		t.create_by,
 		t.create_mobile,
 		t.page_Views,
-		t.page_Views,
 		t.createTime 
 	ORDER BY
-		t.createTime DESC
+		t.createTime DESC) a
+	LIMIT #{first},#{end}
 	</select>
 
 	<select id="getALLBlackboardCount" resultType="long"
@@ -188,7 +203,8 @@
 		enterprise_id = #{enterpriseId}
 		AND create_mobile = #{createMobile}
 		AND type = 0 
-		AND NOT EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id ) UNION
+		AND NOT EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id ) 
+	UNION
 		(
 	SELECT
 		blackboard_id,
@@ -201,6 +217,7 @@
 		tb_blackboard tb 
 	WHERE
 		enterprise_id = #{enterpriseId}
+		AND create_mobile = #{createMobile}
 		AND type = 0 
 		AND EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id AND tbl.be_blacklter_id = #{nowUser}  ) 
 		)
@@ -452,4 +469,15 @@
 		</foreach>
 	</delete>
 	
+	<select id="selectBlackboardType" parameterType="String" resultType="Integer">
+		SELECT type 
+		FROM tb_blackboard 
+		WHERE blackboard_id = #{blackboardId}
+	</select>
+	
+	<select id="selectVisibleRangeList" parameterType="String" resultType="String">
+		SELECT be_blacklter_id 
+		FROM tb_blcaklist 
+		WHERE blacklter_id = #{blackboardId}
+	</select>
 </mapper>

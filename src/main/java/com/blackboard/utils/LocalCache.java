@@ -117,9 +117,10 @@ public class LocalCache implements Serializable {
 				}, 0, DEFAULT_TASK_DELAY);
 			}
 		}
-		for(String key : localCache.cache.keySet()) {
-			log.info("缓存中的数据:key:"+key+"-value:"+localCache.cache.get(key).getValue());
-		}
+//		for(String key : localCache.cache.keySet()) {
+//			log.info("缓存中的数据:key:"+key+"-value:"+localCache.cache.get(key).getValue());
+//		}
+		
 		return localCache;
 	}
 

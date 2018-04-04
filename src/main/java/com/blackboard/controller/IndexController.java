@@ -191,7 +191,7 @@ public class IndexController {
 	@RequestMapping(value = "/getEnterpriseId", method = RequestMethod.GET)
 	@ResponseBody
 	private JsonResult getEnterpriseId(HttpServletRequest request) {
-		String enterpriseId = (String) request.getSession().getAttribute("enterpriseId");
+		String enterpriseId = (String) request.getSession().getAttribute("enterDeptId");
 		return JsonResult.ok().put("enterpriseId", enterpriseId);
 	}
 }

@@ -13,7 +13,9 @@ import com.blackboard.dto.CommentDto;
 import com.blackboard.entity.Comment;
 import com.blackboard.service.CommentService;
 import com.blackboard.utils.GainUuid;
+import com.blackboard.utils.Hex16;
 import com.blackboard.utils.JsonResult;
+import com.blackboard.utils.PropertiesUtils;
 import com.blackboard.utils.RelativeDateFormat;
 
 @Service
@@ -21,6 +23,9 @@ public class CommentServiceImpl implements CommentService {
 	
 	@Autowired
 	private CommentDao commentDao;
+	
+	
+	private static final String KEY = PropertiesUtils.getProperties("KEY");
 
 	/**
 	 * 添加评论(黑板报评论)
@@ -86,10 +91,15 @@ public class CommentServiceImpl implements CommentService {
 		List<CommentDto> comments = commentDao.getAllComments(map);
 		dateChange(comments);
 		for(CommentDto c :comments){
+			c.setCommenterId(Hex16.Encode(Hex16.Encode(c.getCommenterId()+KEY)));
 			String commentId = c.getCommentId();
 			map.put("commentId", commentId);
 			List<CommentDto> list = commentDao.getreply(map);
 			dateChange(list);
+			//模糊手机号
+			for(CommentDto re :list){
+				re.setCommenterId(Hex16.Encode(Hex16.Encode(re.getCommenterId()+KEY)));
+			}
 			c.setReplyList(list);
 		}
 		return comments;
@@ -108,6 +118,8 @@ public class CommentServiceImpl implements CommentService {
 		
 		CommentDto cDto = commentDao.selectById(map);
 		cDto.setTime(RelativeDateFormat.format(cDto.getCommentTime()));
+		//模糊手机号
+		cDto.setCommenterId(Hex16.Encode(Hex16.Encode(cDto.getCommenterId()+KEY)));
 		List<CommentDto> list = commentDao.getreply(map);
 		dateChange(list);
 		Map<String,Object> returnMap = new HashMap<>();
@@ -117,12 +129,13 @@ public class CommentServiceImpl implements CommentService {
 		List<Map<String, Object>> comments = new ArrayList<>();
 		for (CommentDto c : list) {
 			Map<String, Object> commentMap = new HashMap<>();
-			commentMap.put("comment", c);
-			if (c.getCommenterId().equals(mobile)) {
+			if (c.getCommenterId().equals(Hex16.Encode(Hex16.Encode(mobile+KEY)))) {
 				commentMap.put("canDelete", 1);
 			} else {
 				commentMap.put("canDelete", 0);
 			}
+			c.setCommenterId(Hex16.Encode(Hex16.Encode(c.getCommenterId()+KEY)));
+			commentMap.put("comment", c);
 			comments.add(commentMap);
 		}
 		returnMap.put("comment", cDto);

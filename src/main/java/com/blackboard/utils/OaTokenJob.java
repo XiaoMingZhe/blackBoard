@@ -1,15 +1,11 @@
 package com.blackboard.utils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
-import com.blackboard.dto.PropertiesUtilesDto;
 
 /**
  * TOKEN
@@ -19,10 +15,10 @@ import com.blackboard.dto.PropertiesUtilesDto;
 @Component
 public class OaTokenJob {
 
-	private static final String APP_ID = PropertiesUtilesDto.getAppId();
-	private static final String APP_PASSWORD = PropertiesUtilesDto.getAppPassword();
-	private static final String GRANT_TYPE = PropertiesUtilesDto.getGrantType();
-	private static final String OA_MSG_TOKEN_URL = PropertiesUtilesDto.getOaMsgTokenUr();
+	private static final String APP_ID = PropertiesUtils.getProperties("APP_ID");
+	private static final String APP_PASSWORD =PropertiesUtils.getProperties("APP_PASSWORD");
+	private static final String GRANT_TYPE = PropertiesUtils.getProperties("GRANT_TYPE");
+	private static final String OA_MSG_TOKEN_URL = PropertiesUtils.getProperties("OA_MSG_TOKEN_URL");
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	/**
@@ -33,7 +29,6 @@ public class OaTokenJob {
 	 */
 	@Scheduled(initialDelay=500,fixedDelay=3000000)
 	public void getMsgToken() throws Exception {
-		System.out.println();
 		JSONObject jsonObject = null;
 		//拼装请求参数对象
 		JSONObject params = new JSONObject();

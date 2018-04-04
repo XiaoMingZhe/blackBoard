@@ -26,7 +26,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 /**
  * HTTP请求封装
- * @author kkkkkkkkkkk
+ * @author XMZ
  *
  */
 public class HttpHelper {
@@ -176,7 +176,85 @@ private static  Logger log = LoggerFactory.getLogger(HttpHelper.class);
 
         return null;
     }
+    
+    
+    /** 消息推送
+     * @desc ：
+     *  
+     * @param url   请求url
+     * @param data  请求参数（json）
+     * @return
+     * @throws Exception JSONObject
+     */
+    public static JSONObject Msgpush(String url, String data,String Address,String Authorization) throws Exception {
+        //1.生成一个请求
+        HttpPost httpPost = new HttpPost(url);
 
+        //2.配置请求属性
+        //2.1 设置请求超时时间
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(100000).setConnectTimeout(100000).build();
+        httpPost.setConfig(requestConfig);
+        //2.2 设置数据传输格式
+        httpPost.addHeader("Content-Type", "application/xml");
+        httpPost.addHeader("Authorization",Authorization);
+        httpPost.addHeader("Address",Address);
+        //2.3 设置请求实体，封装了请求参数
+        HttpEntity requestEntity = new StringEntity(data, "UTF-8");
+        httpPost.setEntity(requestEntity);
+
+        //3.发起请求，获取响应信息    
+        //3.1 创建httpClient 
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpResponse response = null;
+
+        try {
+
+
+            //3.3 发起请求，获取响应
+            response = httpClient.execute(httpPost, new BasicHttpContext());
+
+            if (response.getStatusLine().getStatusCode() != 200) {
+
+                log.info("request url failed, http code=" + response.getStatusLine().getStatusCode()
+                        + ", url=" + url);
+                return null;
+            }
+
+            //获取响应内容
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                String resultStr = EntityUtils.toString(entity, "utf-8");
+                log.info("POST请求结果："+resultStr);
+
+                //解析响应内容
+                JSONObject result = JSON.parseObject(resultStr);
+
+                if(result.getInteger("errcode")==null) {
+                    return result;
+                }else if (0 == result.getInteger("errcode")) {
+                    return result;
+                }else {
+                    log.info("request url=" + url + ",return value=");
+                    log.info(resultStr);
+                    int errCode = result.getInteger("errcode");
+                    String errMsg = result.getString("errmsg");
+                    throw new Exception("error code:"+errCode+", error message:"+errMsg); 
+                }
+            }
+        } catch (IOException e) {
+            log.info("request url=" + url + ", exception, msg=" + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (response != null) try {
+                response.close();              //释放资源
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
+    }
 
 /**
  * @desc ： 3.
@@ -301,5 +379,9 @@ private static  Logger log = LoggerFactory.getLogger(HttpHelper.class);
         }
         return file;
     }
+    
+    
+    
+    
 
 }

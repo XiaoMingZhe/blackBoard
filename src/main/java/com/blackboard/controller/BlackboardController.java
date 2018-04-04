@@ -28,14 +28,18 @@ import com.blackboard.dto.Remind;
 import com.blackboard.entity.Blackboard;
 import com.blackboard.service.BlackboardService;
 import com.blackboard.utils.CheckAttackUtil;
+import com.blackboard.utils.Hex16;
 import com.blackboard.utils.JsonResult;
 import com.blackboard.utils.OaTokenJob;
+import com.blackboard.utils.PropertiesUtils;
 
 @Controller
 @RequestMapping("/blackboard")
 public class BlackboardController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	private static final String KEY = PropertiesUtils.getProperties("KEY");
 
 	private CheckAttackUtil checkAttackUtil = new CheckAttackUtil();
 
@@ -82,7 +86,7 @@ public class BlackboardController {
 	 * @param request
 	 * @return
 	 */
-	private JsonResult saveBlackboard(@RequestBody CreateBlackboardDto createBlackboardDto,
+	private JsonResult saveBlackboard(CreateBlackboardDto createBlackboardDto,
 			HttpServletRequest request) {
 
 		System.out.println(createBlackboardDto);
@@ -91,7 +95,7 @@ public class BlackboardController {
 
 		if (!checkAttackUtil.checkattack(request, checkAttack)) {
 			return JsonResult.error("参数有误");
-		}
+		}  
 
 		// 获取信息
 		// 企业ID
@@ -106,10 +110,8 @@ public class BlackboardController {
 		logger.info("=============获取信息mobile" + mobile);
 		logger.info("=============黑板报内容" + blackboard);
 
-		if (blackboard == null || blackboard.getTitle().trim() == null || blackboard.getTitle().trim().length() <= 0
-				|| blackboard.getContent().trim() == null || blackboard.getContent().trim().length() <= 0) {
-
-			return JsonResult.error("请求参数非法");
+		if (blackboard == null || blackboard.getTitle().trim() == null || blackboard.getTitle().trim().length() <= 0) {
+			return JsonResult.error("标题不能为空");
 		}
 
 		// 为了测试
@@ -203,22 +205,22 @@ public class BlackboardController {
 				&& (mobile == null || mobile.trim().length() <= 0)) {
 			enterDeptId = "517090";
 			mobile = "13432879269";
+			logger.info("=====设置测试数据=====");
 		}
 
-		String currentUser = mobile;
 		logger.info("==============获取单条黑板报详情:ID为" + blackboardId);
 		logger.info("==============企业ID为" + enterDeptId);
 		logger.info("==============用户ID为" + mobile);
 
-		if (enterDeptId == null || enterDeptId.length() <= 0 || blackboardId == null || blackboardId.length() <= 0
-				|| currentUser == null || currentUser.length() <= 0) {
+		if (enterDeptId == null || enterDeptId.length() <= 0 || blackboardId == null || blackboardId.length() <= 0) {
 
 			return JsonResult.error("请求参数非法");
 		}
 		logger.info("==============详情判断参数完毕:ID为" + blackboardId);
 		logger.info("==============获取单条黑板报信息:企业ID" + enterDeptId);
 		JsonResult result = blackboardService.getBlackboardById(blackboardId, enterDeptId, mobile);
-
+		
+		
 		// 获取上一条 下一条黑板报ID
 		List<String> IDlist = (List<String>) request.getSession().getAttribute("IDlist");
 		int index = 0;
@@ -254,7 +256,7 @@ public class BlackboardController {
 
 		logger.info("==============获取单条黑板报成功================");
 
-		if (bb.getCreateMobile().equals(mobile)) {
+		if (bb.getCreateMobile().equals(Hex16.Encode(Hex16.Encode(mobile+KEY)))) {
 			return result.put("canrevise", 1);
 		} else {
 			return result.put("canrevise", 0);
@@ -434,7 +436,7 @@ public class BlackboardController {
 	
 
 	/**
-	 * 修改黑板报
+	 * 修改黑板报或修改草稿(修改草稿就相当于发送黑板报)
 	 * 
 	 * @param blackboard
 	 *            修改的黑板报对象 return flag 是否更新成功（true/false）
@@ -450,6 +452,7 @@ public class BlackboardController {
 			enterDeptId = "517090";
 		}
 		blackboard.setEnterpriseId(enterDeptId);
+
 		logger.info("================修改黑板报开始=====================");
 		logger.info("================参数:"+createBlackboardDto+"=====================");
 		if (blackboard == null || blackboard.getEnterpriseId() == null || blackboard.getEnterpriseId().length() <= 0
@@ -458,6 +461,15 @@ public class BlackboardController {
 
 			return JsonResult.error("请求参数非法");
 		}
+		
+		Integer type = blackboardDao.selectBlackboardType(blackboard.getBlackboardId());
+		if(type==1){
+			logger.info("===============修改草稿，新建黑板报====================");
+			createBlackboardDto.getBlackboard().setType(0);
+			JsonResult jsonResult= saveBlackboard(createBlackboardDto,request);
+			return jsonResult;
+		}
+		
 		logger.info("================修改黑板报:" + blackboard.getBlackboardId());
 		
 		Boolean flag = blackboardService.updateBlackboard(blackboard,createBlackboardDto.getVisibleRange());

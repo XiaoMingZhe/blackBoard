@@ -127,5 +127,17 @@ public interface BlackboardDao {
 	 */
 	void deleteVisibleRangeList(List<String> list);
 	
+	/**
+	 * 根据黑板报ID查询黑板报类型
+	 * @param blackboardId
+	 * @return
+	 */
+	Integer selectBlackboardType(String blackboardId);
 	
+	/**
+	 * 根据黑板报ID获取可见范围
+	 * @param blackboardId
+	 * @return
+	 */
+	List<String> selectVisibleRangeList(String blackboardId);
 }
