@@ -110,7 +110,7 @@ public class BlackboardController {
 		logger.info("=============获取信息mobile" + mobile);
 		logger.info("=============黑板报内容" + blackboard);
 
-		if (blackboard == null || blackboard.getTitle().trim() == null || blackboard.getTitle().trim().length() <= 0) {
+		if (blackboard == null || blackboard.getTitle().trim() == null || blackboard.getTitle().trim().length() <= 0 || blackboard.getCreateBy() == null) {
 			return JsonResult.error("标题不能为空");
 		}
 
@@ -171,9 +171,9 @@ public class BlackboardController {
 		Map<String, Object> selectID = new HashMap<String, Object>();
 		selectID.put("enterDeptId", enterDeptId);
 		selectID.put("type", 0);
+		selectID.put("mobile", mobile);
 		List<String> IDlist = blackboardDao.selectIDList(selectID);
 		request.getSession().setAttribute("IDlist", IDlist);
-		System.out.println(IDlist);
 		return JsonResult.ok().put("blackboardList", map.get("list"))
 							  .put("page", map.get("page"))
 							  .put("remindCount", map.get("remindCount"))
@@ -238,7 +238,7 @@ public class BlackboardController {
 
 		String lastBlackboardID = "";
 		String nextBlackboardID = "";
-		if (index - 1 > 0) {
+		if (index - 1 >= 0) {
 			lastBlackboardID = IDlist.get(index - 1);
 		}
 
@@ -337,7 +337,7 @@ public class BlackboardController {
 		Map<String, Object> selectID = new HashMap<String, Object>();
 		selectID.put("enterDeptId", enterDeptId);
 		selectID.put("mobile", mobile);
-		List<String> IDlist = blackboardDao.selectIDList(selectID);
+		List<String> IDlist = blackboardDao.selectMyIDList(selectID);
 		request.getSession().setAttribute("IDlist", IDlist);
 
 		return JsonResult.ok().put("personalList", map.get("list")).put("page", map.get("page"));
@@ -380,7 +380,8 @@ public class BlackboardController {
 		// 获取所有黑板报ID集合,存到session
 		Map<String, Object> selectID = new HashMap<String, Object>();
 		selectID.put("enterDeptId", enterDeptId);
-		selectID.put("mobile", mobile);
+		selectID.put("createMobile", mobile);
+		selectID.put("mobile", nowUser);
 		List<String> IDlist = blackboardDao.selectIDList(selectID);
 		request.getSession().setAttribute("IDlist", IDlist);
 		logger.info("==================获取手机号为:"+mobile+"黑板报结束==============");

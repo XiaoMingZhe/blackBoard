@@ -22,13 +22,11 @@ public class OaTokenJob {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	/**
-	 * 启动后1S执行一次，之后每50分钟执行一次 cron = "0 0/50 * * * ?"
-	 * 测试每5分钟执行一次cron = "0 0/5 * * * ?"
-	 * initialDelay 不支持cron表达式注册器
-	 * @throws Exception token保存1个小时
+	 * 获取消息推送token
+	 * @return
+	 * @throws Exception
 	 */
-	@Scheduled(initialDelay=500,fixedDelay=3000000)
-	public void getMsgToken() throws Exception {
+	public String getMsgToken() throws Exception {
 		JSONObject jsonObject = null;
 		//拼装请求参数对象
 		JSONObject params = new JSONObject();
@@ -41,11 +39,8 @@ public class OaTokenJob {
 		JSONObject respJson =HttpHelper.doPost(OA_MSG_TOKEN_URL, params);
 		logger.info("token返回json:  "+respJson.toJSONString());
 		jsonObject = respJson;
-		if (null != jsonObject) {
-			//保存在缓存中，方便取用
-			LocalCache localCache = LocalCache.createLocalCache();
-			localCache.put("access_token", jsonObject.getString("access_token"));
-		}
+		String access_token = jsonObject.getString("access_token");
+		return access_token;
 	}
 
 	public static void main(String[] args) throws Exception {

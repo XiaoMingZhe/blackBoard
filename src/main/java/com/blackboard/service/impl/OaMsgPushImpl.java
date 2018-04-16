@@ -113,16 +113,9 @@ public class OaMsgPushImpl implements OaMsgPushService {
 		ext.setExtensionInfo(exinfo);
 		
 		//接口凭证
-		LocalCache localCache = LocalCache.createLocalCache();
 		String access_token = "";
-		if(null!=localCache.get("access_token")) {
-			access_token = localCache.get("access_token").toString();
-		}
-		//以免万一多做一层判断
-		if(StringUtils.isBlank(access_token)) {
-			new OaTokenJob().getMsgToken();
-			access_token = localCache.get("access_token").toString();
-		}
+		access_token = new OaTokenJob().getMsgToken();
+	
 		//接口的授权码
 		String Authorization = "Bearer "+Base64.encode((APP_ID+":"+access_token)).replaceAll("[\\s*\t\n\r]", "");
 		

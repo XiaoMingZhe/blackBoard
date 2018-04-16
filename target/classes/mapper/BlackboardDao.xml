@@ -322,21 +322,55 @@
 		select 1 from DUAL
 	</select>
 	
-	<select id="selectIDList" parameterType="map" resultType="String">
+	<select id="selectIDList" parameterType="map" resultType="String">	
 		SELECT
-		blackboard_id
+		t.blackboard_id 
 		FROM
-		tb_blackboard
+			(
+		SELECT
+			blackboard_id,
+			update_time AS createTime 
+		FROM
+			tb_blackboard tb 
 		WHERE
-		enterprise_id = #{enterDeptId}
-		AND type = #{type}
-		<if test="createMobile != null and createMobile !=''">
-		AND
-		create_mobile = #{createMobile}
-		</if>
+			enterprise_id = #{enterDeptId} 
+			<if test="createMobile != null and createMobile !=''">
+			AND
+			create_mobile = #{createMobile}
+			</if>
+			AND type = 0
+			AND NOT EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id ) UNION
+			(
+		SELECT
+			blackboard_id,
+			update_time AS createTime 
+		FROM
+			tb_blackboard tb 
+		WHERE
+			enterprise_id = #{enterDeptId}
+			<if test="createMobile != null and createMobile !=''">
+			AND
+			create_mobile = #{createMobile}
+			</if>
+			AND type = 0
+			AND EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id AND tbl.be_blacklter_id = #{mobile} ) 
+			) 
+			) t 
 		ORDER BY
-		update_time desc
+			t.createTime DESC
 	</select>
+	
+	<select id="selectMyIDList" parameterType="map" resultType="String">	
+		SELECT
+		t.blackboard_id 
+		FROM
+		tb_blackboard t 
+		where t.create_mobile = #{mobile}
+		AND type = 0
+		ORDER BY
+			t.create_time DESC
+	</select>
+	
 	
 	
 	<select id="selectRemind" parameterType="map" resultType="map">
@@ -389,6 +423,32 @@
 			</if>
 			AND tc.reply_id = #{mobile} 
 			AND tb.enterprise_id = #{enterpriseId}
+		UNION
+		SELECT
+			tb.title AS title,
+			tb.blackboard_id AS blackboardId,
+			tb.content as blackboardContent,
+			tc.comment_content AS content,
+			tc.commenter_id AS moblie,
+			tc.commenter_name AS userName,
+			tc.comment_time AS creatTime,
+			tc.comment_id AS remindID,
+			tc.reply_name AS commenterName,
+			0 AS type,
+			99 AS likeType 
+		FROM
+			tb_blackboard tb,
+			tb_comment tc ,
+			tb_comment tbc 
+		WHERE
+			tb.blackboard_id = tc.blackboard_id 
+			<if test="isread !=null">	
+			AND tc.is_read = 0
+			</if>
+			AND tc.reply_comment_id = tbc.comment_id
+			AND tc.commenter_id != #{mobile}
+			AND tbc.commenter_id = #{mobile}
+			AND tb.enterprise_id =  #{enterpriseId}
 		UNION
 		SELECT
 			tb.title AS title,
@@ -480,4 +540,15 @@
 		FROM tb_blcaklist 
 		WHERE blacklter_id = #{blackboardId}
 	</select>
+	
+	<update id="updateremark" parameterType="map">
+		UPDATE 
+		tb_blackboard 
+		SET 
+		type = 1,
+		remark = #{remark}
+		WHERE 
+		blackboard_id  = #{blackBoardId}
+	</update>
+	
 </mapper>

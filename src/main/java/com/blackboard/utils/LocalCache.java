@@ -37,12 +37,12 @@ public class LocalCache implements Serializable {
 	/**
 	 * 定时器清理间隔（默认60秒钟执行一次）
 	 */
-	private static Long DEFAULT_TASK_DELAY = 60000 * 120L;
+	private static Long DEFAULT_TASK_DELAY = 60000L;
 
 	/**
-	 * 存储有效期,默认存储120分钟
+	 * 存储有效期,默认存储10分钟
 	 */
-	private static Long DEFAULT_TIMEOUT = 60000 * 120L;
+	private static Long DEFAULT_TIMEOUT = 60000 * 100L;
 
 	private LocalCache() {
 	}
@@ -143,7 +143,7 @@ public class LocalCache implements Serializable {
 	}
 
 	/**
-	 * 默认缓存 30分钟
+	 * 默认缓存 10分钟
 	 */
 	public Object put(String key, Object value) {
 		return put(key, value, DEFAULT_TIMEOUT);
@@ -154,7 +154,7 @@ public class LocalCache implements Serializable {
 	 * @param key
 	 * @param value
 	 * @param timeout
-	 *            单位默认是秒,传入小于0的值则使用默认值(30分钟)，传入0 则永久有效(应用重启后失效,目前没有实现存盘)
+	 *            单位默认是秒,传入小于0的值则使用默认值(10分钟)，传入0 则永久有效(应用重启后失效,目前没有实现存盘)
 	 * @return
 	 */
 	public Object put(String key, Object value, Long timeout) {

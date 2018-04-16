@@ -45,7 +45,7 @@ public class CommentController {
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
 
-		if ((enterDeptId.trim().length()<= 0  || enterDeptId == null) && (mobile.trim().length()<=0 || mobile == null) ) {
+		if ((enterDeptId == null || enterDeptId.trim().length()<= 0 ) && (mobile == null ||mobile.trim().length()<=0  ) ) {
 			enterDeptId = "517090";
 			mobile = "13432879269";
 		}

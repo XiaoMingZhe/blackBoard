@@ -26,8 +26,16 @@ public class Blackboard {
 	private String createMobile;// 创建用户手机号
 	private Integer pageViews;//浏览数
 	private Integer type;//类型(0为黑板报，1为草稿)
+	private String remark;//备注
 
-	
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
 	public Integer getPageViews() {
 		return pageViews;
 	}

@@ -3,6 +3,8 @@ package com.blackboard.dao;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.blackboard.dto.CommentDto;
 import com.blackboard.entity.Comment;
 
@@ -75,7 +77,7 @@ public interface CommentDao {
 	 * 修改已读状态
 	 * @param mobile
 	 */
-	void updateRead(String mobile);
+	void updateRead(@Param("mobile") String mobile,@Param("enterpriseId") String enterpriseId);
 	
 	/**
 	 * 获取单条评论信息(包括点赞数，是否点赞)

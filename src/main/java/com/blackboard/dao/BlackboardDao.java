@@ -101,6 +101,12 @@ public interface BlackboardDao {
 	 * @return
 	 */
 	List<String> selectIDList(Map<String,Object> map);
+
+	/**
+	 * 查询黑板报ID列表
+	 * @return
+	 */
+	List<String> selectMyIDList(Map<String,Object> map);
 	
 	/**
 	 * 消息提醒列表
@@ -140,4 +146,10 @@ public interface BlackboardDao {
 	 * @return
 	 */
 	List<String> selectVisibleRangeList(String blackboardId);
+	
+	/**
+	 * 消息送审修改
+	 * @param map
+	 */
+	void updateremark(Map<String, Object> map);
 }

@@ -39,13 +39,20 @@
 		a.comment_time DESC
 	</select>
 
-    <update id="updateRead" parameterType="String">
-    	UPDATE tb_comment 
-		SET is_read = 1 
-		WHERE
-		blackboard_id IN ( 
-		SELECT blackboard_id FROM tb_blackboard WHERE create_mobile = #{mobile} )
-		OR reply_id = #{mobile}
+    <update id="updateRead">
+	UPDATE tb_comment 
+	SET is_read = 1 
+	WHERE
+		blackboard_id IN ( SELECT blackboard_id FROM tb_blackboard WHERE create_mobile = #{mobile} AND enterprise_id = #{enterpriseId} ) 
+		OR ( reply_id = #{mobile} AND enterprise_id = #{enterpriseId} ) 
+		OR (
+		reply_comment_id IN (
+	SELECT
+		t.comment_id 
+	FROM
+		( SELECT tc.comment_id FROM tb_comment tc WHERE tc.commenter_id = #{mobile} AND tc.enterprise_id = #{enterpriseId} ) t 
+		) 
+		)
     
     </update>
 

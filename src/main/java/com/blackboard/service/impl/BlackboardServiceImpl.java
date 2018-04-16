@@ -32,6 +32,9 @@ import com.blackboard.utils.JsonResult;
 import com.blackboard.utils.MsgPushThread;
 import com.blackboard.utils.PropertiesUtils;
 import com.blackboard.utils.RelativeDateFormat;
+import com.blackboard.utils.WebServiceThread;
+import com.blackboard.utils.WebServicesClient;
+import com.vdurmont.emoji.EmojiParser;
 
 @Service
 @Transactional
@@ -64,7 +67,10 @@ public class BlackboardServiceImpl implements BlackboardService {
 
 		blackboard.setBlackboardId(GainUuid.getUUID());
 		blackboard.setCreateTime(new Date());
-
+		//emoji表情切换
+		blackboard.setTitle(EmojiParser.parseToAliases(blackboard.getTitle()));
+		blackboard.setContent(EmojiParser.parseToAliases(blackboard.getContent()));
+		
 		blackboardDao.createBlackboard(blackboard);
 		
 		if(visibleRange != null && visibleRange.size()>0){
@@ -86,8 +92,12 @@ public class BlackboardServiceImpl implements BlackboardService {
 			thread.start();
 		}
 		
-
-
+		Map<String, Object> WebServiceMap = new HashMap<>();
+		WebServiceMap.put("mobile", blackboard.getCreateMobile());
+		WebServiceMap.put("blackboardId", blackboard.getBlackboardId());
+		WebServiceMap.put("content", blackboard.getContent());
+		Thread WebThread = new WebServiceThread(WebServiceMap);
+		WebThread.start();
 	}
 
 	/**
@@ -115,6 +125,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		
 		//模糊电话号码
 		for(BlackboardDto b:list){
+			b.setTitle(EmojiParser.parseToUnicode(b.getTitle()));
 			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile()+KEY)));
 		}
 		
@@ -169,8 +180,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 		dateChange(blackboarddto);
 		//模糊电话号码
 		blackboarddto.setCreateMobile(Hex16.Encode(Hex16.Encode(blackboarddto.getCreateMobile()+KEY)));
-		
-
+		blackboarddto.setTitle(EmojiParser.parseToUnicode(blackboarddto.getTitle()));
+		blackboarddto.setContent(EmojiParser.parseToUnicode(blackboarddto.getContent()));
 		
 		//查看有没有点赞过
 		Like like = new Like();
@@ -193,6 +204,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		List<Map<String, Object>> comments = new ArrayList<>();
 		for (CommentDto c : commentDto) {
 			Map<String, Object> commentMap = new HashMap<>();
+			c.setCommentContent(EmojiParser.parseToUnicode(c.getCommentContent()));
 			//模糊手机号
 			if (c.getCommenterId().equals(Hex16.Encode(Hex16.Encode(mobile+KEY)))) {
 				commentMap.put("canDelete", 1);
@@ -239,17 +251,17 @@ public class BlackboardServiceImpl implements BlackboardService {
 		dateChangeForList(list);
 		//模糊电话号码
 		for(BlackboardDto b:list){
+			b.setTitle(EmojiParser.parseToUnicode(b.getTitle()));
 			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile()+KEY)));
 		}
 		
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
-		long page = count / PAGE_SIZE;
-		if (count % PAGE_SIZE != 0) {
-			page++;
-		}
-
-		logger.info("==============所有黑板报:" + list);
+//		long page = count / PAGE_SIZE;
+//		if (count % PAGE_SIZE != 0) {
+//			page++;
+//		}
+		long page = 1;
 		logger.info("==============黑板报条数:" + count);
 		Map<String, Object> backMap = new HashMap<>();
 		backMap.put("list", list);
@@ -289,16 +301,19 @@ public class BlackboardServiceImpl implements BlackboardService {
 		
 		//模糊电话号码
 		for(BlackboardDto b:list){
+			b.setTitle(EmojiParser.parseToUnicode(b.getTitle()));
 			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile()+KEY)));
 		}
 		
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
-		long page = count / PAGE_SIZE;
-		if (count % PAGE_SIZE != 0) {
-			page++;
-		}
+//		long page = count / PAGE_SIZE;
+//		if (count % PAGE_SIZE != 0) {
+//			page++;
+//		}
 
+		long page = 1;
+		
 		logger.info("==============所有黑板报:" + list);
 		logger.info("==============黑板报条数:" + count);
 		Map<String, Object> backMap = new HashMap<>();
@@ -356,7 +371,9 @@ public class BlackboardServiceImpl implements BlackboardService {
 	public boolean updateBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange) {
 
 		blackboard.setUpdateTime(new Date());
-
+		blackboard.setTitle(EmojiParser.parseToAliases(blackboard.getTitle()));
+		blackboard.setContent(EmojiParser.parseToAliases(blackboard.getContent()));
+		
 		Boolean bFlag = blackboardDao.updateBlackboard(blackboard);
 		
 		blackboardDao.deleteVisibleRange(blackboard.getBlackboardId());
@@ -390,11 +407,15 @@ public class BlackboardServiceImpl implements BlackboardService {
 		List<Map<String, Object>> list = blackboardDao.selectRemind(map);
 		for (Map<String, Object> m : list) {
 			Remind remind = new Remind();
-			String title = (String) m.get("title");
+			String title = EmojiParser.parseToUnicode((String) m.get("title"));
 			String blackboardId = (String) m.get("blackboardId");
 			String blackboardContent = (String)m.get("blackboardContent");
 			String userName = (String)m.get("userName");
 			String content = (String) m.get("content");
+			if(content!=null){
+				content = EmojiParser.parseToUnicode(content);
+			}
+//			String content = EmojiParser.parseToUnicode((String) m.get("content");
 			//模糊手机号
 			String moblie = Hex16.Encode(Hex16.Encode((String) m.get("moblie")+KEY));
 			Date creatTime = (Date) m.get("creatTime");
@@ -427,7 +448,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		}
 		
 		//修改已读状态
-		commentDao.updateRead(mobile);
+		commentDao.updateRead(mobile,enterpriseId);
 		likeDao.updateRead(mobile);
 		
 		return returnList;

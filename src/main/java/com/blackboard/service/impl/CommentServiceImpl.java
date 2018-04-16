@@ -17,6 +17,7 @@ import com.blackboard.utils.Hex16;
 import com.blackboard.utils.JsonResult;
 import com.blackboard.utils.PropertiesUtils;
 import com.blackboard.utils.RelativeDateFormat;
+import com.vdurmont.emoji.EmojiParser;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -34,6 +35,9 @@ public class CommentServiceImpl implements CommentService {
 	public Comment addComment(Comment comment) {
 		comment.setCommentId(GainUuid.getUUID());
 		Comment com = new Comment();
+		String commentConnent = comment.getCommentContent();
+		String commentConnents = EmojiParser.parseToAliases(commentConnent);
+		comment.setCommentContent(commentConnents);
 		try {
 			commentDao.addComment(comment);
 			 com = commentDao.selectCommentById(comment.getCommentId());
@@ -129,7 +133,7 @@ public class CommentServiceImpl implements CommentService {
 		List<Map<String, Object>> comments = new ArrayList<>();
 		for (CommentDto c : list) {
 			Map<String, Object> commentMap = new HashMap<>();
-			if (c.getCommenterId().equals(Hex16.Encode(Hex16.Encode(mobile+KEY)))) {
+			if (c.getCommenterId().equals(mobile)) {
 				commentMap.put("canDelete", 1);
 			} else {
 				commentMap.put("canDelete", 0);
