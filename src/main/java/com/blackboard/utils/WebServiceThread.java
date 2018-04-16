@@ -18,6 +18,7 @@ public class WebServiceThread extends Thread {
 	public void run() {
 		WebServicesClient web = new WebServicesClient();
 		String result = web.getWeather(WebServiceMap);
+		logger.info("==========消息送审返回："+result+"==========");
 		if(!"成功接收".equals(result.trim())){
 			logger.error("发送消息送审失败："+result);
 		}

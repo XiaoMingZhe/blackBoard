@@ -129,6 +129,8 @@ public class WebServicesClient {
         String msgid = "blackboard"+(String) map.get("blackboardId");
         String content = (String) map.get("content");
         
+        System.out.println(MD5(content));
+        
         sb.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:chin=\"http://www.chinamobile.com/\">");  
         sb.append("   <soapenv:Header>");
         sb.append("   	<chin:authenticatorcode>"+SHA256.getSHA256StrJava(msgid+"88"+timestamp)+"</chin:authenticatorcode>");
@@ -140,21 +142,32 @@ public class WebServicesClient {
         sb.append("   	<chin:msgname>H5黑板报安全送审</chin:msgname>");
         sb.append("   </soapenv:Header>");
         sb.append("   <soapenv:Body>");  
-        sb.append("      <chin:pstReq>");  
+        sb.append("      <chin:exPstReq>");  
         sb.append("         <msgid>"+msgid+"</msgid>");  
         sb.append("         <userid>"+mobile+"</userid>");  
         sb.append("         <date>"+timestamp+"</date>"); 
-        sb.append("         <md5>"+DigestUtils.md5DigestAsHex(content.getBytes())+"</md5>"); 
+        sb.append("         <hash>"+MD5(content)+"</hash>"); 
         sb.append("         <contenttype>1</contenttype>"); 
         sb.append("         <contentlength>"+content.length()+"</contentlength>"); 
         sb.append("         <content>"+content+"</content>"); 
         sb.append("         <fileposition/>"); 
-        sb.append("         <svctype>4</svctype>"); 
-        sb.append("      </chin:pstReq>");  
+        sb.append("         <svctype>16</svctype>"); 
+        sb.append("         <platfrom>10</platfrom>"); 
+        sb.append("      </chin:exPstReq>");  
         sb.append("   </soapenv:Body>");  
         sb.append("</soapenv:Envelope>");  
   
   
         return sb.toString();  
-    }  
+    } 
+    
+    
+    private String MD5(String content){
+    	String md5 = DigestUtils.md5DigestAsHex(content.getBytes());
+    	StringBuilder hash = new StringBuilder("md5");
+    	for(int i = 0;i<md5.length()/2;i++){
+    		hash.append(":"+md5.substring(2*i,2*i+2).toUpperCase());
+    	}
+    	return hash.toString();
+    }
 }

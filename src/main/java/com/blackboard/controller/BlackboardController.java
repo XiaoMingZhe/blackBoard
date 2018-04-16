@@ -160,7 +160,7 @@ public class BlackboardController {
 		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0
 				|| pageNumber == null) {
 
-			return JsonResult.error("请求参数非法");
+			return JsonResult.error("获取用户数据出错,请重新进入。");
 		}
 
 		Map<String, Object> map = blackboardService.getAllBlackboard(enterDeptId, pageNumber,mobile);
