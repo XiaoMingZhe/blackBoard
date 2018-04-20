@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -126,7 +127,8 @@ public class WebServicesClient {
         StringBuffer sb = new StringBuffer(); 
         //获取参数
         String mobile = (String) map.get("mobile");
-        String msgid = "blackboard"+(String) map.get("blackboardId");
+        String msgid = (String) map.get("msgid");
+        logger.info("msgid:"+msgid);
         String content = (String) map.get("content");
         
         System.out.println(MD5(content));
@@ -148,7 +150,11 @@ public class WebServicesClient {
         sb.append("         <date>"+timestamp+"</date>"); 
         sb.append("         <hash>"+MD5(content)+"</hash>"); 
         sb.append("         <contenttype>1</contenttype>"); 
-        sb.append("         <contentlength>"+content.length()+"</contentlength>"); 
+        try {
+			sb.append("         <contentlength>"+content.getBytes("utf-8").length+"</contentlength>");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} 
         sb.append("         <content>"+content+"</content>"); 
         sb.append("         <fileposition/>"); 
         sb.append("         <svctype>16</svctype>"); 

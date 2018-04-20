@@ -92,12 +92,21 @@ public class BlackboardServiceImpl implements BlackboardService {
 			thread.start();
 		}
 		
-		Map<String, Object> WebServiceMap = new HashMap<>();
-		WebServiceMap.put("mobile", blackboard.getCreateMobile());
-		WebServiceMap.put("blackboardId", blackboard.getBlackboardId());
-		WebServiceMap.put("content", blackboard.getContent());
-		Thread WebThread = new WebServiceThread(WebServiceMap);
-		WebThread.start();
+		//安全送审
+		Map<String, Object> conntentMap = new HashMap<>();
+		conntentMap.put("mobile", blackboard.getCreateMobile());
+		conntentMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
+		conntentMap.put("content", blackboard.getContent());
+		Thread conntentThread = new WebServiceThread(conntentMap);
+		conntentThread.start();
+		
+		//安全送审
+		Map<String,Object> TitleMap = new HashMap<>();
+		TitleMap.put("mobile", blackboard.getCreateMobile());
+		TitleMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
+		TitleMap.put("content", blackboard.getTitle());
+		Thread titleThread = new WebServiceThread(TitleMap);
+		titleThread.start();
 	}
 
 	/**
@@ -429,7 +438,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 			} else {
 				remind.setTitle(img);
 			}
-			System.out.println("标题是："+remind.getTitle());
 			
 			remind.setUserName(userName);
 			remind.setBlackboardId(blackboardId);
@@ -468,7 +476,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		// 查找符合规则的子串
 		while (matcher.find()) {
 			// 获取 字符串
-			System.out.println(matcher.group());
 			img = matcher.group();
 			break;
 		}

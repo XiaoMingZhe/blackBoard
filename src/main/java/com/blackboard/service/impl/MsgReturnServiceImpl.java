@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.blackboard.dao.BlackboardDao;
+import com.blackboard.dao.CommentDao;
 import com.blackboard.service.MsgReturnService;
 
 @Service
@@ -16,6 +17,9 @@ public class MsgReturnServiceImpl implements MsgReturnService {
 	
 	@Autowired
 	private BlackboardDao blackboardDao;
+	
+	@Autowired
+	private CommentDao commentDao;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -56,12 +60,21 @@ public class MsgReturnServiceImpl implements MsgReturnService {
 			remark = "等待审核";
 		}
 		
-		String blackboardid = msgid.substring(10);
-		logger.info("============blackboardid:"+blackboardid+"========");
-		Map<String, Object> map = new HashMap<>();
-		map.put("blackBoardId", blackboardid);
-		map.put("remark", remark);
-		blackboardDao.updateremark(map);
+		if(msgid.indexOf("blackboard")!=-1){
+			String blackboardid = msgid.substring(10);
+			logger.info("============blackboardid:"+blackboardid+"========");
+			Map<String, Object> map = new HashMap<>();
+			map.put("blackBoardId", blackboardid);
+			map.put("remark", remark);
+			blackboardDao.updateremark(map);
+		}
+
+		if(msgid.indexOf("comment")!=-1){
+			String commentId = msgid.substring(7);
+			logger.info("============commentId:"+commentId+"========");
+			commentDao.delectReply(commentId);
+			commentDao.deleteOneComments(commentId);
+		}
 		
 		return "ok";
 	}

@@ -17,15 +17,15 @@ import com.blackboard.utils.Hex16;
 import com.blackboard.utils.JsonResult;
 import com.blackboard.utils.PropertiesUtils;
 import com.blackboard.utils.RelativeDateFormat;
+import com.blackboard.utils.WebServiceThread;
 import com.vdurmont.emoji.EmojiParser;
 
 @Service
 public class CommentServiceImpl implements CommentService {
-	
+
 	@Autowired
 	private CommentDao commentDao;
-	
-	
+
 	private static final String KEY = PropertiesUtils.getProperties("KEY");
 
 	/**
@@ -40,10 +40,14 @@ public class CommentServiceImpl implements CommentService {
 		comment.setCommentContent(commentConnents);
 		try {
 			commentDao.addComment(comment);
-			 com = commentDao.selectCommentById(comment.getCommentId());
+			com = commentDao.selectCommentById(comment.getCommentId());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		// 送审
+		result(comment);
+
 		return com;
 	}
 
@@ -56,11 +60,13 @@ public class CommentServiceImpl implements CommentService {
 		Comment com = new Comment();
 		try {
 			commentDao.replyReply(comment);
-			 com = commentDao.selectCommentById(comment.getCommentId());
+			com = commentDao.selectCommentById(comment.getCommentId());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+		// 送审
+		result(comment);
+
 		return com;
 	}
 
@@ -71,38 +77,40 @@ public class CommentServiceImpl implements CommentService {
 	public Comment reply(Comment comment) {
 		comment.setCommentId(GainUuid.getUUID());
 		Comment com = new Comment();
-		
+
 		try {
 			commentDao.reply(comment);
 			com = commentDao.selectCommentById(comment.getCommentId());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		// 送审
+		result(comment);
 		
 		return com;
 	}
-
 
 	/**
 	 * 获取当前黑板报所有评论
 	 */
 	@Override
-	public List<CommentDto> getAllComments(String blackboardId,String mobile) {
-		
+	public List<CommentDto> getAllComments(String blackboardId, String mobile) {
+
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("blackboardId", blackboardId);
 		map.put("mobile", mobile);
 		List<CommentDto> comments = commentDao.getAllComments(map);
 		dateChange(comments);
-		for(CommentDto c :comments){
-			c.setCommenterId(Hex16.Encode(Hex16.Encode(c.getCommenterId()+KEY)));
+		for (CommentDto c : comments) {
+			c.setCommenterId(Hex16.Encode(Hex16.Encode(c.getCommenterId() + KEY)));
 			String commentId = c.getCommentId();
 			map.put("commentId", commentId);
 			List<CommentDto> list = commentDao.getreply(map);
 			dateChange(list);
-			//模糊手机号
-			for(CommentDto re :list){
-				re.setCommenterId(Hex16.Encode(Hex16.Encode(re.getCommenterId()+KEY)));
+			// 模糊手机号
+			for (CommentDto re : list) {
+				re.setCommenterId(Hex16.Encode(Hex16.Encode(re.getCommenterId() + KEY)));
 			}
 			c.setReplyList(list);
 		}
@@ -113,22 +121,21 @@ public class CommentServiceImpl implements CommentService {
 	 * 获取回复详情
 	 */
 	@Override
-	public Map<String,Object> getReplys(String commentId,String mobile){
-		
+	public Map<String, Object> getReplys(String commentId, String mobile) {
+
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("commentId", commentId);
 		map.put("mobile", mobile);
 		map.put("getreply", "getreply");
-		
+
 		CommentDto cDto = commentDao.selectById(map);
 		cDto.setTime(RelativeDateFormat.format(cDto.getCommentTime()));
-		//模糊手机号
-		cDto.setCommenterId(Hex16.Encode(Hex16.Encode(cDto.getCommenterId()+KEY)));
+		// 模糊手机号
+		cDto.setCommenterId(Hex16.Encode(Hex16.Encode(cDto.getCommenterId() + KEY)));
 		List<CommentDto> list = commentDao.getreply(map);
 		dateChange(list);
-		Map<String,Object> returnMap = new HashMap<>();
-		
-		
+		Map<String, Object> returnMap = new HashMap<>();
+
 		// 判断是不是本人，评论能不能删除
 		List<Map<String, Object>> comments = new ArrayList<>();
 		for (CommentDto c : list) {
@@ -138,7 +145,7 @@ public class CommentServiceImpl implements CommentService {
 			} else {
 				commentMap.put("canDelete", 0);
 			}
-			c.setCommenterId(Hex16.Encode(Hex16.Encode(c.getCommenterId()+KEY)));
+			c.setCommenterId(Hex16.Encode(Hex16.Encode(c.getCommenterId() + KEY)));
 			commentMap.put("comment", c);
 			comments.add(commentMap);
 		}
@@ -147,42 +154,42 @@ public class CommentServiceImpl implements CommentService {
 		System.out.println(comments);
 		return returnMap;
 	}
-	
-	
+
 	/**
 	 * 删除当前黑板报所有评论
-	 * @param enterpriseId    企业ID
-	 * @param blackBoardId    黑板报ID
+	 * 
+	 * @param enterpriseId
+	 *            企业ID
+	 * @param blackBoardId
+	 *            黑板报ID
 	 */
 	@Override
 	public void deleteComments(String enterpriseId, String blackboardId) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("enterpriseId", enterpriseId);
 		map.put("blackboardId", blackboardId);
-		
+
 		commentDao.deleteComments(map);
 	}
-
 
 	@Override
 	public JsonResult deleteOneComment(String commentId, String commenterId) {
 		Comment comment = commentDao.selectCommentById(commentId);
 		System.out.println(comment);
 		System.out.println(commentId);
-		if(comment == null || !comment.getCommenterId().equals(commenterId)){
+		if (comment == null || !comment.getCommenterId().equals(commenterId)) {
 			return JsonResult.error("删除评论失败");
 		}
 		commentDao.deleteOneComments(commentId);
 		return JsonResult.ok();
 	}
-	
-	
+
 	@Override
 	public JsonResult delectReply(String commentId, String commenterId) {
 		Comment comment = commentDao.selectCommentById(commentId);
 		System.out.println(comment);
 		System.out.println(commentId);
-		if(comment == null || !comment.getCommenterId().equals(commenterId)){
+		if (comment == null || !comment.getCommenterId().equals(commenterId)) {
 			return JsonResult.error("删除回复失败");
 		}
 		commentDao.delectReply(commentId);
@@ -191,6 +198,7 @@ public class CommentServiceImpl implements CommentService {
 
 	/**
 	 * 时间转换
+	 * 
 	 * @param list
 	 * @return
 	 */
@@ -207,4 +215,17 @@ public class CommentServiceImpl implements CommentService {
 
 	}
 
+	/**
+	 * 安全送审
+	 * 
+	 * @param comment
+	 */
+	private void result(Comment comment) {
+		Map<String, Object> conntentMap = new HashMap<>();
+		conntentMap.put("mobile", comment.getCommenterId());
+		conntentMap.put("msgid", "comment" + comment.getCommentId());
+		conntentMap.put("content", comment.getCommentContent());
+		Thread conntentThread = new WebServiceThread(conntentMap);
+		conntentThread.start();
+	}
 }

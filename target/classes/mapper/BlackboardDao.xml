@@ -400,6 +400,7 @@
 			</if>
 			AND tb.create_mobile = #{mobile} 
 			AND tb.enterprise_id = #{enterpriseId}
+			AND tc.status=0
 		UNION
 		SELECT
 			tb.title AS title,
@@ -449,6 +450,7 @@
 			AND tc.commenter_id != #{mobile}
 			AND tbc.commenter_id = #{mobile}
 			AND tb.enterprise_id =  #{enterpriseId}
+			AND tc.status=0
 		UNION
 		SELECT
 			tb.title AS title,

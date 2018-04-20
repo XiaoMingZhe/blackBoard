@@ -32,6 +32,9 @@ import com.blackboard.utils.Hex16;
 import com.blackboard.utils.JsonResult;
 import com.blackboard.utils.OaTokenJob;
 import com.blackboard.utils.PropertiesUtils;
+import com.blackboard.utils.UnifiedAuthentication;
+
+import net.sf.json.JSONObject;
 
 @Controller
 @RequestMapping("/blackboard")
@@ -195,7 +198,7 @@ public class BlackboardController {
 	@RequestMapping(value = "/getBlackboardDetails", method = RequestMethod.GET)
 	@ResponseBody
 	private JsonResult getBlackboard(HttpServletRequest request, @RequestParam("blackboardId") String blackboardId) {
-
+		
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
 		// 用户ID
@@ -558,4 +561,5 @@ public class BlackboardController {
 		return true;
 	}
 
+	
 }
