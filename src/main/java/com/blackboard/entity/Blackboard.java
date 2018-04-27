@@ -27,6 +27,15 @@ public class Blackboard {
 	private Integer pageViews;//浏览数
 	private Integer type;//类型(0为黑板报，1为草稿)
 	private String remark;//备注
+	private String visible;//可见范围JSON字符串
+	
+	public String getVisible() {
+		return visible;
+	}
+
+	public void setVisible(String visible) {
+		this.visible = visible;
+	}
 
 	public String getRemark() {
 		return remark;

@@ -61,7 +61,7 @@ public class ImagesController {
 		String serverPath = request.getServletContext().getRealPath("/");
 		String Path = request.getContextPath(); 
 		
-		List<Map<String,Object>> list = imageService.addImage(images, serverPath,Path);
+		List<Map<String,Object>> list = imageService.addImage(images, serverPath,Path,request);
 		
 		return JsonResult.ok().put("list", list);
 	}
@@ -82,7 +82,8 @@ public class ImagesController {
 			return JsonResult.error("请求参数非法");
 		}
 		
-		imageService.deleteImage(imageId);
+		String serverPath = request.getServletContext().getRealPath("/");
+		imageService.deleteImage(imageId,serverPath);
 		
 		return JsonResult.ok();
 	}

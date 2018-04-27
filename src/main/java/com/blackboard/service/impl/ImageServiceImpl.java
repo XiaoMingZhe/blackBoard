@@ -1,12 +1,17 @@
 package com.blackboard.service.impl;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +27,8 @@ public class ImageServiceImpl implements ImageService {
 
 	@Autowired
 	private ImageDao imageDao;
+	
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	/**
 	 * 添加图片
@@ -37,15 +44,18 @@ public class ImageServiceImpl implements ImageService {
 	 * @return imageId 图片ID
 	 */
 	@Override
-	public List<Map<String, Object>> addImage(List<MultipartFile> images, String serverPath, String Path) {
+	public List<Map<String, Object>> addImage(List<MultipartFile> images, String serverPath, String Path,HttpServletRequest request) {
 		List<Image> imageList = new ArrayList<Image>();
 		// Image image = new Image();
 		for (int i = 0; i < images.size(); i++) {
 			MultipartFile file = images.get(i);
 			// 构建新的文件名
-			String oFileName = file.getOriginalFilename();
-
-			// 临时文件存放绝对路径
+			
+			Date dNow = new Date( );
+			SimpleDateFormat ft = new SimpleDateFormat ("yyyyMMddhhmmss");
+			String oFileName = ft.format(dNow);
+			System.out.println(serverPath);
+			// 文件存放绝对路径
 			String realPath = serverPath + "uploadImages/" + oFileName;
 
 			System.out.println(realPath);
@@ -77,14 +87,16 @@ public class ImageServiceImpl implements ImageService {
 
 		List<Map<String, Object>> list = new ArrayList<>();
 		imageDao.saveImage(imageList);
-
+		List<String> imageIdList = new ArrayList<>();
 		for (Image i : imageList) {
 			Map<String, Object> map = new HashMap<>();
 			map.put("imagePath", i.getImagePath());
 			map.put("imageId", i.getImageId());
 			list.add(map);
+			imageIdList.add(i.getImageId());
 		}
 
+		request.getSession().setAttribute("imageIdList", imageIdList);
 		return list;
 	}
 
@@ -103,9 +115,7 @@ public class ImageServiceImpl implements ImageService {
 		parmMap.put("enterpriseId", enterpriseId);
 		parmMap.put("blackboardId", blackboradId);
 
-		List<Image> images = imageDao.getBlackboardImage(parmMap);
-
-		return images;
+		return null;
 	}
 
 	/**
@@ -155,16 +165,49 @@ public class ImageServiceImpl implements ImageService {
 
 		deleteBlackboardImage(enterpriseId, blackboradId);
 
-		// addImage(images, serverPath);
-
 		return true;
 	}
 
+	
 	@Override
-	public void deleteImage(String imageId) {
-
+	public void deleteImage(String imageId,String serverPath) {
+		String path = imageDao.getImageById(imageId);
+		path = serverPath.replace("/blackboard/", path);
+		logger.info("=================删除的图片位置："+path+"=================");
+		File file = new File(path);
+		// 如果文件路径所对应的文件存在，并且是一个文件，则直接删除
+        if (file.exists() && file.isFile()) {
+            if (file.delete()) {
+            	logger.info("=================删除单个文件："+path+"成功！=================");
+            } else {
+            	logger.error("=================删除单个文件："+path+"失败！=================");
+            }
+        } else {
+        	logger.error("=================删除单个文件失败："+path+"不存在！=================");
+        }
 		imageDao.deleteImage(imageId);
-
+	}
+	
+	
+	@Override
+	public void deleteImageForBlackboard(List<String> blackboardIdList,String serverPath){
+		List<String> pathList = imageDao.getImagePath(blackboardIdList);
+		for(String path :pathList){
+			path = serverPath.replace("/blackboard/", path);
+			logger.info("=================删除的图片位置："+path+"=================");
+			File file = new File(path);
+			// 如果文件路径所对应的文件存在，并且是一个文件，则直接删除
+	        if (file.exists() && file.isFile()) {
+	            if (file.delete()) {
+	            	logger.info("=================删除单个文件："+path+"成功！=================");
+	            } else {
+	            	logger.error("=================删除单个文件："+path+"失败！=================");
+	            }
+	        } else {
+	        	logger.error("=================删除单个文件失败："+path+"不存在！=================");
+	        }
+		}
+		imageDao.deleteImages(blackboardIdList);
 	}
 
 }

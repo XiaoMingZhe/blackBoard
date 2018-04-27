@@ -16,7 +16,7 @@ public interface BlackboardService {
 	 * @param blackBoard   黑板报对象
 	 * @return blackboardId   黑板报ID
 	 */
-	void createBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange);
+	void createBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange,List<String> imageIdList);
 	
 	
 	/**
@@ -62,13 +62,13 @@ public interface BlackboardService {
 	 * @param enterpriseId   企业ID
 	 * @param blackboardId	  黑板报ID
 	 */
-	void delete(String blackboardId,String enterpriseId);
+	void delete(String blackboardId,String enterpriseId,String serverPath);
 	
 	/**
 	 * 批量删除黑板报
 	 * @param list
 	 */
-	void deleteList(List<Map<String,Object>> list);
+	void deleteList(List<Map<String,Object>> list,String serverPath);
 	
 	/**
 	 * 修改黑板报 

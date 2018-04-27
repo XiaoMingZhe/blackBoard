@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.blackboard.dao.BlackboardDao;
 import com.blackboard.dao.CommentDao;
+import com.blackboard.dao.ImageDao;
 import com.blackboard.dao.LikeDao;
 import com.blackboard.dto.BlackboardDto;
 import com.blackboard.dto.CommentDto;
@@ -26,6 +27,7 @@ import com.blackboard.entity.Blackboard;
 import com.blackboard.entity.Like;
 import com.blackboard.service.BlackboardService;
 import com.blackboard.service.CommentService;
+import com.blackboard.service.ImageService;
 import com.blackboard.utils.GainUuid;
 import com.blackboard.utils.Hex16;
 import com.blackboard.utils.JsonResult;
@@ -48,6 +50,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 	private CommentDao commentDao;
 	@Autowired
 	private LikeDao likeDao;
+	@Autowired
+	private ImageService imageService;
 
 	private static final Integer PAGE_SIZE = 10;
 	
@@ -63,7 +67,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * @return blackboardId 黑板报ID
 	 */
 	@Override
-	public void createBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange) {
+	public void createBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange,List<String> imageIdList) {
 
 		blackboard.setBlackboardId(GainUuid.getUUID());
 		blackboard.setCreateTime(new Date());
@@ -90,6 +94,15 @@ public class BlackboardServiceImpl implements BlackboardService {
 			MsgPush.put("mobile", list);
 			Thread thread = new MsgPushThread(MsgPush);
 			thread.start();
+		}
+		
+		// 判断有没有上传图片
+		if(imageIdList != null && imageIdList.size()>0){
+			Map<String,Object> imageMap = new HashMap<>();
+			imageMap.put("blackBoardId", blackboard.getBlackboardId());
+			imageMap.put("imageIds", imageIdList);
+			blackboardDao.updateImageBlackBoardID(imageMap);
+			
 		}
 		
 		//安全送审
@@ -343,7 +356,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 *            黑板报ID
 	 */
 	@Override
-	public void delete(String blackboardId, String enterpriseId) {
+	public void delete(String blackboardId, String enterpriseId,String serverPath) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("blackboardId", blackboardId);
 		map.put("enterpriseId", enterpriseId);
@@ -352,6 +365,11 @@ public class BlackboardServiceImpl implements BlackboardService {
 
 		blackboardDao.delete(map);
 		blackboardDao.deleteVisibleRange(blackboardId);
+		
+		List<String> blackboardIdList = new ArrayList<>();
+		blackboardIdList.add(blackboardId);
+		imageService.deleteImageForBlackboard(blackboardIdList, serverPath);
+		
 
 	}
 
@@ -359,7 +377,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * 批量删除黑板报
 	 */
 	@Override
-	public void deleteList(List<Map<String,Object>> maplist) {
+	public void deleteList(List<Map<String,Object>> maplist,String serverPath) {
 		List<String> list = new ArrayList<>();
 		
 		for(Map<String,Object> m : maplist){
@@ -368,6 +386,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		
 		blackboardDao.deleteList(list);
 		blackboardDao.deleteVisibleRangeList(list);
+		imageService.deleteImageForBlackboard(list, serverPath);
 	}
 
 	/**

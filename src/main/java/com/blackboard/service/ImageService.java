@@ -3,6 +3,8 @@ package com.blackboard.service;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.blackboard.entity.Image;
@@ -17,7 +19,7 @@ public interface ImageService {
 	 * @param serverPath        服务器路径
 	 * @return imageId          图片ID
 	 */
-	List<Map<String,Object>> addImage(List<MultipartFile> images,String serverPath,String Path);
+	List<Map<String,Object>> addImage(List<MultipartFile> images,String serverPath,String Path,HttpServletRequest request);
 	
 	/**
 	 * 展示当前黑板报所有图片
@@ -50,6 +52,13 @@ public interface ImageService {
 	 * 删除图片
 	 * @param imagePath
 	 */
-	void deleteImage(String imagePath);
+	void deleteImage(String imagePath,String serverPath);
+	
+	/**
+	 * 根据黑板报ID删除图片
+	 * @param blackboardIdList
+	 * @param serverPath
+	 */
+	void deleteImageForBlackboard(List<String> blackboardIdList,String serverPath);
 	
 }

@@ -41,10 +41,7 @@
 		FROM
 		tb_image
 		WHERE
-		enterprise_id = #{enterpriseId}
-		AND
 		blackboard_id = #{blackboardId}
-		<!-- ORDER By orderNumber -->
 	</select>
 
 
@@ -64,4 +61,33 @@
 		WHERE
 		image_id = #{imageId}
 	</delete>
-</mapper>
+	
+	<select id="getImageById" parameterType="String" resultType="String">
+		SELECT image_path 
+		FROM tb_image 
+		WHERE image_id = #{imageId}
+	</select>
+	
+	<select id="getImagePath" parameterType="list" resultType="String">
+		SELECT image_path 
+		FROM tb_image 
+		WHERE blackboard_id 
+		<trim prefix="in(" suffix=")" suffixOverrides=",">
+			<foreach collection="list" item="blackBoardId" index="index" separator=",">
+				#{blackBoardId}
+			</foreach>
+		</trim>
+	</select>
+
+	<delete id="deleteImages" parameterType="list">
+		DELETE FROM
+		tb_image
+		WHERE blackboard_id 
+		<trim prefix="in(" suffix=")" suffixOverrides=",">
+			<foreach collection="list" item="blackBoardId" index="index" separator=",">
+				#{blackBoardId}
+			</foreach>
+		</trim>
+	</delete>
+	
+</mapper> 

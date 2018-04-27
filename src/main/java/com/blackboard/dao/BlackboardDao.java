@@ -152,4 +152,10 @@ public interface BlackboardDao {
 	 * @param map
 	 */
 	void updateremark(Map<String, Object> map);
+	
+	/**
+	 * 更新图片黑板报ID
+	 * @param imageMap
+	 */
+	void updateImageBlackBoardID(Map<String,Object> imageMap);
 }

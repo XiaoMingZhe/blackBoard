@@ -11,12 +11,18 @@ public interface ImageDao {
 	
 	void saveImage(@Param("imageList")List<Image> imageList);
 
-	List<Image> getBlackboardImage(Map<String, Object> parmMap);
+	List<Image> getBlackboardImage(String blackboardID);
 	
 	void deleteBlackboardImage(Map<String, Object> parmMap);
 	
 	void updateImage(Map<String,Object> map);
 	
 	void deleteImage(String imageId);
+	
+	String getImageById(String imageId);
+	
+	List<String> getImagePath(List<String> blackboardIdList);
+	
+	void deleteImages(List<String> blackboardIdList);
 	
 }

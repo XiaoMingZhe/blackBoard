@@ -302,7 +302,6 @@
 		title = #{title},
 		content = #{content},
 		update_time = now()
-		<!-- <if test="content != null"> content </if> -->
 		WHERE
 		enterprise_id = #{enterpriseId}
 		AND
@@ -552,5 +551,19 @@
 		WHERE 
 		blackboard_id  = #{blackBoardId}
 	</update>
+	
+	
+	<update id="updateImageBlackBoardID" parameterType="map">
+		UPDATE 
+		tb_image
+		SET 
+		blackboard_id  = #{blackBoardId}
+		WHERE
+		image_id in 
+		<foreach collection="imageIds" open="(" close=")" separator="," item="id">
+       		#{id}
+    	</foreach>
+	</update>
+	
 	
 </mapper>

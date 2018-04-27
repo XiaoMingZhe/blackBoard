@@ -107,6 +107,8 @@ public class BlackboardController {
 		String EUserID = (String) request.getSession().getAttribute("EUserID");
 		// 手机号
 		String mobile = (String) request.getSession().getAttribute("mobile");
+		// 图片ID集合
+		List<String> imageIdList = (List<String>) request.getSession().getAttribute("imageIdList");
 
 		logger.info("=============获取信息enterDeptId" + enterDeptId);
 		logger.info("=============获取信息EUserID" + EUserID);
@@ -130,8 +132,9 @@ public class BlackboardController {
 		}
 
 		logger.info("=============黑板报:" + blackboard);
-		blackboardService.createBlackboard(blackboard,createBlackboardDto.getVisibleRange());
-
+		blackboardService.createBlackboard(blackboard,createBlackboardDto.getVisibleRange(),imageIdList);
+		
+		request.getSession().removeAttribute("imageIdList");
 		return JsonResult.ok();
 	}
 
@@ -414,7 +417,8 @@ public class BlackboardController {
 			return JsonResult.error("请求参数非法");
 		}
 		logger.info("===============删除黑板报:" + blackboardId);
-		blackboardService.delete(blackboardId, enterDeptId);
+		String serverPath = request.getServletContext().getRealPath("/");
+		blackboardService.delete(blackboardId, enterDeptId,serverPath);
 
 		return JsonResult.ok();
 	}
@@ -433,7 +437,8 @@ public class BlackboardController {
 		if(blackboardIdList == null|| blackboardIdList.size()<=0){
 			return JsonResult.error("请求参数非法");
 		}
-		blackboardService.deleteList((List<Map<String, Object>>) blackboardIdList.get("blackboardIdList"));
+		String serverPath = request.getServletContext().getRealPath("/");
+		blackboardService.deleteList((List<Map<String, Object>>) blackboardIdList.get("blackboardIdList"),serverPath);
 		
 		return JsonResult.ok();
 	}
