@@ -20,6 +20,7 @@ import com.blackboard.dao.BlackboardDao;
 import com.blackboard.dao.CommentDao;
 import com.blackboard.dao.ImageDao;
 import com.blackboard.dao.LikeDao;
+import com.blackboard.dao.SystemMessageDao;
 import com.blackboard.dto.BlackboardDto;
 import com.blackboard.dto.CommentDto;
 import com.blackboard.dto.Remind;
@@ -50,6 +51,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 	private CommentDao commentDao;
 	@Autowired
 	private LikeDao likeDao;
+	@Autowired
+	private SystemMessageDao systemMessageDao;
 	@Autowired
 	private ImageService imageService;
 
@@ -285,9 +288,17 @@ public class BlackboardServiceImpl implements BlackboardService {
 //		}
 		long page = 1;
 		logger.info("==============黑板报条数:" + count);
+		
+		//获取系统消息未读条数
+		Map<String, String> systemMap = new HashMap<>();
+		systemMap.put("userId", createMobile);
+		systemMap.put("enterpriseId", enterpriseId);
+		Long SystemCount = systemMessageDao.slectSystemCount(systemMap);
+		
 		Map<String, Object> backMap = new HashMap<>();
 		backMap.put("list", list);
 		backMap.put("page", page);
+		backMap.put("SystemCount", SystemCount);
 		return backMap;
 	}
 

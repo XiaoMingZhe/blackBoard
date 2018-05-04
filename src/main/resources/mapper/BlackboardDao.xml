@@ -145,7 +145,7 @@
 		t.*,
 		count( DISTINCT tl.like_id ) AS likeCount,
 		COUNT( tb.blackboard_id ) AS commentCount,
-		count( tll.like_id ) AS isLike 
+		count( tll.like_id ) AS isLike
 	FROM
 		(
 	SELECT
@@ -154,7 +154,8 @@
 		create_by,
 		create_mobile,
 		page_Views,
-		update_time AS createTime 
+		update_time AS createTime,
+		remark 
 	FROM
 		tb_blackboard 
 	WHERE
@@ -565,5 +566,11 @@
     	</foreach>
 	</update>
 	
-	
+	<select id="selectBlackBoardTitle" parameterType="string" resultType="map">
+		SELECT title,
+			   enterprise_id as enterpriseId,
+			   create_mobile as userId
+		FROM tb_blackboard
+		WHERE blackboard_id = #{blackboardId}
+	</select>
 </mapper>

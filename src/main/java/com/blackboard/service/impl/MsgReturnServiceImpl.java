@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.blackboard.dao.BlackboardDao;
 import com.blackboard.dao.CommentDao;
+import com.blackboard.dao.SystemMessageDao;
+import com.blackboard.entity.Comment;
+import com.blackboard.entity.SystemMessage;
 import com.blackboard.service.MsgReturnService;
 
 @Service
@@ -17,14 +20,15 @@ public class MsgReturnServiceImpl implements MsgReturnService {
 	
 	@Autowired
 	private BlackboardDao blackboardDao;
-	
+	@Autowired
+	private SystemMessageDao systemMessageDao;
 	@Autowired
 	private CommentDao commentDao;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Override
-	public String MsgReturn(String msgid, String result) {
+	public String MsgReturn(String msgid, String result) { 
 		String remark = "";
 		if("200".equals(result)){
 			return "ok";
@@ -51,10 +55,10 @@ public class MsgReturnServiceImpl implements MsgReturnService {
 			remark = "内容涉黄";
 		}
 		if("370".equals(result)){
-			remark = "诈骗";
+			remark = "涉及诈骗";
 		}
 		if("380".equals(result)){
-			remark = "广告";
+			remark = "涉及广告";
 		}
 		if("400".equals(result)){
 			remark = "等待审核";
@@ -67,6 +71,18 @@ public class MsgReturnServiceImpl implements MsgReturnService {
 			map.put("blackBoardId", blackboardid);
 			map.put("remark", remark);
 			blackboardDao.updateremark(map);
+			Map<String,String> blackboardMap = blackboardDao.selectBlackBoardTitle(blackboardid);
+			String message = "你发布的黑板报【"+blackboardMap.get("title")+"】"+remark+"已被系统删除,删除得黑板报将放在草稿列表,请遵循平台规范,文明发布信息,传播正能量,谢谢。";
+			
+			//赋值
+			SystemMessage systemMessage  = new SystemMessage();
+			systemMessage.setEnterprise_id(blackboardMap.get("enterpriseId"));
+			systemMessage.setUserId(blackboardMap.get("userId"));
+			systemMessage.setMessage(message);
+			
+			//保存系统信息
+			systemMessageDao.saveSystemMessage(systemMessage);
+			
 		}
 
 		if(msgid.indexOf("comment")!=-1){
@@ -74,6 +90,17 @@ public class MsgReturnServiceImpl implements MsgReturnService {
 			logger.info("============commentId:"+commentId+"========");
 			commentDao.delectReply(commentId);
 			commentDao.deleteOneComments(commentId);
+			Comment comment = commentDao.selectCommentById(commentId);
+			String message = "你发布的评论/回复【"+comment.getCommentContent()+"】"+remark+"已被系统删除,请遵循平台规范,文明发布信息,传播正能量,谢谢。";
+			
+			//赋值
+			SystemMessage systemMessage  = new SystemMessage();
+			systemMessage.setEnterprise_id(comment.getEnterpriseId());
+			systemMessage.setUserId(comment.getCommenterId());
+			systemMessage.setMessage(message);
+			
+			//保存系统信息
+			systemMessageDao.saveSystemMessage(systemMessage);
 		}
 		
 		return "ok";

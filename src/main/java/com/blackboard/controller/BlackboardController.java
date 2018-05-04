@@ -330,7 +330,7 @@ public class BlackboardController {
 		if ((enterDeptId == null || enterDeptId.trim().length() <= 0)
 				&& (mobile == null || mobile.trim().length() <= 0)) {
 			enterDeptId = "517090";
-			mobile = "13432879269";
+			mobile = "13928909312";
 		}
 		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0
 				|| pageNumber == null) {
@@ -346,7 +346,9 @@ public class BlackboardController {
 		List<String> IDlist = blackboardDao.selectMyIDList(selectID);
 		request.getSession().setAttribute("IDlist", IDlist);
 
-		return JsonResult.ok().put("personalList", map.get("list")).put("page", map.get("page"));
+		return JsonResult.ok().put("personalList", map.get("list"))
+							  .put("page", map.get("page"))
+							  .put("SystemCount", map.get("SystemCount"));
 	}
 
 	

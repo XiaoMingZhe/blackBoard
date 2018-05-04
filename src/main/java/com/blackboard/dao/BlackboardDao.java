@@ -158,4 +158,11 @@ public interface BlackboardDao {
 	 * @param imageMap
 	 */
 	void updateImageBlackBoardID(Map<String,Object> imageMap);
+	
+	/**
+	 * 获取黑板报标题及企业ID
+	 * @param blackboardId
+	 * @return
+	 */
+	Map<String,String> selectBlackBoardTitle(String blackboardId);
 }
