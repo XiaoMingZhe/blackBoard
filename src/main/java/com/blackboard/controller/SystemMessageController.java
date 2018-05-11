@@ -26,7 +26,6 @@ import com.blackboard.utils.JsonResult;
 public class SystemMessageController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-
 	@Autowired
 	private SystemMessageService systemMessageService;
 

@@ -17,9 +17,7 @@ public class LikeServiceImpl implements LikeService {
 	
 	@Override
 	public void Like(Like like) {
-		
 		Map<String,Object> statusMap = likeDao.findStatus(like);
-		
 		//判断之前有没有点赞
 		//如果没找到，新增一条点赞信息
 		if(statusMap == null){
@@ -30,14 +28,6 @@ public class LikeServiceImpl implements LikeService {
 			like.setLikeId(likeId);
 			like.setStatus(status==0?1:0);
 			likeDao.updateLike(like);
-			
 		}
-		
-		
 	}
-
-	
-	
-	
-	
 }

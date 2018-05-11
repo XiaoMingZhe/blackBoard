@@ -31,10 +31,8 @@ import net.sf.json.JSONObject;
 public class IndexController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-
 	@Autowired
 	private LoginlogDao loginlogDao;
-	
 	@Autowired
 	private BlackboardDao blackboardDao;
 
@@ -46,36 +44,26 @@ public class IndexController {
 	 */
 	@RequestMapping(value = "/toindex")
 	private String index(HttpServletRequest request, HttpServletResponse response) {
-
 		String token = (String) request.getParameter("token");
 		// 企业ID
 		String enterDeptId = (String) request.getParameter("enterDeptId");
 		// 联系人ID
 		String EUserID = (String) request.getParameter("EUserID");
-
 		logger.info("=============获取信息token:" + token);
 		logger.info("=============获取信息enterDeptId:" + enterDeptId);
 		logger.info("=============获取信息EUserID:" + EUserID);
 
 		// 获取访问全地址
 		String url = "";
-
 		url = request.getScheme() + "://" + request.getServerName()
-
 				+ ":" + request.getServerPort()
-
 				+ request.getServletPath();
-
 		if (request.getQueryString() != null) {
-
 			url += "?" + request.getQueryString();
-
 		}
-
 		System.out.println(url);
-
+		
 		// 判断token有没有认证过
-
 		UnifiedAuthentication unifiedAuthentication = new UnifiedAuthentication();
 		String ss = "";
 		String msisdn = "";
@@ -119,7 +107,6 @@ public class IndexController {
 		cookie.setMaxAge(24 * 60 * 60);
 		response.addCookie(cookie);
 		logger.info("============绑定数据完毕============");
-
 		return "index";
 	}
 
@@ -132,7 +119,6 @@ public class IndexController {
 	@RequestMapping(value = "/isLogin", method = RequestMethod.GET)
 	@ResponseBody
 	private JsonResult isLogin(HttpServletRequest request) {
-		
 		logger.info("============判断有没有访问过黑板报=============");
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		String token = (String) request.getSession().getAttribute("token");
@@ -149,7 +135,6 @@ public class IndexController {
 		if (mobile != null) {
 			count = loginlogDao.findLog(map);
 		}
-		
 		logger.info("=============用户ID为:" + mobile);
 		logger.info("=============有没有访问过?0是没访问过:" + count);
 
@@ -160,7 +145,6 @@ public class IndexController {
 		loginlog.setToken(token);
 		loginlog.setEnterpriseId(enterpriseId);
 		loginlogDao.saveLog(loginlog);
-
 		logger.info("===========用户登陆:" + mobile);
 		if (count > 0 || blackboardCount > 0) {
 			return JsonResult.ok().put("isLogin", 1);

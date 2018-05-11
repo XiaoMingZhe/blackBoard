@@ -20,7 +20,6 @@ import com.blackboard.utils.JsonResult;
 public class LikeController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	
 	@Autowired
 	private LikeService likeService;
 	
@@ -58,11 +57,9 @@ public class LikeController {
 	 * @return
 	 */
 	private JsonResult Like(HttpServletRequest request,String beLikedId,Integer type,String likeUser){
-		
 		try {
 			// 手机号
 			String mobile = (String) request.getSession().getAttribute("mobile");
-			
 			Like like = new Like();
 			like.setBeLikedId(beLikedId);
 			like.setType(type);
@@ -78,8 +75,5 @@ public class LikeController {
 			e.printStackTrace();
 			return JsonResult.error("点赞失败。");
 		}
-		
-		
 	}
-
 }

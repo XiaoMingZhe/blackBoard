@@ -23,10 +23,9 @@ import com.vdurmont.emoji.EmojiParser;
 @Service
 public class CommentServiceImpl implements CommentService {
 
+	private static final String KEY = PropertiesUtils.getProperties("KEY");
 	@Autowired
 	private CommentDao commentDao;
-
-	private static final String KEY = PropertiesUtils.getProperties("KEY");
 
 	/**
 	 * 添加评论(黑板报评论)
@@ -44,10 +43,8 @@ public class CommentServiceImpl implements CommentService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		// 送审
 		result(comment);
-
 		return com;
 	}
 
@@ -66,7 +63,6 @@ public class CommentServiceImpl implements CommentService {
 		}
 		// 送审
 		result(comment);
-
 		return com;
 	}
 
@@ -77,17 +73,14 @@ public class CommentServiceImpl implements CommentService {
 	public Comment reply(Comment comment) {
 		comment.setCommentId(GainUuid.getUUID());
 		Comment com = new Comment();
-
 		try {
 			commentDao.reply(comment);
 			com = commentDao.selectCommentById(comment.getCommentId());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		// 送审
 		result(comment);
-		
 		return com;
 	}
 
@@ -96,7 +89,6 @@ public class CommentServiceImpl implements CommentService {
 	 */
 	@Override
 	public List<CommentDto> getAllComments(String blackboardId, String mobile) {
-
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("blackboardId", blackboardId);
 		map.put("mobile", mobile);
@@ -122,7 +114,6 @@ public class CommentServiceImpl implements CommentService {
 	 */
 	@Override
 	public Map<String, Object> getReplys(String commentId, String mobile) {
-
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("commentId", commentId);
 		map.put("mobile", mobile);
@@ -135,7 +126,6 @@ public class CommentServiceImpl implements CommentService {
 		List<CommentDto> list = commentDao.getreply(map);
 		dateChange(list);
 		Map<String, Object> returnMap = new HashMap<>();
-
 		// 判断是不是本人，评论能不能删除
 		List<Map<String, Object>> comments = new ArrayList<>();
 		for (CommentDto c : list) {
@@ -168,7 +158,6 @@ public class CommentServiceImpl implements CommentService {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("enterpriseId", enterpriseId);
 		map.put("blackboardId", blackboardId);
-
 		commentDao.deleteComments(map);
 	}
 
@@ -212,7 +201,6 @@ public class CommentServiceImpl implements CommentService {
 			}
 		}
 		return list;
-
 	}
 
 	/**

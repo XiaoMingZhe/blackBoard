@@ -25,10 +25,9 @@ import com.blackboard.utils.GainUuid;
 @Service
 public class ImageServiceImpl implements ImageService {
 
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private ImageDao imageDao;
-	
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	/**
 	 * 添加图片
@@ -57,7 +56,6 @@ public class ImageServiceImpl implements ImageService {
 			System.out.println(serverPath);
 			// 文件存放绝对路径
 			String realPath = serverPath + "uploadImages/" + oFileName;
-
 			System.out.println(realPath);
 			File dest = new File(realPath);
 			File parent = dest.getParentFile();
@@ -73,7 +71,6 @@ public class ImageServiceImpl implements ImageService {
 
 			// 相对路径
 			String relativePath = Path + "/uploadImages/" + oFileName;
-
 			// 设置图片信息
 			Image image = new Image();
 			image.setImageId(GainUuid.getUUID());
@@ -95,7 +92,6 @@ public class ImageServiceImpl implements ImageService {
 			list.add(map);
 			imageIdList.add(i.getImageId());
 		}
-
 		request.getSession().setAttribute("imageIdList", imageIdList);
 		return list;
 	}
@@ -114,7 +110,6 @@ public class ImageServiceImpl implements ImageService {
 		Map<String, Object> parmMap = new HashMap<String, Object>();
 		parmMap.put("enterpriseId", enterpriseId);
 		parmMap.put("blackboardId", blackboradId);
-
 		return null;
 	}
 
@@ -128,7 +123,6 @@ public class ImageServiceImpl implements ImageService {
 	 */
 	@Override
 	public void deleteBlackboardImage(String enterpriseId, String blackboradId) {
-
 		List<Image> images = getBlackboardImage(enterpriseId, blackboradId);
 
 		for (Image lists : images) {
@@ -138,11 +132,9 @@ public class ImageServiceImpl implements ImageService {
 				imgFile.delete();
 			}
 		}
-
 		Map<String, Object> parmMap = new HashMap<String, Object>();
 		parmMap.put("enterpriseId", enterpriseId);
 		parmMap.put("blackboardId", blackboradId);
-
 		imageDao.deleteBlackboardImage(parmMap);
 	}
 
@@ -162,9 +154,7 @@ public class ImageServiceImpl implements ImageService {
 	@Override
 	public Boolean updateBlackboardImage(String enterpriseId, String blackboradId, MultipartFile[] images,
 			String serverPath) {
-
 		deleteBlackboardImage(enterpriseId, blackboradId);
-
 		return true;
 	}
 

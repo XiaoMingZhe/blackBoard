@@ -22,10 +22,9 @@ import com.blackboard.utils.JsonResult;
 @Controller
 public class ImagesController {
 	
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private ImageService imageService;
-	
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	/**
 	 *  添加图片
@@ -36,8 +35,6 @@ public class ImagesController {
 	@RequestMapping(value="/addimages",method = RequestMethod.POST)
 	@ResponseBody
 	public JsonResult upLoadImages (HttpServletRequest request , @RequestParam(value="img", required = false)List<MultipartFile> images){
-		
-		
 		logger.info("=========上传图片开始=========");
 		logger.info("=========图片集合长度========="+images.size());
 		for (int i = 0; i < images.size(); i++) {
@@ -53,19 +50,14 @@ public class ImagesController {
 			}
 		}
 		
-		
 		if(images == null || images.size()<=0){
 			return JsonResult.error("请求参数非法");
 		}
-		
 		String serverPath = request.getServletContext().getRealPath("/");
 		String Path = request.getContextPath(); 
-		
 		List<Map<String,Object>> list = imageService.addImage(images, serverPath,Path,request);
-		
 		return JsonResult.ok().put("list", list);
 	}
-
 
 	/**
 	 * 删除图片
@@ -76,19 +68,14 @@ public class ImagesController {
 	@RequestMapping(value="/deleteImage",method = RequestMethod.GET)
 	@ResponseBody
 	public JsonResult deleteImage(HttpServletRequest request ,String imageId){
-		
-		System.out.println(imageId);
+		logger.info("=======删除图片开始：图片ID为"+imageId+"=======");
 		if(imageId == null || imageId.length()<=0){
 			return JsonResult.error("请求参数非法");
 		}
-		
 		String serverPath = request.getServletContext().getRealPath("/");
 		imageService.deleteImage(imageId,serverPath);
-		
 		return JsonResult.ok();
 	}
-	
-	
 	
 	/**
      * 判断是否为允许的上传文件类型,true表示允许

@@ -18,7 +18,6 @@ import com.blackboard.utils.JsonResult;
 public class ReturnExamineController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	
 	@Autowired
 	private MsgReturnService msgReturnService;
 	
@@ -37,7 +36,6 @@ public class ReturnExamineController {
 			logger.error("failed!",e);
 			return JsonResult.ok().put("date", "").put("status", 200).put("errormsg", "程序异常");
 		}
-		
 		return JsonResult.ok().put("date", "").put("status", 200).put("errormsg", "");
 	}
 }

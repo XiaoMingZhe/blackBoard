@@ -24,7 +24,6 @@ public class CommentController {
 
 	@Autowired
 	private CommentService commentService;
-
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	/**
@@ -38,28 +37,22 @@ public class CommentController {
 	@ResponseBody
 	private JsonResult addComment(@RequestBody Comment comment, HttpServletRequest request) {
 		logger.info("===================评论黑板报开始=================");
-
 		System.out.println(comment);
 		// 手机号
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
-
 		if ((enterDeptId == null || enterDeptId.trim().length()<= 0 ) && (mobile == null ||mobile.trim().length()<=0  ) ) {
 			enterDeptId = "517090";
 			mobile = "13432879269";
 		}
 		comment.setEnterpriseId(enterDeptId);
 		comment.setCommenterId(mobile);
-
 		logger.info("================" + mobile + "评论" + comment.getBlackboardId());
-		if (comment == null 
-				|| comment.getBlackboardId() == null || comment.getBlackboardId().length() <= 0
-				|| comment.getCommentContent() == null || comment.getCommentContent().length() <= 0
-				) {
+		if (comment == null || comment.getBlackboardId() == null || comment.getBlackboardId().length() <= 0
+							|| comment.getCommentContent() == null || comment.getCommentContent().length() <= 0) {
 			return JsonResult.error("请求参数非法");
 		}
-
 		Comment com = commentService.addComment(comment);
 		logger.info("===================评论黑板报完成=================");
 		return JsonResult.ok().put("Comment", com);
@@ -80,7 +73,6 @@ public class CommentController {
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
-
 		if (enterDeptId == null && mobile == null) {
 			enterDeptId = "517090";
 			mobile = "13432879269";
@@ -115,7 +107,6 @@ public class CommentController {
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
-		
 		if (enterDeptId == null && mobile == null) {
 			enterDeptId = "517090";
 			mobile = "13432879269";
@@ -133,7 +124,6 @@ public class CommentController {
 				|| comment.getReplyName() == null || comment.getReplyName().length() <=0) {
 			return JsonResult.error("请求参数非法");
 		}
-
 		Comment com = commentService.replyReply(comment);
 		logger.info("===================评论下回复他人结束=================");
 		return JsonResult.ok().put("comment", com);
@@ -159,7 +149,6 @@ public class CommentController {
 		}
 
 		JsonResult jsonResult = commentService.deleteOneComment(commentId, mobile);
-
 		return jsonResult;
 	}
 
@@ -183,7 +172,6 @@ public class CommentController {
 		}
 
 		JsonResult jsonResult = commentService.delectReply(commentId, mobile);
-
 		return jsonResult;
 	}
 	
@@ -211,5 +199,4 @@ public class CommentController {
 				              .put("reply", map.get("reply"));
 		
 	}
-	
 }

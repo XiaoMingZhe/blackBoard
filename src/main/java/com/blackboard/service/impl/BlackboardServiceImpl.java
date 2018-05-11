@@ -43,6 +43,9 @@ import com.vdurmont.emoji.EmojiParser;
 @Transactional
 public class BlackboardServiceImpl implements BlackboardService {
 
+	private static final Integer PAGE_SIZE = 10;
+	private static final String KEY = PropertiesUtils.getProperties("KEY");
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private BlackboardDao blackboardDao;
 	@Autowired
@@ -56,12 +59,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 	@Autowired
 	private ImageService imageService;
 
-	private static final Integer PAGE_SIZE = 10;
-	
-	private static final String KEY = PropertiesUtils.getProperties("KEY");
-
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
-
 	/**
 	 * 创建黑板报
 	 * 
@@ -71,13 +68,11 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 */
 	@Override
 	public void createBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange,List<String> imageIdList) {
-
 		blackboard.setBlackboardId(GainUuid.getUUID());
 		blackboard.setCreateTime(new Date());
 		//emoji表情切换
 		blackboard.setTitle(EmojiParser.parseToAliases(blackboard.getTitle()));
 		blackboard.setContent(EmojiParser.parseToAliases(blackboard.getContent()));
-		
 		blackboardDao.createBlackboard(blackboard);
 		
 		if(visibleRange != null && visibleRange.size()>0){
@@ -105,7 +100,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 			imageMap.put("blackBoardId", blackboard.getBlackboardId());
 			imageMap.put("imageIds", imageIdList);
 			blackboardDao.updateImageBlackBoardID(imageMap);
-			
 		}
 		
 		//安全送审
@@ -162,7 +156,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		}
 		
 		List<Map<String, Object>> RemindList = blackboardDao.selectRemind(map);
-		
 		Integer remindCount = RemindList.size();
 		String moblie = "";
 		if(remindCount>0){
@@ -282,10 +275,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
-//		long page = count / PAGE_SIZE;
-//		if (count % PAGE_SIZE != 0) {
-//			page++;
-//		}
 		long page = 1;
 		logger.info("==============黑板报条数:" + count);
 		
@@ -326,8 +315,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		map.put("end", PAGE_SIZE);
 		map.put("type", 0);
 		
-
-		System.out.println(map);
 		// 获取所有黑板报
 		List<BlackboardDto> list = blackboardDao.getOtherBlackboard(map);
 		dateChangeForList(list);
@@ -340,13 +327,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
-//		long page = count / PAGE_SIZE;
-//		if (count % PAGE_SIZE != 0) {
-//			page++;
-//		}
-
 		long page = 1;
-		
 		logger.info("==============所有黑板报:" + list);
 		logger.info("==============黑板报条数:" + count);
 		Map<String, Object> backMap = new HashMap<>();
@@ -354,9 +335,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		backMap.put("page", page);
 		return backMap;
 	}
-	
-	
-	
 	
 	/**
 	 * 删除黑板报
@@ -371,17 +349,12 @@ public class BlackboardServiceImpl implements BlackboardService {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("blackboardId", blackboardId);
 		map.put("enterpriseId", enterpriseId);
-
 		commentService.deleteComments(enterpriseId, blackboardId);
-
 		blackboardDao.delete(map);
 		blackboardDao.deleteVisibleRange(blackboardId);
-		
 		List<String> blackboardIdList = new ArrayList<>();
 		blackboardIdList.add(blackboardId);
 		imageService.deleteImageForBlackboard(blackboardIdList, serverPath);
-		
-
 	}
 
 	/**
@@ -390,11 +363,9 @@ public class BlackboardServiceImpl implements BlackboardService {
 	@Override
 	public void deleteList(List<Map<String,Object>> maplist,String serverPath) {
 		List<String> list = new ArrayList<>();
-		
 		for(Map<String,Object> m : maplist){
 			list.add((String) m.get("blackboardId"));
 		}
-		
 		blackboardDao.deleteList(list);
 		blackboardDao.deleteVisibleRangeList(list);
 		imageService.deleteImageForBlackboard(list, serverPath);
@@ -408,13 +379,10 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 */
 	@Override
 	public boolean updateBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange) {
-
 		blackboard.setUpdateTime(new Date());
 		blackboard.setTitle(EmojiParser.parseToAliases(blackboard.getTitle()));
 		blackboard.setContent(EmojiParser.parseToAliases(blackboard.getContent()));
-		
 		Boolean bFlag = blackboardDao.updateBlackboard(blackboard);
-		
 		blackboardDao.deleteVisibleRange(blackboard.getBlackboardId());
 		
 		if(visibleRange.size()>0){
@@ -438,11 +406,9 @@ public class BlackboardServiceImpl implements BlackboardService {
 		Map<String, Object> map = new HashMap<>();
 		map.put("mobile", mobile);
 		map.put("enterpriseId", enterpriseId);
-
 		String regx = "<img(.*?)>";
 
 		List<Remind> returnList = new ArrayList<>();
-
 		List<Map<String, Object>> list = blackboardDao.selectRemind(map);
 		for (Map<String, Object> m : list) {
 			Remind remind = new Remind();
@@ -454,21 +420,18 @@ public class BlackboardServiceImpl implements BlackboardService {
 			if(content!=null){
 				content = EmojiParser.parseToUnicode(content);
 			}
-//			String content = EmojiParser.parseToUnicode((String) m.get("content");
 			//模糊手机号
 			String moblie = Hex16.Encode(Hex16.Encode((String) m.get("moblie")+KEY));
 			Date creatTime = (Date) m.get("creatTime");
 			String remindID = (String) m.get("remindID");
 			Long type = (Long) m.get("type");
 			Long likeType = (Long) m.get("likeType");
-			
 			String img = getString(blackboardContent, regx);
 			if (img == null || img.length() <= 0) {
 				remind.setTitle(title);
 			} else {
 				remind.setTitle(img);
 			}
-			
 			remind.setUserName(userName);
 			remind.setBlackboardId(blackboardId);
 			remind.setContent(content);
@@ -481,14 +444,12 @@ public class BlackboardServiceImpl implements BlackboardService {
 			remind.setRemindID(remindID);
 			remind.setType(type.intValue());
 			remind.setLikeType(likeType.intValue());
-
 			returnList.add(remind);
 		}
 		
 		//修改已读状态
 		commentDao.updateRead(mobile,enterpriseId);
 		likeDao.updateRead(mobile);
-		
 		return returnList;
 	}
 
@@ -529,7 +490,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 			}
 		}
 		return list;
-
 	}
 
 	/**
@@ -546,8 +506,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-
 		return b;
-
 	}
 }
