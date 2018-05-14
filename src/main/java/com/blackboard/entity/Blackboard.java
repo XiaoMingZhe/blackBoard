@@ -28,7 +28,16 @@ public class Blackboard {
 	private Integer type;//类型(0为黑板报，1为草稿)
 	private String remark;//备注
 	private String visible;//可见范围JSON字符串
+	private String pushList;//消息推送电话集合
 	
+	public String getPushList() {
+		return pushList;
+	}
+
+	public void setPushList(String pushList) {
+		this.pushList = pushList;
+	}
+
 	public String getVisible() {
 		return visible;
 	}

@@ -97,7 +97,7 @@ public class IndexController {
 		request.setAttribute("enterDeptId", enterDeptId);
 		request.setAttribute("mobile", msisdn);
 		logger.info("=============绑定数据到cookie=======");
-		Cookie cookie = new Cookie("mobile", msisdn);
+		Cookie cookie = new Cookie("mobile", msisdn.trim());
 		try {
 			URLEncoder.encode("cookie的value值", "utf-8");
 		} catch (UnsupportedEncodingException e) {

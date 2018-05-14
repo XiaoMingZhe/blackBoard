@@ -27,7 +27,6 @@ public class RelativeDateFormat {
 		long delta = new Date().getTime() - date.getTime();
 		
 		if (delta < 1L * ONE_MINUTE) {
-//			long seconds = toSeconds(delta);
 			return "刚刚";
 		}
 		if (delta < 45L * ONE_MINUTE) {

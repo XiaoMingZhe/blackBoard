@@ -139,6 +139,7 @@ public class BlackboardController {
 	@RequestMapping(value = "/getAllBlackboardList", method = RequestMethod.GET)
 	@ResponseBody
 	private JsonResult getAllBlackboard(HttpServletRequest request, @RequestParam("pageNumber") Integer pageNumber) {
+		logger.info("=============获取企业所有黑板报开始==============");
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
 		// 用户ID
@@ -438,6 +439,7 @@ public class BlackboardController {
 	@RequestMapping(value = "/selectRemind" , method = RequestMethod.GET)
 	@ResponseBody
 	private JsonResult selectRemind(HttpServletRequest request){
+		logger.info("==========获取消息提醒列表==========");
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
 		// 用户ID
@@ -453,6 +455,7 @@ public class BlackboardController {
 		}
 		
 		List<Remind> remindlist = blackboardService.selectRemind(mobile, enterDeptId);
+		logger.info("==========返回消息提醒列表==========");
 		return JsonResult.ok().put("remindlist", remindlist);
 	}
 	

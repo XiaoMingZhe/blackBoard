@@ -54,6 +54,7 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	public Comment replyReply(Comment comment) {
 		comment.setCommentId(GainUuid.getUUID());
+		comment.setCommentContent(EmojiParser.parseToAliases(comment.getCommentContent()));
 		Comment com = new Comment();
 		try {
 			commentDao.replyReply(comment);
@@ -72,6 +73,7 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	public Comment reply(Comment comment) {
 		comment.setCommentId(GainUuid.getUUID());
+		comment.setCommentContent(EmojiParser.parseToAliases(comment.getCommentContent()));
 		Comment com = new Comment();
 		try {
 			commentDao.reply(comment);
@@ -103,6 +105,7 @@ public class CommentServiceImpl implements CommentService {
 			// 模糊手机号
 			for (CommentDto re : list) {
 				re.setCommenterId(Hex16.Encode(Hex16.Encode(re.getCommenterId() + KEY)));
+				re.setCommentContent(EmojiParser.parseToUnicode(re.getCommentContent()));
 			}
 			c.setReplyList(list);
 		}
@@ -121,6 +124,7 @@ public class CommentServiceImpl implements CommentService {
 
 		CommentDto cDto = commentDao.selectById(map);
 		cDto.setTime(RelativeDateFormat.format(cDto.getCommentTime()));
+		cDto.setCommentContent(EmojiParser.parseToUnicode(cDto.getCommentContent()));
 		// 模糊手机号
 		cDto.setCommenterId(Hex16.Encode(Hex16.Encode(cDto.getCommenterId() + KEY)));
 		List<CommentDto> list = commentDao.getreply(map);
@@ -136,12 +140,12 @@ public class CommentServiceImpl implements CommentService {
 				commentMap.put("canDelete", 0);
 			}
 			c.setCommenterId(Hex16.Encode(Hex16.Encode(c.getCommenterId() + KEY)));
+			c.setCommentContent(EmojiParser.parseToUnicode(c.getCommentContent()));
 			commentMap.put("comment", c);
 			comments.add(commentMap);
 		}
 		returnMap.put("comment", cDto);
 		returnMap.put("reply", comments);
-		System.out.println(comments);
 		return returnMap;
 	}
 
@@ -164,8 +168,6 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	public JsonResult deleteOneComment(String commentId, String commenterId) {
 		Comment comment = commentDao.selectCommentById(commentId);
-		System.out.println(comment);
-		System.out.println(commentId);
 		if (comment == null || !comment.getCommenterId().equals(commenterId)) {
 			return JsonResult.error("删除评论失败");
 		}

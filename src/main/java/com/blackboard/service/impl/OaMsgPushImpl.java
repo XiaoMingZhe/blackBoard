@@ -58,6 +58,7 @@ public class OaMsgPushImpl implements OaMsgPushService {
 		return xml.toString();
 	}
 	
+	
 	/**
 	 * 获取消息推送请求BODY XML
 	 * @param req
@@ -87,6 +88,7 @@ public class OaMsgPushImpl implements OaMsgPushService {
 		xml.append("</commontemplate>]]>");
 		return xml.toString();
 	}
+
 
 	@Override
 	public void pushMsg(Map<String, Object> msg) throws Exception {
@@ -143,5 +145,8 @@ public class OaMsgPushImpl implements OaMsgPushService {
 			JSONObject resp = HttpHelper.Msgpush(url,xml,"tel:+86"+phone,Authorization);
 			log.info("接口返回  :"+resp);
 		}
+		
 	}
+	
+	
 }

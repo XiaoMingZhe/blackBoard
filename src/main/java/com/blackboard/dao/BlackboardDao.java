@@ -14,13 +14,11 @@ public interface BlackboardDao {
 	 */
 	void createBlackboard(Blackboard blackboard);
 	
-	
 	/**
 	 * 查询企业所有黑板报 
 	 * @param paramMap
 	 */
 	List<BlackboardDto> getAllBlackboard(Map<String,Object> paramMap);
-	
 	
 	/**
 	 * 查询企业所有黑板报,被拉黑的黑板报不可见 
@@ -30,13 +28,11 @@ public interface BlackboardDao {
 	 */
 	List<Blackboard> getAllBlackboard(String enterpriseId,String blcaklterId,String beBlcaklterId);
 	
-	
 	/**
 	 * 查询单条黑板报详情 
 	 * @param paramMap
 	 */
 	BlackboardDto getBlackboardById(Map<String,Object> paramMap);
-	
 	
 	/**
 	 * 查询企业个人所有黑板报
@@ -62,7 +58,6 @@ public interface BlackboardDao {
 	 */
 	void deleteList(List<String> list);
 	
-	
 	/**
 	 * 更新黑板报 
 	 * @param blackboard
@@ -83,7 +78,6 @@ public interface BlackboardDao {
 	 */
 	Long getALLBlackboardCount(Map<String, Object> paramMap);
 
-	
 	/**
 	 * 定时连接数据库
 	 * @return
@@ -165,4 +159,16 @@ public interface BlackboardDao {
 	 * @return
 	 */
 	Map<String,String> selectBlackBoardTitle(String blackboardId);
+	
+	/**
+	 * 查询单条黑板报详情(消息推送用)
+	 * @param paramMap
+	 */
+	Blackboard selectBlackboardById(String blackboardId);
+	
+	/**
+	 * 清空消息推送列表
+	 * @param blackboardId
+	 */
+	void updatePushList(String blackboardId);
 }

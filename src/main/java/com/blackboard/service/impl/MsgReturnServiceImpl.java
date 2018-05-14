@@ -1,6 +1,8 @@
 package com.blackboard.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -11,9 +13,11 @@ import org.springframework.stereotype.Service;
 import com.blackboard.dao.BlackboardDao;
 import com.blackboard.dao.CommentDao;
 import com.blackboard.dao.SystemMessageDao;
+import com.blackboard.entity.Blackboard;
 import com.blackboard.entity.Comment;
 import com.blackboard.entity.SystemMessage;
 import com.blackboard.service.MsgReturnService;
+import com.blackboard.utils.MsgPushThread;
 
 @Service
 public class MsgReturnServiceImpl implements MsgReturnService {
@@ -30,6 +34,25 @@ public class MsgReturnServiceImpl implements MsgReturnService {
 	public String MsgReturn(String msgid, String result) { 
 		String remark = "";
 		if("200".equals(result)){
+			//消息推送
+			if(msgid.indexOf("blackboard")!=-1){
+				String blackboardId = msgid.substring(10);
+				Blackboard bb = blackboardDao.selectBlackboardById(blackboardId);
+				if(bb.getPushList()!=null && bb.getPushList().length()>0){
+				Map<String, Object> MsgPush = new HashMap<>();
+				MsgPush.put("Title", bb.getTitle());
+				MsgPush.put("Connent", "来自："+bb.getCreateBy());
+				MsgPush.put("blackboardId", bb.getBlackboardId());
+				String[] bblist = bb.getPushList().split(",");
+				List<String> list = new ArrayList<>();
+				for(String b :bblist){
+					list.add(b);
+				}
+				MsgPush.put("mobile", list);
+				Thread thread = new MsgPushThread(MsgPush);
+				thread.start();
+				}
+			}
 			return "ok";
 		}
 		if("300".equals(result)){

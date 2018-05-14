@@ -271,6 +271,9 @@
 			<if test="content != null">
 				content,
 			</if>
+			<if test="pushList != null">
+				pushList,
+			</if>
 			create_by,
 			create_time,
 			create_byId,
@@ -286,6 +289,9 @@
 			</if>
 			<if test="content != null">
 				#{content},
+			</if>
+			<if test="pushList != null">
+				#{pushList},
 			</if>
 			#{createBy},
 			#{createTime},
@@ -573,4 +579,20 @@
 		FROM tb_blackboard
 		WHERE blackboard_id = #{blackboardId}
 	</select>
+	
+	<select id="selectBlackboardById" parameterType="string" resultType="blackboard">
+		SELECT title,
+			   create_by,
+			   blackboard_id,
+			   pushList
+		FROM tb_blackboard
+		WHERE blackboard_id = #{blackboardId}
+	</select>
+	
+	<update id="updatePushList" parameterType="string">
+		update
+		tb_blackboard 
+		SET pushList = null 
+		where blackboard_id = #{blackboardId}
+	</update>
 </mapper>

@@ -73,11 +73,11 @@ public class BlackboardServiceImpl implements BlackboardService {
 		//emoji表情切换
 		blackboard.setTitle(EmojiParser.parseToAliases(blackboard.getTitle()));
 		blackboard.setContent(EmojiParser.parseToAliases(blackboard.getContent()));
-		blackboardDao.createBlackboard(blackboard);
-		
-		if(visibleRange != null && visibleRange.size()>0){
-			Map<String,Object> map = new HashMap<>();
+		if(visibleRange != null && visibleRange.size()>0 && blackboard.getType()==0){
 			List<String> list = new ArrayList<>();
+			StringBuffer sBuffer  = new StringBuffer("");
+			Map<String,Object> map = new HashMap<>();
+			//白名单表数据存储
 			for(Map<String,Object> m : visibleRange){
 				list.add((String)m.get("mobile"));
 			}
@@ -85,15 +85,17 @@ public class BlackboardServiceImpl implements BlackboardService {
 			map.put("blackBoardId", blackboard.getBlackboardId());
 			blackboardDao.saveVisibleRange(map);
 			
-			Map<String, Object> MsgPush = new HashMap<>();
-			MsgPush.put("Title", blackboard.getTitle());
-			MsgPush.put("Connent", "来自："+blackboard.getCreateBy());
-			MsgPush.put("blackboardId", blackboard.getBlackboardId());
-			MsgPush.put("mobile", list);
-			Thread thread = new MsgPushThread(MsgPush);
-			thread.start();
+			for(int i = 0;i<visibleRange.size();i++){
+				sBuffer.append((String)visibleRange.get(i).get("mobile"));
+				if(i+1<visibleRange.size()){
+					sBuffer.append(",");
+				}
+			}
+			blackboard.setPushList(sBuffer.toString());
+			logger.info("===========消息推送手机列表:"+sBuffer.toString()+"=================");
 		}
-		
+		System.out.println(blackboard);
+		blackboardDao.createBlackboard(blackboard);
 		// 判断有没有上传图片
 		if(imageIdList != null && imageIdList.size()>0){
 			Map<String,Object> imageMap = new HashMap<>();
@@ -106,17 +108,48 @@ public class BlackboardServiceImpl implements BlackboardService {
 		Map<String, Object> conntentMap = new HashMap<>();
 		conntentMap.put("mobile", blackboard.getCreateMobile());
 		conntentMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
-		conntentMap.put("content", blackboard.getContent());
+		conntentMap.put("content", blackboard.getTitle()+blackboard.getContent());
 		Thread conntentThread = new WebServiceThread(conntentMap);
 		conntentThread.start();
 		
 		//安全送审
-		Map<String,Object> TitleMap = new HashMap<>();
-		TitleMap.put("mobile", blackboard.getCreateMobile());
-		TitleMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
-		TitleMap.put("content", blackboard.getTitle());
-		Thread titleThread = new WebServiceThread(TitleMap);
-		titleThread.start();
+//		Map<String,Object> TitleMap = new HashMap<>();
+//		TitleMap.put("mobile", blackboard.getCreateMobile());
+//		TitleMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
+//		TitleMap.put("content", blackboard.getTitle());
+//		Thread titleThread = new WebServiceThread(TitleMap);
+//		titleThread.start();
+		
+		
+		
+//		if(visibleRange != null && visibleRange.size()>0){
+//			Map<String,Object> map = new HashMap<>();
+//			List<String> list = new ArrayList<>();
+//			StringBuffer sBuffer  = new StringBuffer("");
+//			for(Map<String,Object> m : visibleRange){
+//				list.add((String)m.get("mobile"));
+//			}
+//			logger.info("==========推送电话字符串:"+list+"===========");
+//			for(int i = 0;i<visibleRange.size();i++){
+//				sBuffer.append((String)visibleRange.get(i).get("mobile"));
+//				if(i+1<visibleRange.size()){
+//					sBuffer.append(",");
+//				}
+//			}
+//			logger.info("==========推送电话字符串:"+sBuffer.toString()+"===========");
+//			map.put("list", list);
+//			map.put("blackBoardId", blackboard.getBlackboardId());
+//			blackboardDao.saveVisibleRange(map);
+//			
+//			Map<String, Object> MsgPush = new HashMap<>();
+//			MsgPush.put("Title", blackboard.getTitle());
+//			MsgPush.put("Connent", "来自："+blackboard.getCreateBy());
+//			MsgPush.put("blackboardId", blackboard.getBlackboardId());
+//			MsgPush.put("mobile", list);
+//			Thread thread = new MsgPushThread(MsgPush);
+//			thread.start();
+//		}
+//		
 	}
 
 	/**
@@ -188,10 +221,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 		map.put("enterpriseId", enterpriseId);
 		map.put("blackboardId", blackboardId);
 		map.put("mobile",mobile);
-
 		// 增加浏览数
 		blackboardDao.updatePageViews(blackboardId);
-
 		// 获取单条黑板报信息
 		BlackboardDto blackboarddto = blackboardDao.getBlackboardById(map);
 		logger.info("==============获取单条黑板报信息:ID为" + blackboardId);
@@ -217,7 +248,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		// 获取评论
 		List<CommentDto> commentDto = commentService.getAllComments(blackboardId,mobile);
 		logger.info("==============获取单条黑板报评论:ID为" + blackboardId);
-
 		// 判断是不是本人，评论能不能删除
 		List<Map<String, Object>> comments = new ArrayList<>();
 		for (CommentDto c : commentDto) {
@@ -257,13 +287,11 @@ public class BlackboardServiceImpl implements BlackboardService {
 	public Map<String, Object> getPersonalBlackboard(String enterpriseId, String createMobile, Integer pageNumber,Integer type) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("enterpriseId", enterpriseId);
-		
 		// 封装分页信息
 		map.put("createMobile", createMobile);
 		map.put("first", (pageNumber - 1) * PAGE_SIZE);
 		map.put("end", PAGE_SIZE);
 		map.put("type", type);
-
 		// 获取所有黑板报
 		List<BlackboardDto> list = blackboardDao.getPersonalBlackboard(map);
 		dateChangeForList(list);
@@ -272,12 +300,10 @@ public class BlackboardServiceImpl implements BlackboardService {
 			b.setTitle(EmojiParser.parseToUnicode(b.getTitle()));
 			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile()+KEY)));
 		}
-		
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
 		long page = 1;
 		logger.info("==============黑板报条数:" + count);
-		
 		//获取系统消息未读条数
 		Map<String, String> systemMap = new HashMap<>();
 		systemMap.put("userId", createMobile);
@@ -290,7 +316,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		backMap.put("SystemCount", SystemCount);
 		return backMap;
 	}
-
 
 	/**
 	 * 查询他人所有黑板报
@@ -463,7 +488,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		// 2.将字符串和正则表达式相关联
 		Matcher matcher = pattern.matcher(str);
 		// 3.String 对象中的matches 方法就是通过这个Matcher和pattern来实现的。
-		System.out.println(matcher.matches());
 		// 查找符合规则的子串
 		while (matcher.find()) {
 			// 获取 字符串
