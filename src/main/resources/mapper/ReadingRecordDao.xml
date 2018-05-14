@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blackboard.dao.ReadingRecordDao">
+	
+	<insert id="saveReadingRecord" parameterType="ReadingRecord">
+		INSERT INTO 
+		tb_reading_record 
+		(blackboard_id,user_mobile,create_time) 
+		VALUES
+		(#{blackboardId},#{userMobile},now())
+	</insert>
+	
+	<select id="selectReadingRecordCount" parameterType="map" resultType="long">
+		SELECT COUNT(1)
+		FROM tb_reading_record
+		WHERE 
+		blackboard_id = #{blackboardId}
+		AND user_mobile = #{mobile}
+	</select>
+	
+</mapper>

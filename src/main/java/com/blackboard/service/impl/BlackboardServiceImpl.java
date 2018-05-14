@@ -20,12 +20,14 @@ import com.blackboard.dao.BlackboardDao;
 import com.blackboard.dao.CommentDao;
 import com.blackboard.dao.ImageDao;
 import com.blackboard.dao.LikeDao;
+import com.blackboard.dao.ReadingRecordDao;
 import com.blackboard.dao.SystemMessageDao;
 import com.blackboard.dto.BlackboardDto;
 import com.blackboard.dto.CommentDto;
 import com.blackboard.dto.Remind;
 import com.blackboard.entity.Blackboard;
 import com.blackboard.entity.Like;
+import com.blackboard.entity.ReadingRecord;
 import com.blackboard.service.BlackboardService;
 import com.blackboard.service.CommentService;
 import com.blackboard.service.ImageService;
@@ -58,6 +60,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 	private SystemMessageDao systemMessageDao;
 	@Autowired
 	private ImageService imageService;
+	@Autowired
+	private ReadingRecordDao readingRecordDao;
 
 	/**
 	 * 创建黑板报
@@ -112,44 +116,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		Thread conntentThread = new WebServiceThread(conntentMap);
 		conntentThread.start();
 		
-		//安全送审
-//		Map<String,Object> TitleMap = new HashMap<>();
-//		TitleMap.put("mobile", blackboard.getCreateMobile());
-//		TitleMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
-//		TitleMap.put("content", blackboard.getTitle());
-//		Thread titleThread = new WebServiceThread(TitleMap);
-//		titleThread.start();
-		
-		
-		
-//		if(visibleRange != null && visibleRange.size()>0){
-//			Map<String,Object> map = new HashMap<>();
-//			List<String> list = new ArrayList<>();
-//			StringBuffer sBuffer  = new StringBuffer("");
-//			for(Map<String,Object> m : visibleRange){
-//				list.add((String)m.get("mobile"));
-//			}
-//			logger.info("==========推送电话字符串:"+list+"===========");
-//			for(int i = 0;i<visibleRange.size();i++){
-//				sBuffer.append((String)visibleRange.get(i).get("mobile"));
-//				if(i+1<visibleRange.size()){
-//					sBuffer.append(",");
-//				}
-//			}
-//			logger.info("==========推送电话字符串:"+sBuffer.toString()+"===========");
-//			map.put("list", list);
-//			map.put("blackBoardId", blackboard.getBlackboardId());
-//			blackboardDao.saveVisibleRange(map);
-//			
-//			Map<String, Object> MsgPush = new HashMap<>();
-//			MsgPush.put("Title", blackboard.getTitle());
-//			MsgPush.put("Connent", "来自："+blackboard.getCreateBy());
-//			MsgPush.put("blackboardId", blackboard.getBlackboardId());
-//			MsgPush.put("mobile", list);
-//			Thread thread = new MsgPushThread(MsgPush);
-//			thread.start();
-//		}
-//		
 	}
 
 	/**
@@ -221,8 +187,17 @@ public class BlackboardServiceImpl implements BlackboardService {
 		map.put("enterpriseId", enterpriseId);
 		map.put("blackboardId", blackboardId);
 		map.put("mobile",mobile);
-		// 增加浏览数
-		blackboardDao.updatePageViews(blackboardId);
+		// 判断有没有浏览过
+		long ReadingRecordCount = readingRecordDao.selectReadingRecordCount(map);
+		if(ReadingRecordCount<1){
+			// 增加浏览数
+			blackboardDao.updatePageViews(blackboardId);
+			//添加浏览记录
+			ReadingRecord rr = new ReadingRecord();
+			rr.setBlackboardId(blackboardId);
+			rr.setUserMobile(mobile);
+			readingRecordDao.saveReadingRecord(rr);
+		}
 		// 获取单条黑板报信息
 		BlackboardDto blackboarddto = blackboardDao.getBlackboardById(map);
 		logger.info("==============获取单条黑板报信息:ID为" + blackboardId);

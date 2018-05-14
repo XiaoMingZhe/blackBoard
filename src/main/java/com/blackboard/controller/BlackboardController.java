@@ -422,8 +422,10 @@ public class BlackboardController {
 		Integer type = blackboardDao.selectBlackboardType(blackboard.getBlackboardId());
 		if(type==1){
 			logger.info("===============修改草稿，新建黑板报====================");
+			String blackboardId = blackboard.getBlackboardId();
 			createBlackboardDto.getBlackboard().setType(0);
 			JsonResult jsonResult= saveBlackboard(createBlackboardDto,request);
+			deleteBlackboard(blackboardId, request);
 			return jsonResult;
 		}
 		logger.info("================修改黑板报:" + blackboard.getBlackboardId());

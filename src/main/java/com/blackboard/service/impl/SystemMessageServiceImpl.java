@@ -14,6 +14,7 @@ import com.blackboard.dao.SystemMessageDao;
 import com.blackboard.dto.SystemMessageDto;
 import com.blackboard.service.SystemMessageService;
 import com.blackboard.utils.RelativeDateFormat;
+import com.vdurmont.emoji.EmojiParser;
 
 @Service
 public class SystemMessageServiceImpl implements SystemMessageService {
@@ -40,6 +41,7 @@ public class SystemMessageServiceImpl implements SystemMessageService {
 		List<SystemMessageDto> list = systemMessageDao.selectSystemMessages(map);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		for (SystemMessageDto s : list) {
+			s.setMessage(EmojiParser.parseToUnicode(s.getMessage()));
 			try {
 				Date date = sdf.parse(s.getCreateTime());
 				s.setCreateTime(RelativeDateFormat.format(date));
