@@ -35,8 +35,8 @@ public class ImagesController {
 	@RequestMapping(value="/addimages",method = RequestMethod.POST)
 	@ResponseBody
 	public JsonResult upLoadImages (HttpServletRequest request , @RequestParam(value="img", required = false)List<MultipartFile> images){
-		logger.info("=========上传图片开始=========");
-		logger.info("=========图片集合长度========="+images.size());
+		logger.info("=============上传图片开始=============");
+		logger.info("=============图片集合长度============="+images.size());
 		for (int i = 0; i < images.size(); i++) {
 			MultipartFile file = images.get(i);
 			Long upLoadSize = file.getSize();
@@ -68,7 +68,7 @@ public class ImagesController {
 	@RequestMapping(value="/deleteImage",method = RequestMethod.GET)
 	@ResponseBody
 	public JsonResult deleteImage(HttpServletRequest request ,String imageId){
-		logger.info("=======删除图片开始：图片ID为"+imageId+"=======");
+		logger.info("=============删除图片开始：图片ID为"+imageId+"=============");
 		if(imageId == null || imageId.length()<=0){
 			return JsonResult.error("请求参数非法");
 		}

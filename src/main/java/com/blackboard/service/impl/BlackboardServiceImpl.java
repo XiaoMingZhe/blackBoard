@@ -96,7 +96,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 				}
 			}
 			blackboard.setPushList(sBuffer.toString());
-			logger.info("===========消息推送手机列表:"+sBuffer.toString()+"=================");
+			logger.info("=============消息推送手机列表:"+sBuffer.toString()+"=============");
 		}
 		System.out.println(blackboard);
 		blackboardDao.createBlackboard(blackboard);
@@ -200,7 +200,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		}
 		// 获取单条黑板报信息
 		BlackboardDto blackboarddto = blackboardDao.getBlackboardById(map);
-		logger.info("==============获取单条黑板报信息:ID为" + blackboardId);
+		logger.info("=============获取单条黑板报信息:ID为" + blackboardId);
 		dateChange(blackboarddto);
 		//模糊电话号码
 		blackboarddto.setCreateMobile(Hex16.Encode(Hex16.Encode(blackboarddto.getCreateMobile()+KEY)));
@@ -222,7 +222,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		
 		// 获取评论
 		List<CommentDto> commentDto = commentService.getAllComments(blackboardId,mobile);
-		logger.info("==============获取单条黑板报评论:ID为" + blackboardId);
+		logger.info("=============获取单条黑板报评论:ID为" + blackboardId);
 		// 判断是不是本人，评论能不能删除
 		List<Map<String, Object>> comments = new ArrayList<>();
 		for (CommentDto c : commentDto) {
@@ -243,7 +243,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		if(visibleRangeList!=null && visibleRangeList.size()>0){
 			permission = 1;
 		}
-		logger.info("=============黑板报详情:" + blackboarddto);
 		return JsonResult.ok().put("blackboard", blackboarddto).put("comments", comments).put("permission", permission);
 	}
 
@@ -278,7 +277,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
 		long page = 1;
-		logger.info("==============黑板报条数:" + count);
+		logger.info("=============黑板报条数:" + count);
 		//获取系统消息未读条数
 		Map<String, String> systemMap = new HashMap<>();
 		systemMap.put("userId", createMobile);
@@ -328,8 +327,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
 		long page = 1;
-		logger.info("==============所有黑板报:" + list);
-		logger.info("==============黑板报条数:" + count);
 		Map<String, Object> backMap = new HashMap<>();
 		backMap.put("list", list);
 		backMap.put("page", page);

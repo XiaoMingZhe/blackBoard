@@ -178,8 +178,6 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	public JsonResult delectReply(String commentId, String commenterId) {
 		Comment comment = commentDao.selectCommentById(commentId);
-		System.out.println(comment);
-		System.out.println(commentId);
 		if (comment == null || !comment.getCommenterId().equals(commenterId)) {
 			return JsonResult.error("删除回复失败");
 		}
@@ -197,7 +195,6 @@ public class CommentServiceImpl implements CommentService {
 		for (CommentDto c : list) {
 			try {
 				c.setTime(RelativeDateFormat.format(c.getCommentTime()));
-				System.out.println(c);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

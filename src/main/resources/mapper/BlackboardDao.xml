@@ -346,6 +346,13 @@
 			</if>
 			AND type = 0
 			AND NOT EXISTS ( SELECT 1 FROM tb_blcaklist tbl WHERE tbl.blacklter_id = tb.blackboard_id ) UNION
+			<if test="selectAll != null and selectAll !=''">
+				( SELECT blackboard_id, update_time AS createTime 
+				  FROM tb_blackboard tb 
+				  WHERE enterprise_id = #{enterDeptId} 
+				  AND create_mobile = #{mobile} 
+				  AND type = 0 ) UNION
+			</if>
 			(
 		SELECT
 			blackboard_id,

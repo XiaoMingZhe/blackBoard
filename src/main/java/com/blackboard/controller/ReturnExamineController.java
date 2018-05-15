@@ -24,7 +24,7 @@ public class ReturnExamineController {
 	@RequestMapping(value = "/result" , method = RequestMethod.POST)
 	@ResponseBody
 	private JsonResult result(HttpServletRequest request){
-		logger.info("========消息审批消息返回======");
+		logger.info("=============消息审批消息返回=============");
 		try {
 			String msgid = request.getParameter("msgid");
 			String result = request.getParameter("result");

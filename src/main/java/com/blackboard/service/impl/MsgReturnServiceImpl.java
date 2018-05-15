@@ -88,7 +88,7 @@ public class MsgReturnServiceImpl implements MsgReturnService {
 		
 		if(msgid.indexOf("blackboard")!=-1){
 			String blackboardid = msgid.substring(10);
-			logger.info("============blackboardid:"+blackboardid+"========");
+			logger.info("=============blackboardid:"+blackboardid+"=============");
 			Map<String, Object> map = new HashMap<>();
 			map.put("blackBoardId", blackboardid);
 			map.put("remark", remark);
@@ -106,7 +106,7 @@ public class MsgReturnServiceImpl implements MsgReturnService {
 
 		if(msgid.indexOf("comment")!=-1){
 			String commentId = msgid.substring(7);
-			logger.info("============commentId:"+commentId+"========");
+			logger.info("=============commentId:"+commentId+"=============");
 			commentDao.delectReply(commentId);
 			commentDao.deleteOneComments(commentId);
 			Comment comment = commentDao.selectCommentById(commentId);

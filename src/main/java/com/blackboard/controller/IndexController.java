@@ -71,11 +71,17 @@ public class IndexController {
 		if (count == 0) {
 			try {
 				ss = unifiedAuthentication.validateToken(token);
-				logger.info("=======获取的参数：" + ss);
+				logger.info("=============获取的参数：" + ss);
 				JSONObject jsonObject = JSONObject.fromObject(ss);
 				msisdn = jsonObject.getJSONObject("body").getString("msisdn");
-				logger.info("========登陆手机号:" + msisdn);
-
+				logger.info("=============登陆手机号:" + msisdn);
+				// 添加访问记录
+				Loginlog loginlog = new Loginlog();
+				loginlog.setCreateTime(new Date());
+				loginlog.setUseId(msisdn);
+				loginlog.setToken(token);
+				loginlog.setEnterpriseId(enterDeptId);
+				loginlogDao.saveLog(loginlog);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -83,12 +89,12 @@ public class IndexController {
 			msisdn = loginlogDao.findUserId(token);
 		}
 
-		logger.info("============绑定数据开始============");
+		logger.info("=============绑定数据开始=============");
 		// 绑定数据
-		logger.info("============绑定token:" + token);
-		logger.info("============绑定enterDeptId:" + enterDeptId);
-		logger.info("============绑定EUserID:" + EUserID);
-		logger.info("============绑定msisdn:" + msisdn);
+		logger.info("=============绑定token:" + token);
+		logger.info("=============绑定enterDeptId:" + enterDeptId);
+		logger.info("=============绑定EUserID:" + EUserID);
+		logger.info("=============绑定msisdn:" + msisdn);
 		HttpSession session = request.getSession();
 		session.setAttribute("token", token);
 		session.setAttribute("enterDeptId", enterDeptId);
@@ -106,7 +112,7 @@ public class IndexController {
 		
 		cookie.setMaxAge(24 * 60 * 60);
 		response.addCookie(cookie);
-		logger.info("============绑定数据完毕============");
+		logger.info("=============绑定数据完毕=============");
 		return "index";
 	}
 
@@ -119,7 +125,7 @@ public class IndexController {
 	@RequestMapping(value = "/isLogin", method = RequestMethod.GET)
 	@ResponseBody
 	private JsonResult isLogin(HttpServletRequest request) {
-		logger.info("============判断有没有访问过黑板报=============");
+		logger.info("=============判断有没有访问过黑板报=============");
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		String token = (String) request.getSession().getAttribute("token");
 		String enterpriseId = (String)request.getSession().getAttribute("enterDeptId");
@@ -145,7 +151,7 @@ public class IndexController {
 		loginlog.setToken(token);
 		loginlog.setEnterpriseId(enterpriseId);
 		loginlogDao.saveLog(loginlog);
-		logger.info("===========用户登陆:" + mobile);
+		logger.info("=============用户登陆:" + mobile);
 		if (count > 0 || blackboardCount > 0) {
 			return JsonResult.ok().put("isLogin", 1);
 		} else {

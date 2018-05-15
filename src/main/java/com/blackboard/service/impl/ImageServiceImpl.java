@@ -51,9 +51,8 @@ public class ImageServiceImpl implements ImageService {
 			// 构建新的文件名
 			
 			Date dNow = new Date( );
-			SimpleDateFormat ft = new SimpleDateFormat ("yyyyMMddhhmmss");
-			String oFileName = ft.format(dNow);
-			System.out.println(serverPath);
+			SimpleDateFormat ft = new SimpleDateFormat ("yyyyMMddhhmmssSSS");
+			String oFileName = ft.format(dNow)+i;
 			// 文件存放绝对路径
 			String realPath = serverPath + "uploadImages/" + oFileName;
 			System.out.println(realPath);
@@ -78,7 +77,6 @@ public class ImageServiceImpl implements ImageService {
 			image.setImageName(oFileName);
 			image.setOrderNumber(i);
 			image.setUploadDate(new Date());
-			System.out.println("****Image:" + image);
 			imageList.add(image);
 		}
 
@@ -163,17 +161,17 @@ public class ImageServiceImpl implements ImageService {
 	public void deleteImage(String imageId,String serverPath) {
 		String path = imageDao.getImageById(imageId);
 		path = serverPath.replace("/blackboard/", path);
-		logger.info("=================删除的图片位置："+path+"=================");
+		logger.info("=============删除的图片位置："+path+"=============");
 		File file = new File(path);
 		// 如果文件路径所对应的文件存在，并且是一个文件，则直接删除
         if (file.exists() && file.isFile()) {
             if (file.delete()) {
-            	logger.info("=================删除单个文件："+path+"成功！=================");
+            	logger.info("=============删除单个文件："+path+"成功！=============");
             } else {
-            	logger.error("=================删除单个文件："+path+"失败！=================");
+            	logger.error("=============删除单个文件："+path+"失败！=============");
             }
         } else {
-        	logger.error("=================删除单个文件失败："+path+"不存在！=================");
+        	logger.error("=============删除单个文件失败："+path+"不存在！=============");
         }
 		imageDao.deleteImage(imageId);
 	}
@@ -184,17 +182,17 @@ public class ImageServiceImpl implements ImageService {
 		List<String> pathList = imageDao.getImagePath(blackboardIdList);
 		for(String path :pathList){
 			path = serverPath.replace("/blackboard/", path);
-			logger.info("=================删除的图片位置："+path+"=================");
+			logger.info("=============删除的图片位置："+path+"=============");
 			File file = new File(path);
 			// 如果文件路径所对应的文件存在，并且是一个文件，则直接删除
 	        if (file.exists() && file.isFile()) {
 	            if (file.delete()) {
-	            	logger.info("=================删除单个文件："+path+"成功！=================");
+	            	logger.info("=============删除单个文件："+path+"成功！=============");
 	            } else {
-	            	logger.error("=================删除单个文件："+path+"失败！=================");
+	            	logger.error("=============删除单个文件："+path+"失败！=============");
 	            }
 	        } else {
-	        	logger.error("=================删除单个文件失败："+path+"不存在！=================");
+	        	logger.error("=============删除单个文件失败："+path+"不存在！=============");
 	        }
 		}
 		imageDao.deleteImages(blackboardIdList);

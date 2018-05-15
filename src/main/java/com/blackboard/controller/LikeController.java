@@ -32,7 +32,7 @@ public class LikeController {
 	@RequestMapping(value = "/LikeOfBlackBoard", method = RequestMethod.GET)
 	@ResponseBody
 	private JsonResult BlackBoardLike(HttpServletRequest request,@RequestParam("blackboardId") String blackboardId,@RequestParam("likeUser") String likeUser){
-		logger.info("=======点赞黑板报:"+blackboardId+"==========");
+		logger.info("=============点赞黑板报:"+blackboardId+"=============");
 		return Like(request,blackboardId,0,likeUser);
 	};
 	
@@ -45,7 +45,7 @@ public class LikeController {
 	@RequestMapping(value = "/LikeOfComment", method = RequestMethod.GET)
 	@ResponseBody
 	private JsonResult CommentLike(HttpServletRequest request,@RequestParam("commentId") String commentId,@RequestParam("likeUser") String likeUser){
-		logger.info("=======点赞评论:"+commentId+"==========");
+		logger.info("=============点赞评论:"+commentId+"=============");
 		return Like(request,commentId,1,likeUser);
 	};
 	

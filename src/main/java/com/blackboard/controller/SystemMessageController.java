@@ -43,7 +43,7 @@ public class SystemMessageController {
 		if(MessageIdList == null){
 			return JsonResult.error("消息列表为空");
 		}
-		logger.info("===============删除系统消息:"+MessageIdList+"===============");
+		logger.info("=============删除系统消息:"+MessageIdList+"=============");
 		systemMessageService.deleteSystemMessage(MessageIdList);
 		return JsonResult.ok();
 	}
@@ -68,7 +68,10 @@ public class SystemMessageController {
 			enterDeptId = "517090";
 			mobile = "13928909312";
 		}
-		logger.info("===============查询系统消息===============");
+		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0) {
+			return JsonResult.error("获取用户数据出错,请重新进入。");
+		}
+		logger.info("=============查询系统消息=============");
 		Map<String, String> map = new HashMap<>();
 		map.put("userId", mobile);
 		map.put("enterpriseId", enterDeptId);
