@@ -308,7 +308,8 @@
 		SET
 		title = #{title},
 		content = #{content},
-		update_time = now()
+		update_time = now(),
+		remark = null
 		WHERE
 		enterprise_id = #{enterpriseId}
 		AND

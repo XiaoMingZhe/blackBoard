@@ -55,7 +55,6 @@ public class ImageServiceImpl implements ImageService {
 			String oFileName = ft.format(dNow)+i;
 			// 文件存放绝对路径
 			String realPath = serverPath + "uploadImages/" + oFileName;
-			System.out.println(realPath);
 			File dest = new File(realPath);
 			File parent = dest.getParentFile();
 			if (!parent.exists()) {

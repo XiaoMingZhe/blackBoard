@@ -98,7 +98,6 @@ public class BlackboardServiceImpl implements BlackboardService {
 			blackboard.setPushList(sBuffer.toString());
 			logger.info("=============消息推送手机列表:"+sBuffer.toString()+"=============");
 		}
-		System.out.println(blackboard);
 		blackboardDao.createBlackboard(blackboard);
 		// 判断有没有上传图片
 		if(imageIdList != null && imageIdList.size()>0){
@@ -112,6 +111,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 		Map<String, Object> conntentMap = new HashMap<>();
 		conntentMap.put("mobile", blackboard.getCreateMobile());
 		conntentMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
+		blackboard.setContent(blackboard.getContent().replaceAll("<", "&lt;"));
+		blackboard.setContent(blackboard.getContent().replaceAll(">", "&gt;"));
 		conntentMap.put("content", blackboard.getTitle()+blackboard.getContent());
 		Thread conntentThread = new WebServiceThread(conntentMap);
 		conntentThread.start();
@@ -392,6 +393,17 @@ public class BlackboardServiceImpl implements BlackboardService {
 			map.put("blackBoardId", blackboard.getBlackboardId());
 			blackboardDao.saveVisibleRange(map);
 		}
+		
+		//安全送审
+		Map<String, Object> conntentMap = new HashMap<>();
+		conntentMap.put("mobile", blackboard.getCreateMobile());
+		conntentMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
+		blackboard.setContent(blackboard.getContent().replaceAll("<", "&lt;"));
+		blackboard.setContent(blackboard.getContent().replaceAll(">", "&gt;"));
+		conntentMap.put("content", blackboard.getTitle()+blackboard.getContent());
+		Thread conntentThread = new WebServiceThread(conntentMap);
+		conntentThread.start();
+		
 		return bFlag;
 	}
 

@@ -75,6 +75,9 @@ public class WebServicesClient {
             if (soap == null) {  
                 return null;  
             }  
+            
+            logger.info("安全送审报文:"+soap);
+            
             // 调用的webserviceURL  
             URL url = new URL(  
                     "http://218.205.115.242:18101/Ercs_Proxy/ExtendedBusinessPlatformService/SendMsgAuthenticationReq");  
@@ -130,8 +133,6 @@ public class WebServicesClient {
         String msgid = (String) map.get("msgid");
         logger.info("msgid:"+msgid);
         String content = (String) map.get("content");
-        
-        System.out.println(MD5(content));
         
         sb.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:chin=\"http://www.chinamobile.com/\">");  
         sb.append("   <soapenv:Header>");

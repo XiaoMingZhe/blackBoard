@@ -48,6 +48,8 @@ public class BlackboardController {
 	@Autowired
 	private BlackboardDao blackboardDao;
 	
+	private boolean OnOf = true;
+	
 	/**
 	 * 保存草稿
 	 * 
@@ -58,8 +60,14 @@ public class BlackboardController {
 	@RequestMapping(value = "/saveDraft", method = RequestMethod.POST)
 	@ResponseBody
 	private JsonResult saveDraft(@RequestBody CreateBlackboardDto createBlackboardDto, HttpServletRequest request) {
-		createBlackboardDto.getBlackboard().setType(1);
-		return saveBlackboard(createBlackboardDto, request);
+		String blackboardId = createBlackboardDto.getBlackboard().getBlackboardId();
+		if(blackboardId!=null && blackboardId.trim().length()>0){
+			OnOf = false;
+			return updateBlackboard(createBlackboardDto, request);
+		} else{
+			createBlackboardDto.getBlackboard().setType(1);
+			return saveBlackboard(createBlackboardDto, request);
+		}
 	}
 
 	/**
@@ -85,7 +93,6 @@ public class BlackboardController {
 	 * @return
 	 */
 	private JsonResult saveBlackboard(CreateBlackboardDto createBlackboardDto,HttpServletRequest request) {
-		System.out.println(createBlackboardDto);
 		Blackboard blackboard = createBlackboardDto.getBlackboard();
 		CheckAttack checkAttack = createBlackboardDto.getCheckAttack();
 
@@ -106,7 +113,7 @@ public class BlackboardController {
 		logger.info("=============获取信息mobile:" + mobile);
 		logger.info("=============黑板报内容:" + blackboard);
 
-		if (blackboard == null || blackboard.getTitle().trim() == null || blackboard.getTitle().trim().length() <= 0 || blackboard.getCreateBy() == null) {
+		if (blackboard == null || blackboard.getTitle().trim() == null || blackboard.getTitle().trim().length() <= 0 ) {
 			return JsonResult.error("标题不能为空");
 		}
 		// 为了测试
@@ -422,7 +429,7 @@ public class BlackboardController {
 		}
 		
 		Integer type = blackboardDao.selectBlackboardType(blackboard.getBlackboardId());
-		if(type==1){
+		if(type==1 && OnOf){
 			logger.info("=============修改草稿，新建黑板报=============");
 			String blackboardId = blackboard.getBlackboardId();
 			createBlackboardDto.getBlackboard().setType(0);
@@ -432,6 +439,7 @@ public class BlackboardController {
 		}
 		logger.info("=============修改黑板报:" + blackboard.getBlackboardId());
 		Boolean flag = blackboardService.updateBlackboard(blackboard,createBlackboardDto.getVisibleRange());
+		OnOf = true;
 		return JsonResult.ok().put("flag", flag);
 	}
 

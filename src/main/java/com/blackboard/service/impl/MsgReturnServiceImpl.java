@@ -31,10 +31,11 @@ public class MsgReturnServiceImpl implements MsgReturnService {
 	private CommentDao commentDao;
 
 	@Override
-	public String MsgReturn(String msgid, String result) { 
+	public String MsgReturn(String msgid, String result) {
 		String remark = "";
-		if("200".equals(result)){
-			//消息推送
+
+		switch (result) {
+		case "200":
 			if(msgid.indexOf("blackboard")!=-1){
 				String blackboardId = msgid.substring(10);
 				Blackboard bb = blackboardDao.selectBlackboardById(blackboardId);
@@ -54,36 +55,38 @@ public class MsgReturnServiceImpl implements MsgReturnService {
 				}
 			}
 			return "ok";
-		}
-		if("300".equals(result)){
+		case "300":
 			remark = "其他";
-		}
-		if("310".equals(result)){
+			break;
+		case "310":	
 			remark = "接口字段非法";
-		}
-		if("320".equals(result)){
+			break;
+		case "320":	
 			remark = "用户信用不足";
-		}
-		if("330".equals(result)){
+			break;
+		case "330":	
 			remark = "非法用户行为";
-		}
-		if("340".equals(result)){
+			break;
+		case "340":	
 			remark = "内容涉政";
-		}
-		if("350".equals(result)){
+			break;
+		case "350":	
 			remark = "内容涉黑";
-		}
-		if("360".equals(result)){
+			break;
+		case "360":	
 			remark = "内容涉黄";
-		}
-		if("370".equals(result)){
+			break;
+		case "370":	
 			remark = "涉及诈骗";
-		}
-		if("380".equals(result)){
+			break;
+		case "380":	
 			remark = "涉及广告";
-		}
-		if("400".equals(result)){
+			break;
+		case "400":	
 			remark = "等待审核";
+			break;
+		default:
+			break;
 		}
 		
 		if(msgid.indexOf("blackboard")!=-1){
