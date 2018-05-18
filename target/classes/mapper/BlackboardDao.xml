@@ -388,7 +388,10 @@
 	
 	
 	<select id="selectRemind" parameterType="map" resultType="map">
-		SELECT
+		SELECT 
+		*
+		FROM 
+		(SELECT
 		* 
 		FROM
 			(
@@ -518,6 +521,8 @@
 			) a 
 		ORDER BY
 			a.creatTime DESC
+		) b
+		LIMIT 0,20
 	</select>
 	
 	<insert id="saveVisibleRange" parameterType="map">

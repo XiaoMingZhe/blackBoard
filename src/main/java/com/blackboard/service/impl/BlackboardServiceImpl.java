@@ -31,6 +31,7 @@ import com.blackboard.entity.ReadingRecord;
 import com.blackboard.service.BlackboardService;
 import com.blackboard.service.CommentService;
 import com.blackboard.service.ImageService;
+import com.blackboard.utils.EncodeFilter;
 import com.blackboard.utils.GainUuid;
 import com.blackboard.utils.Hex16;
 import com.blackboard.utils.JsonResult;
@@ -111,9 +112,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 		Map<String, Object> conntentMap = new HashMap<>();
 		conntentMap.put("mobile", blackboard.getCreateMobile());
 		conntentMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
-		blackboard.setContent(blackboard.getContent().replaceAll("<", "&lt;"));
-		blackboard.setContent(blackboard.getContent().replaceAll(">", "&gt;"));
-		conntentMap.put("content", blackboard.getTitle()+blackboard.getContent());
+		//转义
+		conntentMap.put("content", EncodeFilter.encode(blackboard.getTitle()+blackboard.getContent()));
 		Thread conntentThread = new WebServiceThread(conntentMap);
 		conntentThread.start();
 		
@@ -398,9 +398,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 		Map<String, Object> conntentMap = new HashMap<>();
 		conntentMap.put("mobile", blackboard.getCreateMobile());
 		conntentMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
-		blackboard.setContent(blackboard.getContent().replaceAll("<", "&lt;"));
-		blackboard.setContent(blackboard.getContent().replaceAll(">", "&gt;"));
-		conntentMap.put("content", blackboard.getTitle()+blackboard.getContent());
+		//转义
+		conntentMap.put("content", EncodeFilter.encode(blackboard.getTitle()+blackboard.getContent()));
 		Thread conntentThread = new WebServiceThread(conntentMap);
 		conntentThread.start();
 		

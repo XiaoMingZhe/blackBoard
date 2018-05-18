@@ -12,6 +12,7 @@ import com.blackboard.dao.CommentDao;
 import com.blackboard.dto.CommentDto;
 import com.blackboard.entity.Comment;
 import com.blackboard.service.CommentService;
+import com.blackboard.utils.EncodeFilter;
 import com.blackboard.utils.GainUuid;
 import com.blackboard.utils.Hex16;
 import com.blackboard.utils.JsonResult;
@@ -211,7 +212,7 @@ public class CommentServiceImpl implements CommentService {
 		Map<String, Object> conntentMap = new HashMap<>();
 		conntentMap.put("mobile", comment.getCommenterId());
 		conntentMap.put("msgid", "comment" + comment.getCommentId());
-		conntentMap.put("content", comment.getCommentContent());
+		conntentMap.put("content", EncodeFilter.encode(comment.getCommentContent()));
 		Thread conntentThread = new WebServiceThread(conntentMap);
 		conntentThread.start();
 	}

@@ -23,6 +23,7 @@
 		AND t.reply_status = 0 )aa
 		left join tb_comment tb 
 		on aa.comment_id = tb.reply_comment_id
+		and tb.status = 0
 		GROUP BY aa.comment_id) a
 		left join
 		tb_like tl on a.comment_id = tl.Be_likedId
