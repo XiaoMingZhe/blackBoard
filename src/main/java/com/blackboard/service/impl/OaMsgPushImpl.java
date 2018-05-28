@@ -124,7 +124,7 @@ public class OaMsgPushImpl implements OaMsgPushService {
 		for(String s : mobileList) {
 			String phone = s;
 			//替换参数
-			ext.getExtensionInfo().getActMsg().setThumbLink("http://"+BLACKBOARD_URL+"/toindex#/index/dynamic/"+msg.get("blackboardId")+"/");
+			ext.getExtensionInfo().getActMsg().setThumbLink("http://"+BLACKBOARD_URL+"/info#/index/dynamic/"+msg.get("blackboardId")+"/");
 			System.out.println(ext.getExtensionInfo().getActMsg().getThumbLink());
 			OaMsgReq req = new OaMsgReq();
 			req.setAddress("tel:+86"+phone);

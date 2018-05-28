@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blackboard.dao.CouponDao">
+	
+	<select id="selectCouponCode" resultType="coupon">
+		SELECT id,coupon_code 
+		FROM tb_coupon WHERE user IS NULL OR user = '' ORDER BY id LIMIT 0,10
+	</select>
+
+	<select id="selectCouponCodeByMobile" parameterType="String" resultType="coupon">
+		SELECT id,coupon_code,user
+		FROM tb_coupon 
+		WHERE user = #{mobile} 
+	</select>
+	
+	<update id="updateCoupon" parameterType="coupon">
+		UPDATE
+		tb_coupon
+		SET 
+		user = #{user}
+		WHERE id = #{id}
+		And coupon_code = #{couponCode}
+	</update>
+	
+	<insert id="saveCoupon" parameterType="list">
+		INSERT INTO tb_coupon(coupon_code) VALUES
+		<foreach collection="list" index="index" item="item" separator=",">
+			(#{item})
+		</foreach>
+	</insert>
+</mapper>

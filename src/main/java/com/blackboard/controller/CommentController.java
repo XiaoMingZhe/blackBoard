@@ -41,10 +41,6 @@ public class CommentController {
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
-		if ((enterDeptId == null || enterDeptId.trim().length()<= 0 ) && (mobile == null ||mobile.trim().length()<=0  ) ) {
-			enterDeptId = "517090";
-			mobile = "13432879269";
-		}
 		comment.setEnterpriseId(enterDeptId);
 		comment.setCommenterId(mobile);
 		logger.info("=============" + mobile + "评论" + comment.getBlackboardId());
@@ -75,17 +71,11 @@ public class CommentController {
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
-		if (enterDeptId == null && mobile == null) {
-			enterDeptId = "517090";
-			mobile = "13432879269";
-		}
-		
 		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0) {
 			return JsonResult.error("获取用户数据出错,请重新进入。");
 		}
 		comment.setEnterpriseId(enterDeptId);
 		comment.setCommenterId(mobile);
-		
 		logger.info("================" + mobile + "回复评论" + comment.getReplyCommentId());
 		if (comment == null || comment.getEnterpriseId() == null || comment.getEnterpriseId().length() <= 0
 				|| comment.getBlackboardId() == null || comment.getBlackboardId().length() <= 0
@@ -94,7 +84,6 @@ public class CommentController {
 				|| comment.getReplyCommentId() == null || comment.getReplyCommentId().length() <= 0) {
 			return JsonResult.error("请求参数非法");
 		}
-
 		Comment com = commentService.reply(comment);
 		logger.info("=============回复评论完成=============");
 		return JsonResult.ok().put("comment", com);
@@ -114,11 +103,6 @@ public class CommentController {
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		// 企业ID
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
-		if (enterDeptId == null && mobile == null) {
-			enterDeptId = "517090";
-			mobile = "13432879269";
-		}
-		
 		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0) {
 			return JsonResult.error("获取用户数据出错,请重新进入。");
 		}
@@ -151,17 +135,12 @@ public class CommentController {
 	private JsonResult deleteComment(HttpServletRequest request, String commentId) {
 		// 手机号
 		String mobile = (String) request.getSession().getAttribute("mobile");
-		if (mobile == null) {
-			mobile = "13432879269";
-		}
-		
 		if (mobile == null || mobile.length() <= 0) {
 			return JsonResult.error("获取用户数据出错,请重新进入。");
 		}
 		if (commentId == null) {
 			return JsonResult.error("请求参数非法");
 		}
-
 		JsonResult jsonResult = commentService.deleteOneComment(commentId, mobile);
 		return jsonResult;
 	}
@@ -178,18 +157,12 @@ public class CommentController {
 	private JsonResult delectReply(HttpServletRequest request, String commentId) {
 		// 手机号
 		String mobile = (String) request.getSession().getAttribute("mobile");
-		
-		if (mobile == null) {
-			mobile = "13432879269";
-		}
-		
 		if (mobile == null || mobile.length() <= 0) {
 			return JsonResult.error("获取用户数据出错,请重新进入。");
 		}
 		if (commentId == null) {
 			return JsonResult.error("请求参数非法");
 		}
-
 		JsonResult jsonResult = commentService.delectReply(commentId, mobile);
 		return jsonResult;
 	}
@@ -206,10 +179,6 @@ public class CommentController {
 		logger.info("=============获取回复详情开始=============");
 		// 手机号
 		String mobile = (String) request.getSession().getAttribute("mobile");
-		if (mobile == null) {
-			mobile = "13432879269";
-		}
-		
 		if (mobile == null || mobile.length() <= 0) {
 			return JsonResult.error("获取用户数据出错,请重新进入。");
 		}

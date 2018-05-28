@@ -22,41 +22,46 @@ public class LikeController {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private LikeService likeService;
-	
+
 	/**
 	 * 点赞黑板报
+	 * 
 	 * @param request
 	 * @param blackboardId
 	 * @return
 	 */
 	@RequestMapping(value = "/LikeOfBlackBoard", method = RequestMethod.GET)
 	@ResponseBody
-	private JsonResult BlackBoardLike(HttpServletRequest request,@RequestParam("blackboardId") String blackboardId,@RequestParam("likeUser") String likeUser){
-		logger.info("=============点赞黑板报:"+blackboardId+"=============");
-		return Like(request,blackboardId,0,likeUser);
+	private JsonResult BlackBoardLike(HttpServletRequest request, @RequestParam("blackboardId") String blackboardId,
+			@RequestParam("likeUser") String likeUser) {
+		logger.info("=============点赞黑板报:" + blackboardId + "=============");
+		return Like(request, blackboardId, 0, likeUser);
 	};
-	
+
 	/**
 	 * 点赞评论
+	 * 
 	 * @param request
 	 * @param commentId
 	 * @return
 	 */
 	@RequestMapping(value = "/LikeOfComment", method = RequestMethod.GET)
 	@ResponseBody
-	private JsonResult CommentLike(HttpServletRequest request,@RequestParam("commentId") String commentId,@RequestParam("likeUser") String likeUser){
-		logger.info("=============点赞评论:"+commentId+"=============");
-		return Like(request,commentId,1,likeUser);
+	private JsonResult CommentLike(HttpServletRequest request, @RequestParam("commentId") String commentId,
+			@RequestParam("likeUser") String likeUser) {
+		logger.info("=============点赞评论:" + commentId + "=============");
+		return Like(request, commentId, 1, likeUser);
 	};
-	
+
 	/**
 	 * 点赞
+	 * 
 	 * @param request
 	 * @param beLikedId
 	 * @param type
 	 * @return
 	 */
-	private JsonResult Like(HttpServletRequest request,String beLikedId,Integer type,String likeUser){
+	private JsonResult Like(HttpServletRequest request, String beLikedId, Integer type, String likeUser) {
 		try {
 			// 手机号
 			String mobile = (String) request.getSession().getAttribute("mobile");
@@ -64,11 +69,7 @@ public class LikeController {
 			like.setBeLikedId(beLikedId);
 			like.setType(type);
 			like.setLikeUser(likeUser);
-			if ((mobile == null || mobile.trim().length() <= 0)) {
-				like.setLikeUseid("13432879269");
-			} else {
-				like.setLikeUseid(mobile);
-			}
+			like.setLikeUseid(mobile);
 			likeService.Like(like);
 			return JsonResult.ok();
 		} catch (Exception e) {

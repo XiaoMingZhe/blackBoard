@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.blackboard.dao.BlackboardDao;
 import com.blackboard.dao.LoginlogDao;
+import com.blackboard.dto.RcsToken;
 import com.blackboard.entity.Loginlog;
+import com.blackboard.task.CheckUserTask;
 import com.blackboard.utils.JsonResult;
 import com.blackboard.utils.UnifiedAuthentication;
 
@@ -37,13 +39,56 @@ public class IndexController {
 	private BlackboardDao blackboardDao;
 
 	/**
+	 * 检验用户信息
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/checkUser", method = RequestMethod.POST)
+	@ResponseBody
+	private JsonResult checkUser(HttpServletRequest request, HttpServletResponse response) {
+		JsonResult jsonResult = null;
+		String mobile = "";
+		try {
+			mobile = (String) request.getSession().getAttribute("mobile");
+			String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
+			long time = System.currentTimeMillis();
+			do {
+				if (mobile == null || enterDeptId == null) {
+					try {
+						Thread.sleep(100);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					mobile = (String) request.getSession().getAttribute("mobile");
+					enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
+				}
+			} while ((mobile == null || enterDeptId == null) && System.currentTimeMillis() - time <= 2000);
+			jsonResult = JsonResult.ok();
+		} catch (Exception e) {
+			logger.error("校验用户数据", e);
+			return JsonResult.error("用户数据获取失败!");
+		}
+		Cookie cookie = new Cookie("mobile", mobile.trim());
+		try {
+			URLEncoder.encode("cookie的value值", "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		cookie.setMaxAge(24 * 60 * 60);
+		response.addCookie(cookie);
+		return jsonResult;
+	}
+
+	/**
 	 * 跳转到主页
 	 * 
 	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "/toindex")
-	private String index(HttpServletRequest request, HttpServletResponse response) {
+	private String info(HttpServletRequest request, HttpServletResponse response) {
 		String token = (String) request.getParameter("token");
 		// 企业ID
 		String enterDeptId = (String) request.getParameter("enterDeptId");
@@ -55,64 +100,35 @@ public class IndexController {
 
 		// 获取访问全地址
 		String url = "";
-		url = request.getScheme() + "://" + request.getServerName()
-				+ ":" + request.getServerPort()
+		url = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
 				+ request.getServletPath();
 		if (request.getQueryString() != null) {
 			url += "?" + request.getQueryString();
 		}
 		System.out.println(url);
-		
-		// 判断token有没有认证过
-		UnifiedAuthentication unifiedAuthentication = new UnifiedAuthentication();
-		String ss = "";
-		String msisdn = "";
-		Integer count = loginlogDao.findToken(token);
-		if (count == 0) {
-			try {
-				ss = unifiedAuthentication.validateToken(token);
-				logger.info("=============获取的参数：" + ss);
-				JSONObject jsonObject = JSONObject.fromObject(ss);
-				msisdn = jsonObject.getJSONObject("body").getString("msisdn");
-				logger.info("=============登陆手机号:" + msisdn);
-				// 添加访问记录
-				Loginlog loginlog = new Loginlog();
-				loginlog.setCreateTime(new Date());
-				loginlog.setUseId(msisdn);
-				loginlog.setToken(token);
-				loginlog.setEnterpriseId(enterDeptId);
-				loginlogDao.saveLog(loginlog);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			msisdn = loginlogDao.findUserId(token);
-		}
 
-		logger.info("=============绑定数据开始=============");
-		// 绑定数据
-		logger.info("=============绑定token:" + token);
-		logger.info("=============绑定enterDeptId:" + enterDeptId);
-		logger.info("=============绑定EUserID:" + EUserID);
-		logger.info("=============绑定msisdn:" + msisdn);
+		RcsToken rcsToken = new RcsToken();
+		rcsToken.setToken(token);
+		rcsToken.setEnterId(enterDeptId);
 		HttpSession session = request.getSession();
-		session.setAttribute("token", token);
-		session.setAttribute("enterDeptId", enterDeptId);
-		session.setAttribute("EUserID", EUserID);
-		session.setAttribute("mobile", msisdn);
-		request.setAttribute("enterDeptId", enterDeptId);
-		request.setAttribute("mobile", msisdn);
-		logger.info("=============绑定数据到cookie=======");
-		Cookie cookie = new Cookie("mobile", msisdn.trim());
-		try {
-			URLEncoder.encode("cookie的value值", "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		
-		cookie.setMaxAge(24 * 60 * 60);
-		response.addCookie(cookie);
-		logger.info("=============绑定数据完毕=============");
+
+		CheckUserTask checkUserTask = new CheckUserTask(rcsToken, session);
+		checkUserTask.run();
+		return "index";
+	}
+
+	/**
+	 * 消息推送跳转接口
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/push")
+	public String push(HttpServletRequest request, HttpServletResponse response) {
+		HttpSession session = request.getSession();
+		session.setAttribute("mobile", "");
+		session.setAttribute("enterDeptId", "");
 		return "index";
 	}
 
@@ -128,15 +144,15 @@ public class IndexController {
 		logger.info("=============判断有没有访问过黑板报=============");
 		String mobile = (String) request.getSession().getAttribute("mobile");
 		String token = (String) request.getSession().getAttribute("token");
-		String enterpriseId = (String)request.getSession().getAttribute("enterDeptId");
-		
-		Map<String,Object> map = new HashMap<>();
+		String enterpriseId = (String) request.getSession().getAttribute("enterDeptId");
+
+		Map<String, Object> map = new HashMap<>();
 		map.put("enterpriseId", enterpriseId);
 		map.put("EUserID", mobile);
 		map.put("token", token);
 		map.put("enterpriseId", enterpriseId);
 		long blackboardCount = blackboardDao.getALLBlackboardCount(map);
-		
+
 		Integer count = 0;
 		if (mobile != null) {
 			count = loginlogDao.findLog(map);
@@ -171,7 +187,7 @@ public class IndexController {
 		String moblie = (String) request.getSession().getAttribute("mobile");
 		return JsonResult.ok().put("moblie", moblie);
 	}
-	
+
 	/**
 	 * 获取当前登陆用户企业ID
 	 * 

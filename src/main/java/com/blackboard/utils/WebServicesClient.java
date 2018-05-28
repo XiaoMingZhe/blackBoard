@@ -80,7 +80,7 @@ public class WebServicesClient {
             
             // 调用的webserviceURL  
             URL url = new URL(  
-                    "http://218.205.115.242:18101/Ercs_Proxy/ExtendedBusinessPlatformService/SendMsgAuthenticationReq");  
+                    "http://10.1.109.107:8089/Ercs_Proxy/ExtendedBusinessPlatformService/SendMsgAuthenticationReq");  
             HttpURLConnection  conn = (HttpURLConnection) url.openConnection();  
             conn.setUseCaches(false);
             conn.setRequestMethod("POST");

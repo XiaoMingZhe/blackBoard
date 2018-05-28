@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +22,16 @@ import com.blackboard.dao.BlackboardDao;
 import com.blackboard.dao.CommentDao;
 import com.blackboard.dao.ImageDao;
 import com.blackboard.dao.LikeDao;
+import com.blackboard.dao.LoginlogDao;
 import com.blackboard.dao.ReadingRecordDao;
 import com.blackboard.dao.SystemMessageDao;
 import com.blackboard.dto.BlackboardDto;
 import com.blackboard.dto.CommentDto;
+import com.blackboard.dto.RcsToken;
 import com.blackboard.dto.Remind;
 import com.blackboard.entity.Blackboard;
 import com.blackboard.entity.Like;
+import com.blackboard.entity.Loginlog;
 import com.blackboard.entity.ReadingRecord;
 import com.blackboard.service.BlackboardService;
 import com.blackboard.service.CommentService;
@@ -38,11 +43,14 @@ import com.blackboard.utils.JsonResult;
 import com.blackboard.utils.MsgPushThread;
 import com.blackboard.utils.PropertiesUtils;
 import com.blackboard.utils.RelativeDateFormat;
+import com.blackboard.utils.UnifiedAuthentication;
 import com.blackboard.utils.WebServiceThread;
 import com.blackboard.utils.WebServicesClient;
 import com.vdurmont.emoji.EmojiParser;
 
-@Service
+import net.sf.json.JSONObject;
+
+@Service("blackboardServiceImpl")
 @Transactional
 public class BlackboardServiceImpl implements BlackboardService {
 
@@ -63,6 +71,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 	private ImageService imageService;
 	@Autowired
 	private ReadingRecordDao readingRecordDao;
+	@Autowired
+	private LoginlogDao loginlogDao;
 
 	/**
 	 * 创建黑板报
@@ -72,51 +82,52 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * @return blackboardId 黑板报ID
 	 */
 	@Override
-	public void createBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange,List<String> imageIdList) {
+	public void createBlackboard(Blackboard blackboard, List<Map<String, Object>> visibleRange,
+			List<String> imageIdList) {
 		blackboard.setBlackboardId(GainUuid.getUUID());
 		blackboard.setCreateTime(new Date());
-		//emoji表情切换
+		// emoji表情切换
 		blackboard.setTitle(EmojiParser.parseToAliases(blackboard.getTitle()));
 		blackboard.setContent(EmojiParser.parseToAliases(blackboard.getContent()));
-		if(visibleRange != null && visibleRange.size()>0 && blackboard.getType()==0){
+		if (visibleRange != null && visibleRange.size() > 0 && blackboard.getType() == 0) {
 			List<String> list = new ArrayList<>();
-			StringBuffer sBuffer  = new StringBuffer("");
-			Map<String,Object> map = new HashMap<>();
-			//白名单表数据存储
-			for(Map<String,Object> m : visibleRange){
-				list.add((String)m.get("mobile"));
+			StringBuffer sBuffer = new StringBuffer("");
+			Map<String, Object> map = new HashMap<>();
+			// 白名单表数据存储
+			for (Map<String, Object> m : visibleRange) {
+				list.add((String) m.get("mobile"));
 			}
 			map.put("list", list);
 			map.put("blackBoardId", blackboard.getBlackboardId());
 			blackboardDao.saveVisibleRange(map);
-			
-			for(int i = 0;i<visibleRange.size();i++){
-				sBuffer.append((String)visibleRange.get(i).get("mobile"));
-				if(i+1<visibleRange.size()){
+
+			for (int i = 0; i < visibleRange.size(); i++) {
+				sBuffer.append((String) visibleRange.get(i).get("mobile"));
+				if (i + 1 < visibleRange.size()) {
 					sBuffer.append(",");
 				}
 			}
 			blackboard.setPushList(sBuffer.toString());
-			logger.info("=============消息推送手机列表:"+sBuffer.toString()+"=============");
+			logger.info("=============消息推送手机列表:" + sBuffer.toString() + "=============");
 		}
 		blackboardDao.createBlackboard(blackboard);
 		// 判断有没有上传图片
-		if(imageIdList != null && imageIdList.size()>0){
-			Map<String,Object> imageMap = new HashMap<>();
+		if (imageIdList != null && imageIdList.size() > 0) {
+			Map<String, Object> imageMap = new HashMap<>();
 			imageMap.put("blackBoardId", blackboard.getBlackboardId());
 			imageMap.put("imageIds", imageIdList);
 			blackboardDao.updateImageBlackBoardID(imageMap);
 		}
-		
-		//安全送审
+
+		// 安全送审
 		Map<String, Object> conntentMap = new HashMap<>();
 		conntentMap.put("mobile", blackboard.getCreateMobile());
-		conntentMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
-		//转义
-		conntentMap.put("content", EncodeFilter.encode(blackboard.getTitle()+blackboard.getContent()));
+		conntentMap.put("msgid", "blackboard" + blackboard.getBlackboardId());
+		// 转义
+		conntentMap.put("content", EncodeFilter.encode(blackboard.getTitle() + blackboard.getContent()));
 		Thread conntentThread = new WebServiceThread(conntentMap);
 		conntentThread.start();
-		
+
 	}
 
 	/**
@@ -129,39 +140,39 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * @return blackboardList 黑板报列表对象
 	 */
 	@Override
-	public Map<String, Object> getAllBlackboard(String enterpriseId, Integer pageNumber,String mobile) {
+	public Map<String, Object> getAllBlackboard(String enterpriseId, Integer pageNumber, String mobile) {
 		HashMap<String, Object> map = new HashMap<>();
 		map.put("enterpriseId", enterpriseId);
 		map.put("mobile", mobile);
 		map.put("isread", "noread");
-		
+
 		// 设置分页页数
 		map.put("first", (pageNumber - 1) * PAGE_SIZE);
 		map.put("end", PAGE_SIZE);
 
 		List<BlackboardDto> list = blackboardDao.getAllBlackboard(map);
 		dateChangeForList(list);
-		
-		//模糊电话号码
-		for(BlackboardDto b:list){
+
+		// 模糊电话号码
+		for (BlackboardDto b : list) {
 			b.setTitle(EmojiParser.parseToUnicode(b.getTitle()));
-			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile()+KEY)));
+			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile() + KEY)));
 		}
-		
+
 		// 获取总条数，计算总页数
 		Long count = blackboardDao.getALLBlackboardCount(map);
 		long page = count / PAGE_SIZE;
 		if (count % PAGE_SIZE != 0) {
 			page++;
 		}
-		
+
 		List<Map<String, Object>> RemindList = blackboardDao.selectRemind(map);
 		Integer remindCount = RemindList.size();
 		String moblie = "";
-		if(remindCount>0){
-			moblie = (String)RemindList.get(0).get("moblie");
+		if (remindCount > 0) {
+			moblie = (String) RemindList.get(0).get("moblie");
 		}
-				
+
 		Map<String, Object> backMap = new HashMap<>();
 		backMap.put("list", list);
 		backMap.put("page", page);
@@ -187,13 +198,13 @@ public class BlackboardServiceImpl implements BlackboardService {
 		Map<String, Object> map = new HashMap<>();
 		map.put("enterpriseId", enterpriseId);
 		map.put("blackboardId", blackboardId);
-		map.put("mobile",mobile);
+		map.put("mobile", mobile);
 		// 判断有没有浏览过
 		long ReadingRecordCount = readingRecordDao.selectReadingRecordCount(map);
-		if(ReadingRecordCount<1){
+		if (ReadingRecordCount < 1) {
 			// 增加浏览数
 			blackboardDao.updatePageViews(blackboardId);
-			//添加浏览记录
+			// 添加浏览记录
 			ReadingRecord rr = new ReadingRecord();
 			rr.setBlackboardId(blackboardId);
 			rr.setUserMobile(mobile);
@@ -201,36 +212,34 @@ public class BlackboardServiceImpl implements BlackboardService {
 		}
 		// 获取单条黑板报信息
 		BlackboardDto blackboarddto = blackboardDao.getBlackboardById(map);
-		logger.info("=============获取单条黑板报信息:ID为" + blackboardId);
 		dateChange(blackboarddto);
-		//模糊电话号码
-		blackboarddto.setCreateMobile(Hex16.Encode(Hex16.Encode(blackboarddto.getCreateMobile()+KEY)));
+		// 模糊电话号码
+		blackboarddto.setCreateMobile(Hex16.Encode(Hex16.Encode(blackboarddto.getCreateMobile() + KEY)));
 		blackboarddto.setTitle(EmojiParser.parseToUnicode(blackboarddto.getTitle()));
 		blackboarddto.setContent(EmojiParser.parseToUnicode(blackboarddto.getContent()));
-		
-		//查看有没有点赞过
+
+		// 查看有没有点赞过
 		Like like = new Like();
 		like.setBeLikedId(blackboardId);
 		like.setLikeUseid(mobile);
 		Map<String, Object> statusMap = likeDao.findStatus(like);
-		if(statusMap == null){
+		if (statusMap == null) {
 			blackboarddto.setIsLike(0);
-		}else{
-			Integer status = (Integer)statusMap.get("status");
+		} else {
+			Integer status = (Integer) statusMap.get("status");
 			System.out.println(status);
-			blackboarddto.setIsLike(status==0?1:0);
+			blackboarddto.setIsLike(status == 0 ? 1 : 0);
 		}
-		
+
 		// 获取评论
-		List<CommentDto> commentDto = commentService.getAllComments(blackboardId,mobile);
-		logger.info("=============获取单条黑板报评论:ID为" + blackboardId);
+		List<CommentDto> commentDto = commentService.getAllComments(blackboardId, mobile);
 		// 判断是不是本人，评论能不能删除
 		List<Map<String, Object>> comments = new ArrayList<>();
 		for (CommentDto c : commentDto) {
 			Map<String, Object> commentMap = new HashMap<>();
 			c.setCommentContent(EmojiParser.parseToUnicode(c.getCommentContent()));
-			//模糊手机号
-			if (c.getCommenterId().equals(Hex16.Encode(Hex16.Encode(mobile+KEY)))) {
+			// 模糊手机号
+			if (c.getCommenterId().equals(Hex16.Encode(Hex16.Encode(mobile + KEY)))) {
 				commentMap.put("canDelete", 1);
 			} else {
 				commentMap.put("canDelete", 0);
@@ -238,10 +247,10 @@ public class BlackboardServiceImpl implements BlackboardService {
 			commentMap.put("comment", c);
 			comments.add(commentMap);
 		}
-		
+
 		List<String> visibleRangeList = blackboardDao.selectVisibleRangeList(blackboardId);
 		Integer permission = 0;
-		if(visibleRangeList!=null && visibleRangeList.size()>0){
+		if (visibleRangeList != null && visibleRangeList.size() > 0) {
 			permission = 1;
 		}
 		return JsonResult.ok().put("blackboard", blackboarddto).put("comments", comments).put("permission", permission);
@@ -259,7 +268,8 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * @return List<Blackboard> 个人发布的所有黑板报记录
 	 */
 	@Override
-	public Map<String, Object> getPersonalBlackboard(String enterpriseId, String createMobile, Integer pageNumber,Integer type) {
+	public Map<String, Object> getPersonalBlackboard(String enterpriseId, String createMobile, Integer pageNumber,
+			Integer type) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("enterpriseId", enterpriseId);
 		// 封装分页信息
@@ -270,21 +280,21 @@ public class BlackboardServiceImpl implements BlackboardService {
 		// 获取所有黑板报
 		List<BlackboardDto> list = blackboardDao.getPersonalBlackboard(map);
 		dateChangeForList(list);
-		//模糊电话号码
-		for(BlackboardDto b:list){
+		// 模糊电话号码
+		for (BlackboardDto b : list) {
 			b.setTitle(EmojiParser.parseToUnicode(b.getTitle()));
-			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile()+KEY)));
+			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile() + KEY)));
 		}
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
 		long page = 1;
 		logger.info("=============黑板报条数:" + count);
-		//获取系统消息未读条数
+		// 获取系统消息未读条数
 		Map<String, String> systemMap = new HashMap<>();
 		systemMap.put("userId", createMobile);
 		systemMap.put("enterpriseId", enterpriseId);
 		Long SystemCount = systemMessageDao.slectSystemCount(systemMap);
-		
+
 		Map<String, Object> backMap = new HashMap<>();
 		backMap.put("list", list);
 		backMap.put("page", page);
@@ -304,27 +314,28 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * @return List<Blackboard> 个人发布的所有黑板报记录
 	 */
 	@Override
-	public Map<String, Object> getOtherBlackboard(String enterpriseId, String createMobile, Integer pageNumber,String nowUser) {
+	public Map<String, Object> getOtherBlackboard(String enterpriseId, String createMobile, Integer pageNumber,
+			String nowUser) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("enterpriseId", enterpriseId);
-		
+
 		// 封装分页信息
 		map.put("createMobile", createMobile);
 		map.put("nowUser", nowUser);
 		map.put("first", (pageNumber - 1) * PAGE_SIZE);
 		map.put("end", PAGE_SIZE);
 		map.put("type", 0);
-		
+
 		// 获取所有黑板报
 		List<BlackboardDto> list = blackboardDao.getOtherBlackboard(map);
 		dateChangeForList(list);
-		
-		//模糊电话号码
-		for(BlackboardDto b:list){
+
+		// 模糊电话号码
+		for (BlackboardDto b : list) {
 			b.setTitle(EmojiParser.parseToUnicode(b.getTitle()));
-			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile()+KEY)));
+			b.setCreateMobile(Hex16.Encode(Hex16.Encode(b.getCreateMobile() + KEY)));
 		}
-		
+
 		// 获取黑板报条数，计算分页总页数
 		Long count = blackboardDao.getPersonalBlackboardCount(map);
 		long page = 1;
@@ -333,7 +344,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 		backMap.put("page", page);
 		return backMap;
 	}
-	
+
 	/**
 	 * 删除黑板报
 	 * 
@@ -343,7 +354,7 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 *            黑板报ID
 	 */
 	@Override
-	public void delete(String blackboardId, String enterpriseId,String serverPath) {
+	public void delete(String blackboardId, String enterpriseId, String serverPath) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("blackboardId", blackboardId);
 		map.put("enterpriseId", enterpriseId);
@@ -359,9 +370,9 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 * 批量删除黑板报
 	 */
 	@Override
-	public void deleteList(List<Map<String,Object>> maplist,String serverPath) {
+	public void deleteList(List<Map<String, Object>> maplist, String serverPath) {
 		List<String> list = new ArrayList<>();
-		for(Map<String,Object> m : maplist){
+		for (Map<String, Object> m : maplist) {
 			list.add((String) m.get("blackboardId"));
 		}
 		blackboardDao.deleteList(list);
@@ -376,33 +387,32 @@ public class BlackboardServiceImpl implements BlackboardService {
 	 *            修改的黑板报对象
 	 */
 	@Override
-	public boolean updateBlackboard(Blackboard blackboard,List<Map<String,Object>> visibleRange) {
+	public boolean updateBlackboard(Blackboard blackboard, List<Map<String, Object>> visibleRange) {
 		blackboard.setUpdateTime(new Date());
 		blackboard.setTitle(EmojiParser.parseToAliases(blackboard.getTitle()));
 		blackboard.setContent(EmojiParser.parseToAliases(blackboard.getContent()));
 		Boolean bFlag = blackboardDao.updateBlackboard(blackboard);
 		blackboardDao.deleteVisibleRange(blackboard.getBlackboardId());
-		
-		if(visibleRange.size()>0){
-			Map<String,Object> map = new HashMap<>();
+
+		if (visibleRange.size() > 0) {
+			Map<String, Object> map = new HashMap<>();
 			List<String> list = new ArrayList<>();
-			for(Map<String,Object> m : visibleRange){
-				list.add((String)m.get("mobile"));
+			for (Map<String, Object> m : visibleRange) {
+				list.add((String) m.get("mobile"));
 			}
 			map.put("list", list);
 			map.put("blackBoardId", blackboard.getBlackboardId());
 			blackboardDao.saveVisibleRange(map);
 		}
-		
-		//安全送审
+
+		// 安全送审
 		Map<String, Object> conntentMap = new HashMap<>();
 		conntentMap.put("mobile", blackboard.getCreateMobile());
-		conntentMap.put("msgid","blackboard"+ blackboard.getBlackboardId());
-		//转义
-		conntentMap.put("content", EncodeFilter.encode(blackboard.getTitle()+blackboard.getContent()));
+		conntentMap.put("msgid", "blackboard" + blackboard.getBlackboardId());
+		// 转义
+		conntentMap.put("content", EncodeFilter.encode(blackboard.getTitle() + blackboard.getContent()));
 		Thread conntentThread = new WebServiceThread(conntentMap);
 		conntentThread.start();
-		
 		return bFlag;
 	}
 
@@ -422,14 +432,14 @@ public class BlackboardServiceImpl implements BlackboardService {
 			Remind remind = new Remind();
 			String title = EmojiParser.parseToUnicode((String) m.get("title"));
 			String blackboardId = (String) m.get("blackboardId");
-			String blackboardContent = (String)m.get("blackboardContent");
-			String userName = (String)m.get("userName");
+			String blackboardContent = (String) m.get("blackboardContent");
+			String userName = (String) m.get("userName");
 			String content = (String) m.get("content");
-			if(content!=null){
+			if (content != null) {
 				content = EmojiParser.parseToUnicode(content);
 			}
-			//模糊手机号
-			String moblie = Hex16.Encode(Hex16.Encode((String) m.get("moblie")+KEY));
+			// 模糊手机号
+			String moblie = Hex16.Encode(Hex16.Encode((String) m.get("moblie") + KEY));
 			Date creatTime = (Date) m.get("creatTime");
 			String remindID = (String) m.get("remindID");
 			Long type = (Long) m.get("type");
@@ -454,9 +464,9 @@ public class BlackboardServiceImpl implements BlackboardService {
 			remind.setLikeType(likeType.intValue());
 			returnList.add(remind);
 		}
-		
-		//修改已读状态
-		commentDao.updateRead(mobile,enterpriseId);
+
+		// 修改已读状态
+		commentDao.updateRead(mobile, enterpriseId);
 		likeDao.updateRead(mobile);
 		return returnList;
 	}
@@ -514,5 +524,45 @@ public class BlackboardServiceImpl implements BlackboardService {
 			e.printStackTrace();
 		}
 		return b;
+	}
+
+	@Override
+	public void CheckToken(RcsToken rcsToken, HttpSession session) {
+		UnifiedAuthentication unifiedAuthentication = new UnifiedAuthentication();
+		String token = rcsToken.getToken();
+		String enterDeptId = rcsToken.getEnterId();
+		String ss = "";
+		String msisdn = "";
+		Integer count = loginlogDao.findToken(token);
+		if (count == 0) {
+			try {
+				ss = unifiedAuthentication.validateToken(token);
+				logger.info("=============获取的参数：" + ss);
+				JSONObject jsonObject = JSONObject.fromObject(ss);
+				msisdn = jsonObject.getJSONObject("body").getString("msisdn");
+				logger.info("=============登陆手机号:" + msisdn);
+				// 添加访问记录
+				Loginlog loginlog = new Loginlog();
+				loginlog.setCreateTime(new Date());
+				loginlog.setUseId(msisdn);
+				loginlog.setToken(token);
+				loginlog.setEnterpriseId(enterDeptId);
+				loginlogDao.saveLog(loginlog);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			msisdn = loginlogDao.findUserId(token);
+		}
+
+		logger.info("=============绑定数据开始=============");
+		// 绑定数据
+		logger.info("=============绑定token:" + token);
+		logger.info("=============绑定enterDeptId:" + enterDeptId);
+		logger.info("=============绑定msisdn:" + msisdn);
+		session.setAttribute("token", token);
+		session.setAttribute("enterDeptId", enterDeptId);
+		session.setAttribute("mobile", msisdn);
+		logger.info("=============绑定数据完毕=============");
 	}
 }

@@ -62,12 +62,6 @@ public class SystemMessageController {
 		String enterDeptId = (String) request.getSession().getAttribute("enterDeptId");
 		// 用户ID
 		String mobile = (String) request.getSession().getAttribute("mobile");
-		
-		if ((enterDeptId == null || enterDeptId.trim().length() <= 0)
-				&& (mobile == null || mobile.trim().length() <= 0)) {
-			enterDeptId = "517090";
-			mobile = "13928909312";
-		}
 		if (enterDeptId == null || enterDeptId.length() <= 0 || mobile == null || mobile.length() <= 0) {
 			return JsonResult.error("获取用户数据出错,请重新进入。");
 		}
